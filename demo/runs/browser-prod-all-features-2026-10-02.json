@@ -1,0 +1,142 @@
+[
+ {
+  "eval": "JSON.stringify({rows:[...document.querySelectorAll('input[ar",
+  "value": "{\"rows\":[\"0.01\",\"0.03406\",\"0.02976\",\"0.005\",\"0.01984\",\"0.01819\"]}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 floor','0.09');return 'set'})()",
+  "value": "set"
+ },
+ {
+  "eval": "JSON.stringify({err:[...document.querySelectorAll('aside p')",
+  "value": "{\"err\":\"floor 0.09 is above line 0.03406: the tranche could never fill\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 floor','0.02976');__set('Tranche 1 MO",
+  "value": "set"
+ },
+ {
+  "eval": "JSON.stringify({err:[...document.querySelectorAll('aside p')",
+  "value": "{\"err\":\"Enter how much MON sale 1 sells.\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','0.01');return 'ok'})()",
+  "value": "ok"
+ },
+ {
+  "click": "-10%",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({lineAfterPreset:document.querySelector('inpu",
+  "value": "{\"lineAfterPreset\":\"0.02976\",\"price\":\"0.03307\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 line','0.03406');__set('Tranche 1 flo",
+  "value": "ok"
+ },
+ {
+  "click": "Add a staged sell",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const n=document.querySelectorAll('input[aria-label$=\"",
+  "value": 3
+ },
+ {
+  "eval": "JSON.stringify({rowsAfterRemove:document.querySelectorAll('i",
+  "value": "{\"rowsAfterRemove\":2}"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','full-test');return 'ok",
+  "value": "ok"
+ },
+ {
+  "click": "Create",
+  "ok": true
+ },
+ {
+  "eval": "document.querySelector('aside a[href*=\"/address/\"]')?.href.s",
+  "value": "0xc002f23BB0343FD5caf50B777f3dF7Ef33221687"
+ },
+ {
+  "click": "Get 0.1 testnet MON",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','1');return 'ok'})()",
+  "value": "ok"
+ },
+ {
+  "click": "Fit to my balance",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({fitted:[...document.querySelectorAll('input[",
+  "value": "{\"fitted\":[\"0.0449\",\"0.0002\"],\"sign\":\"Sign plan (2 sales)\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','0.01');__set('Tranche 2 MON','0",
+  "value": "2026-10-05"
+ },
+ {
+  "eval": "fetch('/api/drip',{method:'POST',headers:{'content-type':'ap",
+  "value": "This passkey already got testnet MON from tripwire."
+ },
+ {
+  "click": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({tab:document.querySelector('[aria-current=pa",
+  "value": "{\"tab\":\"Watch\",\"err\":\"\"}"
+ },
+ {
+  "eval": "JSON.stringify({plan:document.querySelector('aside')?.innerT",
+  "value": "{\"plan\":\"Plan 8\\nRevoke\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.01\\n0.03406\\n0.02976\\nsold\\n2\\n0.005\\n0.01984\\n0.01819\\n39.9% to line\\nPlan posted by 0xc002..1687\\n0xb8d2476e..25b4\\nSold 0.01 MON at a 60 s average of 0.03307. 0xc002..1687 received 0.000329 aUSD (floor 0.000298; sale 1, line 0.03406)\\n0x94e7b377..9aa2\\nTry to cheat\\n\\nMake the keeper break plan 8 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and thi\"}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({cheat:[...document.querySelectorAll('section",
+  "value": "{\"cheat\":[\"Tripwire:above-line\",\"Tripwire:min-out\",\"Tripwire:recipient\"]}"
+ },
+ {
+  "click": "Revoke",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({revoked:document.querySelector('aside')?.inn",
+  "value": "{\"revoked\":true,\"err\":\"\"}"
+ },
+ {
+  "click": "Turn back into MON",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({wmonLine:[...document.querySelectorAll('asid",
+  "value": "{\"wmonLine\":\"gone\",\"err\":\"\"}"
+ },
+ {
+  "eval": "(()=>{window.__a=document.querySelector('aside a[href*=\"/add",
+  "value": "reloading"
+ },
+ {
+  "click": "Sign in with passkey",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({addrAfterSignIn:document.querySelector('asid",
+  "value": "{\"addrAfterSignIn\":\"0xc002f23BB0343FD5caf50B777f3dF7Ef33221687\",\"errs\":[]}"
+ }
+]
