@@ -1,0 +1,63 @@
+{
+ "title": "ETHUSD 2,744.46 \u25b2 +1.44%",
+ "h1": null,
+ "h2": null,
+ "h3": null,
+ "body": {
+  "text": "ETHUSD\nD\nIndicators\nAlert\nReplay\nSave\nSave\nTrade\nUpgrade\nE\nE",
+  "font": "-apple-system, \"system-ui\", \"Trebuchet MS\", Roboto, Ubuntu, sans-serif",
+  "size": "14px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "normal",
+  "color": "rgb(15, 15, 15)",
+  "bg": "rgb(235, 235, 235)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px none rgb(15, 15, 15)",
+  "transform": "none",
+  "features": "\"lnum\", \"tnum\""
+ },
+ "p": null,
+ "a": {
+  "text": "Ethereum / U.S. Dollar",
+  "font": "-apple-system, \"system-ui\", \"Trebuchet MS\", Roboto, Ubuntu, sans-serif",
+  "size": "12px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "22px",
+  "color": "rgb(15, 15, 15)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px none rgb(15, 15, 15)",
+  "transform": "none",
+  "features": "\"lnum\", \"tnum\""
+ },
+ "button": {
+  "text": "ETHUSD",
+  "font": "-apple-system, \"system-ui\", \"Trebuchet MS\", Roboto, Ubuntu, sans-serif",
+  "size": "14px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "normal",
+  "color": "rgb(15, 15, 15)",
+  "bg": "rgb(235, 235, 235)",
+  "radius": "14px",
+  "padding": "0px 34px 0px 12px",
+  "border": "0px none rgb(15, 15, 15)",
+  "transform": "none",
+  "features": "\"lnum\", \"tnum\""
+ },
+ "input": null,
+ "loadedFonts": [],
+ "htmlBg": "rgba(0, 0, 0, 0)",
+ "textLen": 1528,
+ "height": 900,
+ "url": "https://www.tradingview.com/chart/?symbol=COINBASE%3AETHUSD",
+ "viewport": [
+  1440,
+  900
+ ],
+ "lumaStddev": 32.3
+}

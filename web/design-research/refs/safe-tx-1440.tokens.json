@@ -1,0 +1,93 @@
+{
+ "title": "Safe{Wallet} \u2013 Transaction details",
+ "h1": null,
+ "h2": null,
+ "h3": {
+  "text": "Transaction details",
+  "font": "\"DM Sans\", sans-serif",
+  "size": "24px",
+  "weight": "600",
+  "tracking": "normal",
+  "leading": "28.8px",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "8px 0px 0px",
+  "border": "0px solid rgb(64, 64, 64)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "body": {
+  "text": "Home\nToggle Sidebar\nNew transaction\nOverview\nAssets\nTransact",
+  "font": "\"DM Sans\", sans-serif",
+  "size": "16px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "normal",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgb(28, 28, 28)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px none rgb(255, 255, 255)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "p": null,
+ "a": {
+  "text": "Home",
+  "font": "\"DM Sans\", sans-serif",
+  "size": "16px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "normal",
+  "color": "rgb(245, 245, 245)",
+  "bg": "rgb(5, 46, 22)",
+  "radius": "16px",
+  "padding": "8px 12px",
+  "border": "0px solid rgb(64, 64, 64)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "button": {
+  "text": "Toggle Sidebar",
+  "font": "\"DM Sans\", sans-serif",
+  "size": "14px",
+  "weight": "500",
+  "tracking": "normal",
+  "leading": "20px",
+  "color": "oklab(0.869938 0.0000396967 0.0000174046 / 0.65)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "12px",
+  "padding": "0px",
+  "border": "1px solid rgba(0, 0, 0, 0)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "input": {
+  "text": "1:0x93AcCD5b8AEE795C6efcfdEDFE4a292e59e00e84",
+  "font": "\"DM Sans\", sans-serif",
+  "size": "16px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "normal",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px none rgb(255, 255, 255)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "loadedFonts": [
+  "DM Sans"
+ ],
+ "htmlBg": "rgb(28, 28, 28)",
+ "textLen": 1325,
+ "height": 900,
+ "url": "https://app.safe.global/transactions/tx?safe=eth:0x93AcCD5b8AEE795C6efcfdEDFE4a292e59e00e84&id=multisig_0x93AcCD5b8AEE795C6efcfdEDFE4a292e59e00e84_0xa39e00ed704d04531c22dcaf45c3b89437292e2d6a42287ddcf6c309457bad35",
+ "viewport": [
+  1440,
+  900
+ ],
+ "lumaStddev": 31.6
+}

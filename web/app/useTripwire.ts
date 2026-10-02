@@ -56,7 +56,8 @@ export function useTripwire() {
     try {
       await fn();
     } catch (e) {
-      setError(String((e as Error).message).split("\n")[0]);
+      const cause = (e as { cause?: { name?: string; message?: string } }).cause;
+      setError(`${String((e as Error).message).split("\n")[0]}${cause?.message ? ` (${cause.name ?? "cause"}: ${cause.message})` : ""}`);
     } finally {
       setBusy(null);
       setRefresh((r) => r + 1);

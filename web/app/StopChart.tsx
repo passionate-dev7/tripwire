@@ -24,7 +24,7 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
     if (!host.current) return;
     const c = createChart(host.current, {
       height,
-      layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: MUTE, fontFamily: "Inter, system-ui, sans-serif", fontSize: 11, attributionLogo: false },
+      layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: MUTE, fontFamily: "IBM Plex Mono, ui-monospace, monospace", fontSize: 11, attributionLogo: false },
       grid: { vertLines: { visible: false }, horzLines: { color: HAIR } },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.12 } },
       timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },
@@ -66,7 +66,7 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
         axisLabelVisible: true,
         title: l.label,
       }),
-      s.createPriceLine({ price: l.floor, color: "rgba(255,97,97,0.35)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: false, title: "" }),
+      s.createPriceLine({ price: l.floor, color: "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: "floor" }),
     ]);
     // keep every line in view, not just the price
     s.applyOptions({

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<rect width="1024" height="1024" fill="#07080a"/>
+<g transform="translate(512 512) scale(1.06) translate(-512 -430)">
+<!-- stop line: the red horizontal tripwire -->
+<line x1="110" y1="430" x2="914" y2="430" stroke="#ff6161" stroke-width="52" stroke-linecap="round"/>
+<!-- price curve falling through the line -->
+<path d="M140 260 L300 180 L400 260 L730 710" fill="none" stroke="#f4f4f6" stroke-width="68" stroke-linecap="round" stroke-linejoin="round"/>
+<!-- trip point where the curve crosses -->
+<circle cx="524" cy="430" r="78" fill="#ff6161" stroke="#07080a" stroke-width="30"/>
+</g>
+</svg>

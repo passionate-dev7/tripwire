@@ -1,0 +1,80 @@
+{
+ "title": "0.03346 | MON / USDC | Kuru",
+ "h1": null,
+ "h2": null,
+ "h3": null,
+ "body": {
+  "text": "Discover\nTrade\nSwap\nLiquidity\nPortfolio\nWeekly contest\nNew\n\u2318",
+  "font": "Inter, \"Inter Fallback\"",
+  "size": "16px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "24px",
+  "color": "rgb(250, 250, 250)",
+  "bg": "rgb(10, 10, 10)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px solid rgba(255, 255, 255, 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "p": null,
+ "a": {
+  "text": "Discover",
+  "font": "Inter, \"Inter Fallback\"",
+  "size": "14px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "20px",
+  "color": "rgb(229, 224, 220)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "6px",
+  "padding": "8px 16px",
+  "border": "0px solid rgba(255, 255, 255, 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "button": {
+  "text": "Connect wallet",
+  "font": "Inter, \"Inter Fallback\"",
+  "size": "14px",
+  "weight": "500",
+  "tracking": "normal",
+  "leading": "20px",
+  "color": "rgb(250, 250, 250)",
+  "bg": "rgb(38, 38, 38)",
+  "radius": "9999px",
+  "padding": "8px 16px",
+  "border": "0px solid rgba(255, 255, 255, 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "input": {
+  "text": "",
+  "font": "Inter, \"Inter Fallback\"",
+  "size": "14px",
+  "weight": "400",
+  "tracking": "normal",
+  "leading": "20px",
+  "color": "rgb(163, 163, 163)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px 0px 0px 24px",
+  "border": "0px solid rgba(255, 255, 255, 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "loadedFonts": [
+  "Inter",
+  "Inter Fallback"
+ ],
+ "htmlBg": "rgba(0, 0, 0, 0)",
+ "textLen": 1246,
+ "height": 900,
+ "url": "https://www.kuru.io/markets/0x065c9d28e428a0db40191a54d33d5b7c71a9c394/trade",
+ "viewport": [
+  1440,
+  900
+ ],
+ "lumaStddev": 30.0
+}

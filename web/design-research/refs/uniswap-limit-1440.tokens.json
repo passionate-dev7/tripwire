@@ -1,0 +1,79 @@
+{
+ "title": "Place limit orders on Uniswap",
+ "h1": null,
+ "h2": null,
+ "h3": null,
+ "body": {
+  "text": "Uniswap\nTrade\nExplore\nLaunches\nBeta\nPool\nPortfolio\nConnect\nE",
+  "font": "Basel, sans-serif",
+  "size": "16px",
+  "weight": "485",
+  "tracking": "normal",
+  "leading": "24px",
+  "color": "oklch(0.985 0 0)",
+  "bg": "rgb(19, 19, 19)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px solid oklch(1 0 0 / 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "p": null,
+ "a": {
+  "text": "Uniswap",
+  "font": "Basel, sans-serif",
+  "size": "16px",
+  "weight": "485",
+  "tracking": "normal",
+  "leading": "24px",
+  "color": "rgb(255, 55, 199)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px solid oklch(1 0 0 / 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "button": {
+  "text": "Uniswap",
+  "font": "Basel, sans-serif",
+  "size": "16px",
+  "weight": "485",
+  "tracking": "normal",
+  "leading": "24px",
+  "color": "oklch(0.985 0 0)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px solid oklch(1 0 0 / 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "input": {
+  "text": "2744.55",
+  "font": "Basel, -apple-system, system-ui, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+  "size": "36px",
+  "weight": "485",
+  "tracking": "normal",
+  "leading": "54px",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "radius": "0px",
+  "padding": "0px",
+  "border": "0px solid oklch(1 0 0 / 0.1)",
+  "transform": "none",
+  "features": "normal"
+ },
+ "loadedFonts": [
+  "Basel"
+ ],
+ "htmlBg": "rgb(0, 0, 0)",
+ "textLen": 533,
+ "height": 900,
+ "url": "https://app.uniswap.org/limit",
+ "viewport": [
+  1440,
+  900
+ ],
+ "lumaStddev": 16.6
+}
