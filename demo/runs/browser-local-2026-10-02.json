@@ -1,0 +1,80 @@
+[
+ {
+  "eval": "JSON.stringify({price:document.querySelector('.text-\\\\[56px\\",
+  "value": "{\"price\":\"...\",\"buttons\":[\"Plan\",\"Watch\",\"Market\",\"-5%\",\"-10%\",\"-20%\",\"×\",\"Add a staged sell\",\"Sign in with passkey\",\"Create\"],\"errs\":[]}"
+ },
+ {
+  "eval": "(()=>{const i=document.querySelector('input[aria-label=\"Name",
+  "value": "qa-holder"
+ },
+ {
+  "click": "Create",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const a=document.querySelector('a[href*=\"/address/\"]')",
+  "value": "0xc21413656F5BDddE74E6eB8D3A667B4CA1b49459"
+ },
+ {
+  "eval": "fetch('http://127.0.0.1:3531/fund?addr='+window.__addr,{meth",
+  "value": "{\"hash\":\"0x2b4cf418fd33dab896a3d85a3243abec69c6cb3eb6f8607cb3153ba225d6b806\",\"status\":\"success\"}"
+ },
+ {
+  "eval": "(()=>{const set=(l,v)=>{const i=document.querySelector(`inpu",
+  "value": "ok"
+ },
+ {
+  "click": "Add a staged sell",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const set=(l,v)=>{const i=document.querySelector(`inpu",
+  "value": "ok"
+ },
+ {
+  "eval": "JSON.stringify({facts:[...document.querySelectorAll('section",
+  "value": "{\"facts\":\"MON / aUSD, testnet pool, 60 s average\\n0.03399\\nSpot\\nMON on mainnet\\nKeeper\\n0.03399\\n0.03365\\n2 plans\\n\\t\\n\\t\\n\\n\\t\\n\\t\\nKeeper checked 3 s ago\\n\\nThe testnet pool's price comes from liquidity seeded for testing, so it is not MON's market price; the mainnet figure is the 60 s average of Monad's WMON/USDC pool, read live. The contract reads the 60 s average, the solid line; spot is the faint one. | Sell 0.02 MON when 1 MON is worth\\n\\nLine, in aUSD per MON\\naUSD\\nMarket\\n-5%\\n-10%\\n-20%\\nSELL MON\\nAT OR BELOW\\nFLOOR\\n×\\n×\\nAdd a staged sell | What the keeper can do\\nSells\\nWMON for aUSD, one sale per row\\nOnly at or below\\n0.03600, 0.02200\\nNever for less than\\n0.03000, 0.02000 aUSD per MON\\nPays only to\\n0xc21413..9459copy\\nLargest single sale\\n0.02 MON\\nIn total, at most\\n0.03 MON\\nStops on\",\"sign\":\"Sign plan (2 sales)\",\"errs\":[]}"
+ },
+ {
+  "shot": "plan-1440"
+ },
+ {
+  "click": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({steps:[...document.querySelectorAll('ol li')",
+  "value": "{\"steps\":[],\"links\":[],\"tab\":\"Watch\",\"err\":\"0.02200 / 0.03600 / 0.02200\",\"errs\":[]}"
+ },
+ {
+  "eval": "JSON.stringify({tab:document.querySelector('[aria-current=pa",
+  "value": "{\"tab\":\"Watch\",\"main\":\"MON / aUSD, testnet pool, 60 s average\\n0.03383\\nSpot\\nMON on mainnet\\nKeeper\\n0.03383\\n0.03365\\n3 plans\\n\\t\\n\\t\\n\\n\\t\\n\\t\\nKeeper checked 2 s ago\\n\\nThe testnet pool's price comes from liquidity seeded for testing, so it is not MON's market price; the mainnet figure is the 60 s average of Monad's WMON/USDC pool, read live. The contract reads the 60 s average, the solid line; spot is the faint one.\\n\\nMON 0.03383. Your next line is 0.02200, 35.0% below.\\n\\n1 plan armed, 1 sales waiting, stops on 2026-11-24\\n\\nPlan 2\\nRevoke\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03600\\n0.03000\\nsold\\n2\\n0.01\\n0.02200\\n0.02000\\n35.0% away\\nPlan posted from your address\\n0x70166483..ed65\\nSold 0.02 MON at a 60 s average of 0.03399, at least 0.0006 aUSD to 0xc214..9459 (sale 1, line 0.03600)\\n0x3e9bef9c..d3eb\\nTry to cheat\\n\\nMake the keeper break plan 2 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell before MON reaches your line\\nMake it try\\nSell for half your floor\\nMake it try\\nSend the aUSD to the keeper\\nMake it try\\n0.01 WMON set aside. Revoke first if a plan is still armed.\\nTurn back into MON\",\"errs\":[]}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({cheat:[...document.querySelectorAll('section",
+  "value": "{\"cheat\":\"Try to cheat\\n\\nMake the keeper break plan 2 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell before MON reaches your line\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:above-line 0x0ab2d97b..aba5\\nSell for half your floor\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:min-out 0xccccd9ee..b62c\\nSend the aUSD to the keeper\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:recipient 0xb0afa51a..a905\",\"links\":[\"https://testnet.monadvision.com/tx/0x701664836b1c1bb3ed0bb8d87e4999d1ddb50bec7cd5062fb66d4bd88dd4ed65\",\"https://testnet.monadvision.com/tx/0x3e9bef9ce2c0a989efff0e3c01bf862eb1f75e2a6ac284788a8e53db2f12d3eb\",\"https://testnet.monadvision.com/tx/0x0ab2d97ba9370793e31536564efc67bac557549ef5eed181813e14cf7664aba5\",\"https://testnet.monadvision.com/tx/0xccccd9eeb0c4d9e44c71dcf84630c9bc7580704fd108cd3c8bd98f1a41a0b62c\",\"https://testnet.monadvision.com/tx/0xb0afa51ae9d6c7be3a905f24a2e6febbe586268610e5776d0e839fd1c227a905\",\"https://testnet.monadvision.com/tx/0x0ab2d97ba9370793e31536564efc67bac557549ef5eed181813e14cf7664aba5\",\"https://testnet.monadvision.com/tx/0xccccd9eeb0c4d9e44c71dcf84630c9bc7580704fd108cd3c8bd98f1a41a0b62c\",\"https://testnet.monadvision.com/tx/0xb0afa51ae9d6c7be3a905f24a2e6febbe586268610e5776d0e839fd1c227a905\"],\"errs\":[]}"
+ },
+ {
+  "shot": "watch-1440"
+ },
+ {
+  "click": "Revoke",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({plan:[...document.querySelectorAll('section'",
+  "value": "{\"plan\":\"Plan 2\\nrevoked\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03600\\n0.03000\\nsold\\n2\\n0.01\\n0.02200\\n0.02000\\noff\\nPlan posted from your address\\n0x70166483..ed65\\nSold 0.02 MON at a 60 s average of 0.03399, at least 0.0006 aUSD to 0xc214..9459 (sale 1, line 0.03600)\\n0x3e9bef9c..d3eb\\nKeeper tried sell before mon reaches your line. Refused by the contract: MON is above your line\\n0x0ab2d97b..aba5\\nKeeper tried sell for half your floor. Refused by the contract: below your floor\\n0xccccd9ee..b62c\\nKeeper tried send the ausd to the keeper. Refused by the contract: pays someone other than you\\n0xb0afa51a..a905\",\"err\":\"0.03600 / 0.02200\",\"steps\":[],\"errs\":[]}"
+ }
+]
