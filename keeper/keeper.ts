@@ -236,12 +236,14 @@ async function planView(p: PlanRow) {
   };
 }
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body, (_, v) => (typeof v === "bigint" ? v.toString() : v)), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, POST, OPTIONS", "access-control-allow-headers": "content-type" };
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body, (_, v) => (typeof v === "bigint" ? v.toString() : v)), { status, headers: { "content-type": "application/json", "cache-control": "no-store", ...CORS } });
 
 Bun.serve({
   port: PORT,
   async fetch(req) {
     const url = new URL(req.url);
+    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     try {
       if (url.pathname === "/api/status") {
         const [head, twap, slot0, gas, poolStable] = await Promise.all([
