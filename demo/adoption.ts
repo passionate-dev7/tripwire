@@ -12,7 +12,9 @@ const team = new Set(
 const pub = createPublicClient({ transport: http(TESTNET.rpc, { retryCount: 4 }) });
 const count = Number(await pub.readContract({ address: TESTNET.planBook, abi: abis.planBook, functionName: "count" }));
 if (count === 0) throw new Error("PlanBook reads 0 plans: wrong address or chain, an empty book proves nothing");
-const plans = await Promise.all(Array.from({ length: count }, (_, i) => pub.readContract({ address: TESTNET.planBook, abi: abis.planBook, functionName: "plan", args: [BigInt(i)] })));
+// one read at a time: the public RPC allows 15 requests per second
+const plans = [];
+for (let i = 0; i < count; i++) plans.push(await pub.readContract({ address: TESTNET.planBook, abi: abis.planBook, functionName: "plan", args: [BigInt(i)] }));
 const outside = [...new Set(plans.map((p) => p.holder.toLowerCase()).filter((h) => !team.has(h)))];
 const teamSeen = new Set(plans.map((p) => p.holder.toLowerCase()).filter((h) => team.has(h)));
 console.log(`plans ${count}, team holders ${teamSeen.size}, outside holders ${outside.length}${outside.length ? `: ${outside.join(", ")}` : ""}`);
