@@ -1,0 +1,18 @@
+{
+  "wmon": "0x4c594690108f808d9e5603df548740b22e82703e",
+  "wmonTx": "0x79d1bbf7c707c99288b038525488c50687fd9386bc619d7871f46499475b8bbe",
+  "factory": "0xa3157a5a011404a70c033834a19826a9628e6928",
+  "factoryTx": "0xd31a76ff803adafad9729d61074959c65cc522cb8f5352ffc55676e3bf9c4697",
+  "router": "0x13c320c4488d4e18ea85e11c46b0d6d29a335e96",
+  "routerTx": "0x58ef9905a047a5559df4d6513968e6ed42e032bd5e637309bf94e1dd4bbd68a8",
+  "enforcer": "0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37",
+  "enforcerTx": "0x5733201094f6e69fc2e3d47938e633ffeb84d375bd790544abf5ec5f40938132",
+  "planBook": "0xdd26f52338cc714830e23ff6999961bf2503d77a",
+  "planBookTx": "0x91019dee6a8e6e38b27d7491d45b14172ef57986117844cd4bad426a4a99f703",
+  "seeder": "0xea084a42b282e10b49b322a3e17c3def73c5d032",
+  "seederTx": "0xf04aff8ff501118e8f2fda66d2307bcb6b6bcafabc63eabf1da59d5aa63773c6",
+  "pool": "0x75E6B52BF8AEFFa56908b6C565944Db9D4C638F5",
+  "wmonIsToken0": "true",
+  "seeded": "true",
+  "bands": "{\"top\":[-310620,-309540],\"bids\":[-315420,-310620]}"
+}
