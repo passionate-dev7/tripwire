@@ -2,10 +2,13 @@
 //
 // One delegation carries the whole plan. Its first caveat is TripwirePlanEnforcer with the terms below; its second
 // is MetaMask's TimestampEnforcer with the expiry. The holder signs it as EIP-712 typed data (DelegationManager v1),
-// then one EIP-7702 transaction from the holder's own address upgrades it to MetaMask's stateless DeleGator and, in
-// the same batch, wraps the planned MON, approves the router for exactly the planned amount, and posts the plan to
-// PlanBook. A keeper can then fill each tranche once, only while the MON price is at or below its line, only for at
-// least its floor, only to the holder. Shared by the web app, the keeper and the demo scripts.
+// then sends two transactions from its own address: a plain WMON deposit of the planned MON, then one EIP-7702
+// transaction that upgrades the address to MetaMask's stateless DeleGator and, in the same batch, approves the router
+// for exactly the planned amount and posts the plan to PlanBook. The deposit goes first and alone because Monad's
+// reserve balance rule lets an account under 10 MON spend value only in an "emptying transaction", which a
+// transaction carrying a 7702 authorization never is (testnet tx 0x80e8c96e reverted "reserve balance violation"
+// with the wrap inside the 7702 batch). A keeper can then fill each tranche once, only while the MON price is at or
+// below its line, only for at least its floor, only to the holder. Shared by the web app, the keeper and the demos.
 import {
   type Account,
   type Address,
@@ -318,12 +321,17 @@ export function decodeDelegation(data: Hex): Delegation {
   return { ...d, caveats: d.caveats.map((c) => ({ ...c })) } as Delegation;
 }
 
-// ---------- the holder's one setup transaction ----------
+// ---------- the holder's two setup transactions ----------
 
-/** Calldata for the holder's own address (as a 7702 DeleGator) to run: wrap, approve exactly the plan, post. */
+/** First transaction, sent while the address is still a plain account: wrap the planned MON. */
+export function wrapCall(net: Net, total: bigint): { to: Address; value: bigint; data: Hex } {
+  return { to: net.wmon, value: total, data: encodeFunctionData({ abi: abis.wmon, functionName: "deposit" }) };
+}
+
+/** Second transaction, carrying the 7702 authorization, run by the holder's own address: approve exactly the plan,
+ * then post it. It moves no MON, so the reserve balance rule never blocks it. */
 export function setupCalldata(net: Net, signed: Delegation, total: bigint): Hex {
   return encodeCalls([
-    { to: net.wmon, value: total, data: encodeFunctionData({ abi: abis.wmon, functionName: "deposit" }) },
     { to: net.wmon, value: 0n, data: encodeFunctionData({ abi: abis.wmon, functionName: "approve", args: [net.router, total] }) },
     { to: net.planBook, value: 0n, data: encodeFunctionData({ abi: abis.planBook, functionName: "post", args: [signed] }) },
   ]);
