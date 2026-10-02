@@ -25,6 +25,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
+  MAINNET_VENUE,
   TESTNET,
   abis,
   decodeDelegation,
@@ -58,7 +59,8 @@ const LOOP_MS = 2_000;
 type Fill = { index: number; hash: Hex; block: string; amountIn: string; minOut: string; priceTick: number };
 type Attack = { kind: string; hash: Hex; status: string; reason: string };
 type PlanRow = { id: number; holder: Address; delegationHash: Hex; postedTx: Hex; delegation: Hex; fills: Fill[]; attacks: Attack[]; lastError?: string };
-type State = { cursor: string; plans: PlanRow[] };
+type Point = { t: number; twap: number; spot: number };
+type State = { cursor: string; plans: PlanRow[]; history?: Point[] };
 
 const stateFile = path.join(here, "state.json");
 const state: State = fs.existsSync(stateFile)
@@ -103,6 +105,38 @@ async function index(head: bigint) {
   persist();
 }
 
+// ---------- price history (testnet pool) and the real MON price (mainnet pool, read only) ----------
+
+const HISTORY_EVERY_MS = 15_000;
+const HISTORY_KEEP = (24 * 3600 * 1000) / HISTORY_EVERY_MS;
+state.history ??= [];
+const mainnet = createPublicClient({ transport: http(MAINNET_VENUE.rpc, { retryCount: 3 }) });
+let mainnetRead: { price: number; tick: number; block: string; at: number } | null = null;
+
+async function spotTick(): Promise<number> {
+  const s0 = await pub.readContract({ address: net.pool, abi: abis.pool, functionName: "slot0" });
+  return net.wmon.toLowerCase() < net.stable.toLowerCase() ? Number(s0[1]) : -Number(s0[1]);
+}
+
+async function sample(twap: number) {
+  const last = state.history!.at(-1);
+  if (last && Date.now() - last.t < HISTORY_EVERY_MS) return;
+  state.history!.push({ t: Date.now(), twap, spot: await spotTick() });
+  if (state.history!.length > HISTORY_KEEP) state.history!.splice(0, state.history!.length - HISTORY_KEEP);
+}
+
+/** 60 s TWAP of Monad mainnet's WMON/USDC 0.3% pool, where WMON is token0, so the raw tick is the MON price tick. */
+async function readMainnet() {
+  if (mainnetRead && Date.now() - mainnetRead.at < 60_000) return;
+  try {
+    const [cum] = await mainnet.readContract({ address: MAINNET_VENUE.pool, abi: [{ type: "function", name: "observe", stateMutability: "view", inputs: [{ type: "uint32[]" }], outputs: [{ type: "int56[]" }, { type: "uint160[]" }] }] as const, functionName: "observe", args: [[60, 0]] });
+    const tick = Math.floor(Number(cum[1] - cum[0]) / 60);
+    mainnetRead = { price: tickToPrice(tick), tick, block: String(await mainnet.getBlockNumber()), at: Date.now() };
+  } catch (e) {
+    log(`mainnet read: ${String((e as Error).message).split("\n")[0]}`);
+  }
+}
+
 // ---------- fill ----------
 
 const priceTick = async () => Number(await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "monPriceTick", args: [net.pool, net.wmon, net.stable, net.twapSeconds] }));
@@ -132,14 +166,18 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
   }
 }
 
+let lastLoop = 0;
 async function loop() {
   for (;;) {
     try {
       const head = await pub.getBlockNumber();
       await index(head);
       const tick = await priceTick();
+      await sample(tick);
+      await readMainnet();
       for (const plan of state.plans) await tryFill(plan, decodeDelegation(plan.delegation), tick);
       persist();
+      lastLoop = Date.now();
     } catch (e) {
       log(`loop: ${String((e as Error).message).split("\n")[0]}`);
     }
@@ -214,7 +252,10 @@ Bun.serve({
           pub.readContract({ address: net.stable, abi: erc20Abi, functionName: "balanceOf", args: [net.pool] }),
         ]);
         const spotTick = net.wmon.toLowerCase() < net.stable.toLowerCase() ? Number(slot0[1]) : -Number(slot0[1]);
-        return json({ chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds });
+        return json({ chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), lastLoop, plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds, mainnet: mainnetRead });
+      }
+      if (url.pathname === "/api/history") {
+        return json({ points: state.history ?? [] });
       }
       if (url.pathname === "/api/plans") {
         const holder = (url.searchParams.get("holder") ?? "").toLowerCase();
