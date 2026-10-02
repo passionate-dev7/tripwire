@@ -12,11 +12,11 @@ const { plans } = await (await fetch(`${process.env.NEXT_PUBLIC_KEEPER_API}/api/
 if (plans.length === 0) throw new Error(`no plans for ${holder}`);
 for (const p of plans) {
   const d = decodeDelegation(p.delegation);
-  const { recipient, tranches } = decodeTranches(d.caveats[0].terms);
+  const { recipient, tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const expiry = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
   const revoked = await pub.readContract({ address: TESTNET.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [p.delegationHash] });
   const spent: boolean[] = [];
-  for (let i = 0; i < tranches.length; i++) spent.push(await pub.readContract({ address: TESTNET.enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] }));
+  for (let i = 0; i < tranches.length; i++) spent.push(await pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] }));
   console.log(JSON.stringify({
     plan: p.id,
     endsAt: new Date(expiry * 1000).toISOString(),

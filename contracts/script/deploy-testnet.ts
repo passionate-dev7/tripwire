@@ -98,8 +98,10 @@ const router = await deploy(
   "node_modules/@uniswap/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json",
   ["0x0000000000000000000000000000000000000000", factory, "0x0000000000000000000000000000000000000000", wmon],
 );
-const enforcer = await deploy("enforcer", "out/TripwirePlanEnforcer.sol/TripwirePlanEnforcer.json", [DELEGATION_MANAGER]);
-const planBook = await deploy("planBook", "out/PlanBook.sol/PlanBook.json", [DELEGATION_MANAGER, enforcer]);
+// V=2 deploys a new enforcer and plan book beside the old ones (same WMON, router and pool); earlier plans keep theirs.
+const V = process.env.V ?? "";
+const enforcer = await deploy(`enforcer${V}`, "out/TripwirePlanEnforcer.sol/TripwirePlanEnforcer.json", [DELEGATION_MANAGER]);
+const planBook = await deploy(`planBook${V}`, "out/PlanBook.sol/PlanBook.json", [DELEGATION_MANAGER, enforcer]);
 const seeder = await deploy("seeder", "out/PoolSeeder.sol/PoolSeeder.json");
 
 const factoryAbi = parseAbi([

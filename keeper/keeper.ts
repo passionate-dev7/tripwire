@@ -28,6 +28,7 @@ import {
   MAINNET_VENUE,
   TESTNET,
   abis,
+  lineReached,
   decodeDelegation,
   decodeTranches,
   fillCalldata,
@@ -79,6 +80,12 @@ const revertReason = (hash: Hex) => chainRevertReason(net.rpc, hash);
 
 // ---------- index ----------
 
+const BOOKS = [net.planBook, ...net.legacy.map((l) => l.planBook)];
+const ENFORCERS = [net.enforcer, ...net.legacy.map((l) => l.enforcer)];
+// the legacy plan book takes no new plans, so its count is fixed; read once at start
+let legacyCount = 0;
+for (const l of net.legacy) legacyCount += Number(await pub.readContract({ address: l.planBook, abi: abis.planBook, functionName: "count" }));
+
 /** What the holder actually received in a sale: the stablecoin Transfer logs to the holder in that receipt. */
 async function received(hash: Hex, holder: string): Promise<string> {
   const r = await pub.getTransactionReceipt({ hash });
@@ -96,13 +103,15 @@ async function index(head: bigint) {
   while (from <= head) {
     const to = from + WINDOW - 1n > head ? head : from + WINDOW - 1n;
     const [posted, filled] = await Promise.all([
-      pub.getLogs({ address: net.planBook, fromBlock: from, toBlock: to }),
-      pub.getLogs({ address: net.enforcer, fromBlock: from, toBlock: to }),
+      pub.getLogs({ address: BOOKS, fromBlock: from, toBlock: to }),
+      pub.getLogs({ address: ENFORCERS, fromBlock: from, toBlock: to }),
     ]);
     for (const l of posted) {
       const ev = decodeEventLog({ abi: abis.planBook, data: l.data, topics: l.topics });
       if (ev.eventName !== "PlanPosted") continue;
-      const id = Number(ev.args.id);
+      // ids restart in each plan book; plans after the first book continue its numbering
+      const legacy = net.legacy.some((x) => x.planBook.toLowerCase() === l.address.toLowerCase());
+      const id = legacy ? Number(ev.args.id) : legacyCount + Number(ev.args.id);
       if (state.plans.some((p) => p.id === id)) continue;
       state.plans.push({ id, holder: ev.args.holder, delegationHash: ev.args.delegationHash, postedTx: l.transactionHash!, delegation: ev.args.delegation, fills: [], attacks: [] });
       log(`plan #${id} from ${ev.args.holder}`);
@@ -157,14 +166,14 @@ async function readMainnet() {
 const priceTick = async () => Number(await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "monPriceTick", args: [net.pool, net.wmon, net.stable, net.twapSeconds] }));
 
 async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
-  const { tranches } = decodeTranches(d.caveats[0].terms);
+  const { tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const expiry = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
   if (expiry * 1000 < Date.now()) return;
   if (await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [plan.delegationHash] })) return;
   for (let i = 0; i < tranches.length; i++) {
     const t = tranches[i];
-    if (tick > t.lineTick) continue;
-    if (await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [plan.delegationHash, BigInt(i)] })) continue;
+    if (!lineReached(t, tick)) continue;
+    if (await pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [plan.delegationHash, BigInt(i)] })) continue;
     const data = fillCalldata(net, d, i);
     let gas: bigint;
     try {
@@ -226,9 +235,9 @@ async function attack(planId: number, kind: string): Promise<Attack> {
   const prior = plan.attacks.find((a) => a.kind === kind);
   if (prior) return prior;
   const d = decodeDelegation(plan.delegation);
-  const { recipient, tranches } = decodeTranches(d.caveats[0].terms);
+  const { recipient, tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const tick = await priceTick();
-  const spent = await Promise.all(tranches.map((_, i) => pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [plan.delegationHash, BigInt(i)] })));
+  const spent = await Promise.all(tranches.map((_, i) => pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [plan.delegationHash, BigInt(i)] })));
   // Attack a tranche that is still live, so the revert shows the guard named by `kind`, not "already spent".
   const live = tranches.map((t, i) => ({ t, i })).filter(({ i }) => !spent[i]);
   if (live.length === 0) throw new Error("every tranche is already sold, so there is nothing left to attack");
@@ -240,7 +249,7 @@ async function attack(planId: number, kind: string): Promise<Attack> {
     const { t, i } = live[0];
     data = redeemCalldata(net, d, i, net.router, 0n, swapCalldata(net, keeper.address, t.amountIn, (t.amountIn * t.minOutPerUnit) / 10n ** 18n + 1n));
   } else if (kind === "line") {
-    const above = live.find(({ t }) => tick > t.lineTick);
+    const above = live.find(({ t }) => !lineReached(t, tick));
     if (!above) throw new Error("every live line is already crossed, so there is no early sale to attempt");
     data = fillCalldata(net, d, above.i);
   } else throw new Error("kind is floor, line or recipient");
@@ -286,13 +295,13 @@ async function drip(address: string, ip: string) {
 
 async function planView(p: PlanRow) {
   const d = decodeDelegation(p.delegation);
-  const { tranches } = decodeTranches(d.caveats[0].terms);
-  const spent = await Promise.all(tranches.map((_, i) => pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] })));
+  const { tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
+  const spent = await Promise.all(tranches.map((_, i) => pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] })));
   const revoked = await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [p.delegationHash] });
   return {
     id: p.id, holder: p.holder, delegationHash: p.delegationHash, postedTx: p.postedTx, delegation: p.delegation, revoked,
     expiresAt: Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`)),
-    tranches: tranches.map((t, i) => ({ index: i, line: tickToPrice(t.lineTick), lineTick: t.lineTick, mon: String(t.amountIn), floorPerMon: Number(t.minOutPerUnit) / 1e6, spent: spent[i] })),
+    tranches: tranches.map((t, i) => ({ index: i, line: tickToPrice(t.lineTick), lineTick: t.lineTick, mon: String(t.amountIn), floorPerMon: Number(t.minOutPerUnit) / 1e6, atOrAbove: t.atOrAbove, spent: spent[i] })),
     fills: p.fills, attacks: p.attacks, lastError: p.lastError ?? null,
   };
 }

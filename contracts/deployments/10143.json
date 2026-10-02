@@ -14,5 +14,9 @@
   "pool": "0x75E6B52BF8AEFFa56908b6C565944Db9D4C638F5",
   "wmonIsToken0": "true",
   "seeded": "true",
-  "bands": "{\"top\":[-310620,-309540],\"bids\":[-315420,-310620]}"
+  "bands": "{\"top\":[-310620,-309540],\"bids\":[-315420,-310620]}",
+  "enforcer2": "0xc66cc7b7b91b893abfd0661c0312f6c45ead056b",
+  "enforcer2Tx": "0x617ecf79bf07d8d626479200a47d01b958d7082b4aa91e99439ec7e3d57550ab",
+  "planBook2": "0x6a1fcb214a1c43f53afb9d31014e1cdc92fa593e",
+  "planBook2Tx": "0x2d1eb4c70d04ea0945fb4b60cf8634d1a7e73cc0a2b43bc227ae932a4b08df7f"
 }

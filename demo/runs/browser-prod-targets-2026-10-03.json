@@ -1,0 +1,65 @@
+[
+ {
+  "eval": "JSON.stringify({rows:[...document.querySelectorAll('input[ar",
+  "value": "{\"rows\":[\"1 MON=0.02\",\"1 line=0.03234\",\"1 floor=0.0297\",\"2 MON=0.01\",\"2 line=0.02145\",\"2 floor=0.0198\"],\"dirs\":[\"rises\",\"falls\"],\"sentence\":\"Sell 0.02 MON once MON's 60 s average rises to\"}"
+ },
+ {
+  "click": "Add a staged sell",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{document.querySelector('button[aria-label=\"Tranche 3 d",
+  "value": "flipped"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 3 MON','0.005');__set('Tranche 3 line',",
+  "value": "ok"
+ },
+ {
+  "eval": "JSON.stringify({dirs:[...document.querySelectorAll('button[a",
+  "value": "{\"dirs\":[\"rises\",\"falls\",\"rises\"],\"facts\":[\"Stops: once MON falls to: 0.02145\",\"Targets: once MON rises to: 0.03234, 0.04290\",\"Stops on\"],\"err\":\"\"}"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','v2-target');return 'ok",
+  "value": "ok"
+ },
+ {
+  "click": "Create",
+  "ok": true
+ },
+ {
+  "eval": "document.querySelector('aside a[href*=\"/address/\"]')?.href.s",
+  "value": "0x3e56f320534cC8f24a35B283Df77225fc0855D95"
+ },
+ {
+  "click": "Get 0.1 testnet MON",
+  "ok": true
+ },
+ {
+  "click": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({tab:document.querySelector('[aria-current=pa",
+  "value": "{\"tab\":\"Watch\",\"plan\":\"Plan 9\\nRevoke\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03234\\n0.02970\\nsold\\n2\\n0.01\\n0.02145\\n0.01980\\n34.7% to stop\\n3\\n0.005\\n0.04290\\n0.03960\\n30.6% to target\\nPlan posted by 0x3e56..5D95\\n0x5cf24759..bc82\\nSold 0.02 MON at a 60 s average of 0.03300. 0x3e56..5D95 received 0.000656 aUSD (floor 0.000594; sale 1, line 0.03234)\\n0x886f28ef..ee5a\\nTry to cheat\\n\\nMake the keeper break plan 9 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell bef\",\"err\":\"\"}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({cheat:[...document.querySelectorAll('section",
+  "value": "{\"cheat\":[\"Tripwire:above-line\",\"Tripwire:min-out\",\"Tripwire:recipient\"],\"errs\":[]}"
+ },
+ {
+  "shot": "v2watch"
+ }
+]

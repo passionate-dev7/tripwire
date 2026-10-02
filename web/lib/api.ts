@@ -17,7 +17,7 @@ export type RecentPlan = {
   refused: { hash: Hex; attack: "line" | "floor" | "recipient"; reason: string }[];
 };
 export type Attack = { kind: "floor" | "line" | "recipient"; hash: Hex; status: string; reason: string };
-export type TrancheView = { index: number; line: number; lineTick: number; mon: string; floorPerMon: number; spent: boolean };
+export type TrancheView = { index: number; line: number; lineTick: number; mon: string; floorPerMon: number; atOrAbove?: boolean; spent: boolean };
 export type PlanView = {
   id: number; holder: Hex; delegationHash: Hex; postedTx: Hex; delegation: Hex; revoked: boolean; expiresAt: number;
   tranches: TrancheView[]; fills: Fill[]; attacks: Attack[]; lastError: string | null;

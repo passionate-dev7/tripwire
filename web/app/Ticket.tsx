@@ -27,7 +27,10 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
   const total = checked.tranches?.reduce((s, x) => s + x.amountIn, 0n) ?? 0n;
   const largest = checked.tranches?.reduce((m, x) => (x.amountIn > m ? x.amountIn : m), 0n) ?? 0n;
   const expiresAt = Math.floor(new Date(`${expiry}T00:00:00Z`).getTime() / 1000);
-  const firesNow = price !== null && plan.some((p) => priceToTick(price) <= priceToTick(p.line));
+  const reached = (p: PlainTranche) => price !== null && p.line > 0 && (p.up ? priceToTick(price) >= priceToTick(p.line) : priceToTick(price) <= priceToTick(p.line));
+  const firesNow = plan.some(reached);
+  const flip = (i: number) => setPlan(plan.map((p, j) => (j === i ? { ...p, up: !p.up } : p)));
+  const up0 = plan[0]?.up === true;
 
   const set = (i: number, k: keyof PlainTranche, v: string) =>
     setPlan(plan.map((p, j) => (j === i ? { ...p, [k]: k === "mon" ? v : Number(v) } : p)));
@@ -47,7 +50,10 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
       <Card>
         <div className="px-4 pb-4 pt-5">
           <p className="text-[14px] leading-6 text-body">
-            Sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once MON&apos;s 60 s average is at or below
+            Sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once MON&apos;s 60 s average{" "}
+            <button type="button" onClick={() => flip(0)} className="rounded-md border border-hairline px-1.5 text-ink hover:border-hairline-strong" aria-label="Switch sale 1 between falls to and rises to">
+              {up0 ? "rises to" : "falls to"}
+            </button>
           </p>
           <label className="mt-1 flex items-baseline gap-2">
             <span className="sr-only">Line, in aUSD per MON</span>
@@ -62,12 +68,12 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           <p className="num mt-1 text-[12px] text-mute">
             {price === null || !(plan[0]?.line > 0)
               ? "Reading the price."
-              : plan[0].line >= price
-                ? `At or above today's ${fmtPrice(price)}: the keeper sells this within about a minute of arming.`
-                : `${(((price - plan[0].line) / price) * 100).toFixed(1)}% below today's 60 s average of ${fmtPrice(price)}.`}
+              : reached(plan[0])
+                ? `MON is already ${up0 ? "at or above" : "at or below"} it (${fmtPrice(price)}): the keeper sells this within about a minute of arming.`
+                : `${((Math.abs(price - plan[0].line) / price) * 100).toFixed(1)}% ${up0 ? "above" : "below"} today's 60 s average of ${fmtPrice(price)}.`}
           </p>
           <div className="mt-2 flex gap-2 overflow-x-auto">
-            {[["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]].map(([l, v]) => (
+            {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
               <button key={l} type="button" onClick={() => preset(v as number)} className="h-10 shrink-0 rounded-lg border border-hairline px-3 text-[13px] text-body hover:border-hairline-strong hover:text-ink">
                 {l}
               </button>
@@ -75,12 +81,15 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           </div>
         </div>
         <div className="border-t border-hairline">
-          <div className="grid h-8 grid-cols-[1fr_1fr_1fr_36px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
-            <span>Sell MON</span><span className="text-right">At or below</span><span className="text-right" title="In a fast drop past the floor, that row does not sell">Floor</span><span />
+          <div className="grid h-8 grid-cols-[1fr_60px_1fr_1fr_36px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+            <span>Sell MON</span><span>When MON</span><span className="text-right">Line</span><span className="text-right" title="The sale never pays less than this per MON">Floor</span><span />
           </div>
           {plan.map((p, i) => (
-            <div key={i} className="grid h-10 grid-cols-[1fr_1fr_1fr_36px] items-center gap-2 border-t border-hairline px-4">
+            <div key={i} className="grid h-10 grid-cols-[1fr_60px_1fr_1fr_36px] items-center gap-2 border-t border-hairline px-4">
               <input aria-label={`Tranche ${i + 1} MON`} inputMode="decimal" value={p.mon} onChange={(e) => set(i, "mon", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-[13px] text-ink outline-none" />
+              <button type="button" aria-label={`Tranche ${i + 1} direction`} onClick={() => flip(i)} className="h-8 rounded-lg border border-hairline text-[12px] text-body hover:border-hairline-strong hover:text-ink">
+                {p.up ? "rises" : "falls"}
+              </button>
               <input aria-label={`Tranche ${i + 1} line`} inputMode="decimal" value={String(p.line)} onChange={(e) => set(i, "line", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-line outline-none" />
               <input aria-label={`Tranche ${i + 1} floor`} inputMode="decimal" value={String(p.floor)} onChange={(e) => set(i, "floor", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-ink outline-none" />
               <button type="button" aria-label={`Remove tranche ${i + 1}`} disabled={plan.length === 1} onClick={() => setPlan(plan.filter((_, j) => j !== i))} className="h-9 w-9 text-[16px] text-mute hover:text-ink disabled:opacity-20">
@@ -89,7 +98,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             </div>
           ))}
           {plan.length < 3 && (
-            <button type="button" onClick={() => { const last = plan[plan.length - 1]; setPlan([...plan, { mon: last.mon, line: Number((last.line * 0.85).toFixed(5)), floor: Number((last.floor * 0.85).toFixed(5)) }]); }} className="h-10 w-full border-t border-hairline px-4 text-left text-[13px] text-mute hover:text-ink">
+            <button type="button" onClick={() => { const last = plan[plan.length - 1]; const k = last.up ? 1.15 : 0.85; setPlan([...plan, { mon: last.mon, line: Number((last.line * k).toFixed(5)), floor: Number((last.floor * k).toFixed(5)), ...(last.up ? { up: true } : {}) }]); }} className="h-10 w-full border-t border-hairline px-4 text-left text-[13px] text-mute hover:text-ink">
               Add a staged sell
             </button>
           )}
@@ -98,7 +107,8 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
 
       <Card title="What the keeper can do">
         <Fact label="Sells">WMON for aUSD, one sale per row</Fact>
-        <Fact label="Only at or below">{plan.map((p) => fmtPrice(p.line)).join(", ")}</Fact>
+        {plan.some((p) => !p.up) && <Fact label="Stops: once MON falls to">{plan.filter((p) => !p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
+        {plan.some((p) => p.up) && <Fact label="Targets: once MON rises to">{plan.filter((p) => p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
         <Fact label="Never for less than">{plan.map((p) => `${fmtPrice(p.floor)}`).join(", ")} aUSD per MON</Fact>
         <Fact label="Pays only to">
           {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
@@ -117,12 +127,12 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
 
       <div className="flex flex-col gap-3">
         {checked.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{checked.error}</p>}
-        {firesNow && !checked.error && <p className="text-[13px] text-body">MON is already at or below a line in this plan, so the keeper sells that row within about a minute of arming.</p>}
+        {firesNow && !checked.error && <p className="text-[13px] text-body">MON is already past a line in this plan, so the keeper sells that row within about a minute of arming.</p>}
 
         {!t.account ? (
           <div className="flex flex-col gap-2">
             <Pill onClick={t.signIn} disabled={t.busy !== null}>{t.busy === "Signing in" ? "Waiting for your passkey" : "Sign in with passkey"}</Pill>
-            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average is at or below your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
+            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average reaches your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
             <div className="flex gap-2">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name a new passkey" aria-label="Name for a new passkey" className="h-[31px] min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-3 text-[13px] text-ink outline-none placeholder:text-mute" />
               <Ghost onClick={() => t.create(name || "tripwire")} disabled={t.busy !== null}>Create</Ghost>
@@ -160,7 +170,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             <Pill onClick={() => t.arm(plan, expiresAt)} disabled={t.busy !== null || !!checked.error}>
               {t.busy === "Arming" ? t.steps.at(-1)?.label ?? "Signing" : `Sign plan (${plan.length} ${plan.length === 1 ? "sale" : "sales"})`}
             </Pill>
-            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average is at or below your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
+            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average reaches your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
           </>
         )}
 

@@ -46,6 +46,8 @@ export type Net = {
   planBook: Address;
   planBookFromBlock: bigint;
   keeper: Address;
+  /** Earlier enforcer and plan book deployments whose plans still read and fill (terms without the direction bit). */
+  legacy: { enforcer: Address; planBook: Address; planBookFromBlock: bigint }[];
 };
 
 // MetaMask delegation framework v1.3.0, same addresses on Monad mainnet and testnet (read with eth_getCode 2026-10-02).
@@ -70,10 +72,11 @@ export const TESTNET: Net = {
   stableDecimals: 6,
   fee: 3000,
   twapSeconds: 60,
-  enforcer: getAddress("0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37"),
-  planBook: getAddress("0xdd26f52338cc714830e23ff6999961bf2503d77a"),
-  planBookFromBlock: 67513065n,
+  enforcer: getAddress("0xc66cc7b7b91b893abfd0661c0312f6c45ead056b"),
+  planBook: getAddress("0x6a1fcb214a1c43f53afb9d31014e1cdc92fa593e"),
+  planBookFromBlock: 67630820n,
   keeper: getAddress("0x8a916555418dC4a8A4b11E2Fc2B8e85127204468"),
+  legacy: [{ enforcer: getAddress("0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37"), planBook: getAddress("0xdd26f52338cc714830e23ff6999961bf2503d77a"), planBookFromBlock: 67513065n }],
 };
 
 // Mainnet venue, read only until a mainnet enforcer and plan book are deployed.
@@ -98,10 +101,12 @@ export type Delegation = {
   salt: bigint;
   signature: Hex;
 };
-export type Tranche = { lineTick: number; amountIn: bigint; minOutPerUnit: bigint };
+/** atOrAbove false: a stop, sells once MON falls to the line. true: a target, sells once MON rises to it. */
+export type Tranche = { lineTick: number; amountIn: bigint; minOutPerUnit: bigint; atOrAbove: boolean };
 
-/** A tranche as the holder states it: sell `mon` MON once MON trades at or below `line`, for no less than `floor`. */
-export type PlainTranche = { mon: string; line: number; floor: number };
+/** A tranche as the holder states it: sell `mon` MON once MON falls to `line` (or, with `up`, rises to it), for no
+ * less than `floor` per MON. */
+export type PlainTranche = { mon: string; line: number; floor: number; up?: boolean };
 
 export const abis = {
   delegationManager: parseAbi([
@@ -156,6 +161,28 @@ const DELEGATION_TUPLE = {
   ],
 } as const;
 
+const TERMS_TUPLE_V1 = {
+  type: "tuple",
+  components: [
+    { name: "router", type: "address" },
+    { name: "pool", type: "address" },
+    { name: "wmon", type: "address" },
+    { name: "usdc", type: "address" },
+    { name: "fee", type: "uint24" },
+    { name: "twapSeconds", type: "uint32" },
+    { name: "recipient", type: "address" },
+    {
+      name: "tranches",
+      type: "tuple[]",
+      components: [
+        { name: "lineTick", type: "int24" },
+        { name: "amountIn", type: "uint256" },
+        { name: "minOutPerUnit", type: "uint256" },
+      ],
+    },
+  ],
+} as const;
+
 const TERMS_TUPLE = {
   type: "tuple",
   components: [
@@ -173,6 +200,7 @@ const TERMS_TUPLE = {
         { name: "lineTick", type: "int24" },
         { name: "amountIn", type: "uint256" },
         { name: "minOutPerUnit", type: "uint256" },
+        { name: "atOrAbove", type: "bool" },
       ],
     },
   ],
@@ -215,6 +243,7 @@ export function toTranches(plain: PlainTranche[], stableDecimals = 6): Tranche[]
       lineTick: priceToTick(p.line, stableDecimals),
       amountIn,
       minOutPerUnit: floorToMinOutPerUnit(p.floor, stableDecimals),
+      atOrAbove: p.up === true,
     };
   });
 }
@@ -236,17 +265,28 @@ export function encodeTerms(net: Net, recipient: Address, tranches: Tranche[]): 
       fee: net.fee,
       twapSeconds: net.twapSeconds,
       recipient,
-      tranches: tranches.map((t) => ({ lineTick: t.lineTick, amountIn: t.amountIn, minOutPerUnit: t.minOutPerUnit })),
+      tranches: tranches.map((t) => ({ lineTick: t.lineTick, amountIn: t.amountIn, minOutPerUnit: t.minOutPerUnit, atOrAbove: t.atOrAbove })),
     }],
   );
 }
 
-export function decodeTranches(terms: Hex): { recipient: Address; tranches: Tranche[] } {
+/** Decodes a plan's terms. Plans signed for a legacy enforcer carry no direction bit; every tranche there is a stop. */
+export function decodeTranches(terms: Hex, enforcer?: Address): { recipient: Address; tranches: Tranche[] } {
+  const legacy = enforcer !== undefined && TESTNET.legacy.some((l) => l.enforcer.toLowerCase() === enforcer.toLowerCase());
+  if (legacy) {
+    const [t] = decodeAbiParameters([TERMS_TUPLE_V1], terms);
+    return { recipient: t.recipient, tranches: t.tranches.map((x) => ({ lineTick: Number(x.lineTick), amountIn: x.amountIn, minOutPerUnit: x.minOutPerUnit, atOrAbove: false })) };
+  }
   const [t] = decodeAbiParameters([TERMS_TUPLE], terms);
   return {
     recipient: t.recipient,
-    tranches: t.tranches.map((x) => ({ lineTick: Number(x.lineTick), amountIn: x.amountIn, minOutPerUnit: x.minOutPerUnit })),
+    tranches: t.tranches.map((x) => ({ lineTick: Number(x.lineTick), amountIn: x.amountIn, minOutPerUnit: x.minOutPerUnit, atOrAbove: x.atOrAbove })),
   };
+}
+
+/** True when MON's price tick has reached the tranche's line from the side the tranche waits on. */
+export function lineReached(t: Tranche, priceTick: number): boolean {
+  return t.atOrAbove ? priceTick >= t.lineTick : priceTick <= t.lineTick;
 }
 
 export function timestampTerms(expiresAt: number): Hex {
@@ -368,7 +408,7 @@ export function redeemCalldata(net: Net, signed: Delegation, index: number, targ
 
 /** The exact fill the plan signed for tranche `index`: its amount, its floor, to the holder. */
 export function fillCalldata(net: Net, signed: Delegation, index: number): Hex {
-  const { recipient, tranches } = decodeTranches(signed.caveats[0].terms);
+  const { recipient, tranches } = decodeTranches(signed.caveats[0].terms, signed.caveats[0].enforcer);
   const t = tranches[index];
   if (!t) throw new Error(`no tranche ${index}`);
   const minOut = (t.amountIn * t.minOutPerUnit + 10n ** 18n - 1n) / 10n ** 18n;

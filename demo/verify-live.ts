@@ -8,14 +8,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type Address, type Hex, createPublicClient, decodeErrorResult, erc20Abi, formatUnits, http, parseEventLogs } from "viem";
-import { TESTNET, abis, decodeDelegation, decodeTranches, tickToPrice } from "../web/lib/plan";
+import { TESTNET, abis, decodeDelegation, decodeTranches, lineReached, tickToPrice } from "../web/lib/plan";
 import { revertReason as chainRevertReason } from "../web/lib/chain";
 
 const holder = (process.argv[2] ?? "") as Address;
 if (!/^0x[0-9a-fA-F]{40}$/.test(holder)) throw new Error("usage: verify-live.ts <holder> [--attack]");
 const api = process.env.KEEPER_API ?? "https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire";
 const net = TESTNET;
-const pub = createPublicClient({ transport: http(net.rpc) });
+const pub = createPublicClient({ transport: http(net.rpc, { retryCount: 6, retryDelay: 700 }) });
 const dir = path.dirname(new URL(import.meta.url).pathname);
 const report: Record<string, unknown>[] = [];
 
@@ -29,13 +29,13 @@ const check = (ok: boolean, what: string) => { console.log(`${ok ? "ok  " : "FAI
 
 for (const p of plans) {
   const d = decodeDelegation(p.delegation);
-  const { tranches, recipient } = decodeTranches(d.caveats[0].terms);
+  const { tranches, recipient } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const posted = await pub.getTransactionReceipt({ hash: p.postedTx });
   check(posted.status === "success" && posted.from.toLowerCase() === holder.toLowerCase(), `plan #${p.id} posted by the holder in ${p.postedTx}`);
   check(recipient.toLowerCase() === holder.toLowerCase(), `plan #${p.id} pays only the holder`);
   for (let i = 0; i < tranches.length; i++) {
     const t = tranches[i];
-    const spent = await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] });
+    const spent = await pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] });
     const fill = p.fills.find((f) => f.index === i);
     const row: Record<string, unknown> = { plan: p.id, tranche: i, line: tickToPrice(t.lineTick), floor: Number(t.minOutPerUnit) / 1e6, spent };
     if (fill) {
@@ -49,10 +49,10 @@ for (const p of plans) {
       check(r.status === "success" && r.from.toLowerCase() === net.keeper.toLowerCase(), `tranche ${i} filled by the keeper in ${fill.hash}`);
       check(sold === t.amountIn, `tranche ${i} sold exactly ${formatUnits(t.amountIn, 18)} WMON`);
       check(got >= owed, `tranche ${i} paid ${formatUnits(got, 6)} aUSD, floor ${formatUnits(owed, 6)}`);
-      check(filledAt !== undefined && Number(filledAt) <= t.lineTick, `tranche ${i} filled at or below its line`);
+      check(filledAt !== undefined && lineReached(t, Number(filledAt)), `tranche ${i} (${t.atOrAbove ? "target" : "stop"}) filled with its line reached`);
     } else {
       check(!spent, `tranche ${i} unspent and unsold`);
-      if (twap > t.lineTick) check(!spent, `tranche ${i} not sold while MON ${tickToPrice(twap).toFixed(5)} is above its line ${tickToPrice(t.lineTick).toFixed(5)} (negative case)`);
+      if (!lineReached(t, twap)) check(!spent, `tranche ${i} (${t.atOrAbove ? "target" : "stop"}) not sold while MON ${tickToPrice(twap).toFixed(5)} has not reached its line ${tickToPrice(t.lineTick).toFixed(5)} (negative case)`);
     }
     report.push(row);
   }

@@ -10,13 +10,19 @@ const team = new Set(
     .split("\n").map((l) => l.trim().toLowerCase()).filter((l) => l.startsWith("0x")),
 );
 const pub = createPublicClient({ transport: http(TESTNET.rpc, { retryCount: 6, retryDelay: 700 }) });
-const count = Number(await pub.readContract({ address: TESTNET.planBook, abi: abis.planBook, functionName: "count" }));
+// every plan book: the current one and the legacy ones whose plans still count
+const books = [TESTNET.planBook, ...TESTNET.legacy.map((l) => l.planBook)];
+const counts: number[] = [];
+for (const b of books) counts.push(Number(await pub.readContract({ address: b, abi: abis.planBook, functionName: "count" })));
+const count = counts.reduce((a, b) => a + b, 0);
 if (count === 0) throw new Error("PlanBook reads 0 plans: wrong address or chain, an empty book proves nothing");
 // one read at a time: the public RPC allows 15 requests per second
 const plans = [];
-for (let i = 0; i < count; i++) {
-  plans.push(await pub.readContract({ address: TESTNET.planBook, abi: abis.planBook, functionName: "plan", args: [BigInt(i)] }));
-  await new Promise((r) => setTimeout(r, 120));
+for (const [k, b] of books.entries()) {
+  for (let i = 0; i < counts[k]; i++) {
+    plans.push(await pub.readContract({ address: b, abi: abis.planBook, functionName: "plan", args: [BigInt(i)] }));
+    await new Promise((r) => setTimeout(r, 120));
+  }
 }
 const outside = [...new Set(plans.map((p) => p.holder.toLowerCase()).filter((h) => !team.has(h)))];
 const teamSeen = new Set(plans.map((p) => p.holder.toLowerCase()).filter((h) => team.has(h)));

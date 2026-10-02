@@ -114,7 +114,7 @@ export function PlanCard({ p, price, action, title }: { p: PlanView; price: numb
           <span className="text-right text-ink">{fmtMon(x.mon)}</span>
           <span className="text-right text-line">{fmtPrice(x.line)}</span>
           <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
-          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}% to line`}</span>
+          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && (x.atOrAbove ? price >= x.line : price <= x.line) ? "selling" : `${((Math.abs((price ?? 0) - x.line) / (price || 1)) * 100).toFixed(1)}% to ${x.atOrAbove ? "target" : "stop"}`}</span>
         </div>
       ))}
       <ul className="border-t border-hairline">
@@ -136,7 +136,8 @@ export function PlanCard({ p, price, action, title }: { p: PlanView; price: numb
 export function Watch({ t, price, part }: { t: T; price: number | null; part: "summary" | "side" }) {
   const live = t.plans.filter((p) => !p.revoked && p.expiresAt * 1000 > Date.now());
   const target = live.find((p) => p.tranches.some((x) => !x.spent)) ?? null;
-  const next = target?.tranches.filter((x) => !x.spent).sort((a, b) => b.line - a.line)[0];
+  // the unsold line closest to the price, from either side
+  const next = target?.tranches.filter((x) => !x.spent).sort((a, b) => Math.abs((price ?? 0) - a.line) - Math.abs((price ?? 0) - b.line))[0];
 
   if (!t.account) {
     if (part === "summary") return <Proof t={t} />;
@@ -160,7 +161,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
       <div className="min-h-[88px] px-1 pt-6">
         {price !== null && next ? (
           <div className="flex flex-wrap items-baseline gap-x-4">
-            <span className="num text-[28px] font-medium leading-9 text-ink">{price > next.line ? `-${(((price - next.line) / price) * 100).toFixed(1)}%` : "crossed"}</span>
+            <span className="num text-[28px] font-medium leading-9 text-ink">{(next.atOrAbove ? price >= next.line : price <= next.line) ? "reached" : `${next.atOrAbove ? "+" : "-"}${((Math.abs(price - next.line) / price) * 100).toFixed(1)}%`}</span>
             <span className="text-[14px] text-body">
               to your next line, <span className="num text-line">{fmtPrice(next.line)}</span>. MON is <span className="num text-ink">{fmtPrice(price)}</span>.
             </span>
