@@ -33,7 +33,7 @@ export function Record({ plans }: { plans: RecentPlan[] | null }) {
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <span className="text-mute">Refused:</span>
                   {p.refused.map((r) => (
-                    <a key={r.hash} href={txUrl(r.hash)} target="_blank" rel="noreferrer" title={`${r.reason}, ${r.hash}`} className="num inline-flex h-7 items-center rounded-md border border-hairline px-2 text-[12px] text-body hover:border-hairline-strong hover:text-ink">
+                    <a key={r.hash} href={txUrl(r.hash)} target="_blank" rel="noreferrer" title={`${r.reason}, ${r.hash}`} className="num inline-flex h-9 items-center rounded-md border border-hairline px-2 text-[12px] text-body hover:border-hairline-strong hover:text-ink">
                       {CHIP[r.attack]} <span className="ml-1.5 text-mute">{r.reason.replace("Tripwire:", "")}</span>
                     </a>
                   ))}

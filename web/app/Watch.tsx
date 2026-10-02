@@ -63,19 +63,52 @@ function activity(p: PlanView, holder: string) {
   return rows;
 }
 
+const TRIED_SHORT: Record<string, string> = { line: "Sell before MON reached the line", floor: "Sell for half the floor", recipient: "Pay the aUSD to the keeper" };
+
+/** Signed out: every forbidden sale the keeper has sent, what the contract said, and the totals. */
+function Proof({ t }: { t: T }) {
+  const plans = t.recent?.plans ?? [];
+  const rows = plans.flatMap((p) => p.refused.map((r) => ({ ...r, plan: p.plan })));
+  const tot = t.recent?.totals;
+  if (rows.length === 0) return null;
+  return (
+    <section className="mt-6 rounded-[10px] border border-hairline bg-surface-card" aria-label="Forbidden sales">
+      <header className="border-b border-hairline px-4 py-3">
+        {tot && (
+          <p className="num text-[22px] font-medium leading-8 text-ink">
+            {tot.forbiddenSent} forbidden sales sent, {tot.forbiddenReverted} reverted, {tot.forbiddenPaidOut} paid out
+          </p>
+        )}
+        <p className="text-[13px] text-mute">The keeper broke the rules on purpose. Each attempt is a mined Monad testnet transaction with status 0.</p>
+      </header>
+      <div className="grid min-h-8 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+        <span>Plan</span><span>Keeper tried to</span><span>Contract said</span><span>Tx</span>
+      </div>
+      {rows.slice(0, 12).map((r) => (
+        <div key={r.hash} className="num grid min-h-9 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline px-4 text-[13px]">
+          <span className="text-mute">{r.plan}</span>
+          <span className="font-sans text-body">{TRIED_SHORT[r.attack]}</span>
+          <span className="text-line">{r.reason}</span>
+          <TxLink hash={r.hash} />
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export function PlanCard({ p, price, action, title }: { p: PlanView; price: number | null; action?: ReactNode; title?: string }) {
   return (
     <Card title={title ?? `Plan ${p.id}`} aside={action}>
-      <div className="grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+      <div className="grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
         <span>Sale</span><span className="text-right">MON</span><span className="text-right">Line</span><span className="text-right">Floor</span><span className="text-right">State</span>
       </div>
       {p.tranches.map((x) => (
-        <div key={x.index} className="num grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
+        <div key={x.index} className="num grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
           <span className="text-mute">{x.index + 1}</span>
           <span className="text-right text-ink">{fmtMon(x.mon)}</span>
           <span className="text-right text-line">{fmtPrice(x.line)}</span>
           <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
-          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `-${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}%`}</span>
+          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}% to line`}</span>
         </div>
       ))}
       <ul className="border-t border-hairline">
@@ -100,7 +133,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
   const next = target?.tranches.filter((x) => !x.spent).sort((a, b) => b.line - a.line)[0];
 
   if (!t.account) {
-    if (part === "summary") return null;
+    if (part === "summary") return <Proof t={t} />;
     return (
       <div className="flex flex-col gap-4">
         {t.publicPlan ? (
@@ -108,7 +141,10 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
         ) : (
           <p className="text-[13px] text-mute">Reading the latest plan on chain.</p>
         )}
-        <p className="text-[13px] leading-5 text-body">Each refusal above is a real transaction: the keeper sent a sale the plan forbids and Monad reverted it with the enforcer's reason. Sign in with a passkey on the Plan tab to arm your own plan and try it yourself.</p>
+        {t.publicPlan && t.publicPlan.attacks.length > 0 && (
+          <p className="text-[13px] leading-5 text-body">Each refusal above is a real transaction: the keeper sent a sale the plan forbids and Monad reverted it with the enforcer's reason.</p>
+        )}
+        <p className="text-[13px] leading-5 text-body">Sign in with a passkey on the Plan tab to arm your own plan and make the keeper try it.</p>
       </div>
     );
   }

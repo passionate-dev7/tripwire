@@ -40,7 +40,7 @@ export function Fact({ label, children }: { label: string; children: ReactNode }
 
 export function TxLink({ hash, label }: { hash: Hex; label?: string }) {
   return (
-    <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="font-mono text-[12px] text-body underline decoration-hairline-strong underline-offset-4 hover:text-ink">
+    <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center font-mono text-[12px] text-body underline decoration-hairline-strong underline-offset-4 hover:text-ink">
       {label ?? short(hash, 10)}
     </a>
   );

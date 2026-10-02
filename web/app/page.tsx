@@ -59,7 +59,7 @@ export default function Page() {
   const lines: ChartLine[] = useMemo(() => {
     if (tab === "plan") return plan.filter((p) => p.line > 0 && p.floor > 0).map((p) => ({ price: p.line, floor: p.floor, label: `sell ${p.mon}`, state: "draft" as const }));
     const shown = t.account ? t.plans : t.publicPlan ? [t.publicPlan] : [];
-    return shown.filter((p) => !p.revoked || !t.account).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, label: x.spent ? `sold ${x.index + 1}` : `plan ${p.id} sale ${x.index + 1}`, state: x.spent ? ("sold" as const) : ("armed" as const) })));
+    return shown.filter((p) => !p.revoked || !t.account).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, label: x.spent ? `sold ${x.index + 1}` : p.revoked ? `off ${x.index + 1}` : `plan ${p.id} sale ${x.index + 1}`, state: x.spent ? ("sold" as const) : p.revoked ? ("off" as const) : ("armed" as const) })));
   }, [tab, plan, t.plans, t.publicPlan, t.account]);
 
   return (

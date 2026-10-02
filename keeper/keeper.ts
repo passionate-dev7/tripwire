@@ -257,8 +257,8 @@ async function attack(planId: number, kind: string): Promise<Attack> {
 // ---------- testnet MON drip for empty passkey accounts ----------
 
 const DRIP = parseEther("0.1");
-const DRIP_PER_IP_DAY = 2;
-const DRIP_PER_DAY = 20;
+const DRIP_PER_IP_DAY = 10;
+const DRIP_PER_DAY = 30;
 const dripped = new Set<string>();
 const dripLog: { at: number; ip: string }[] = [];
 
@@ -267,11 +267,11 @@ async function drip(address: string, ip: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error("address=0x... required");
   const day = Date.now() - 86_400_000;
   while (dripLog.length && dripLog[0].at < day) dripLog.shift();
-  if (dripped.has(address.toLowerCase())) throw new Error("this address already got testnet MON from tripwire");
-  if (dripLog.filter((d) => d.ip === ip).length >= DRIP_PER_IP_DAY) throw new Error("two drips per day from one network; use faucet.monad.xyz");
-  if (dripLog.length >= DRIP_PER_DAY) throw new Error("today's drips are used up; use faucet.monad.xyz");
-  if ((await pub.getBalance({ address: address as `0x${string}` })) > 0n) throw new Error("this address already holds MON");
-  if ((await pub.getCode({ address: address as `0x${string}` })) && (await pub.getCode({ address: address as `0x${string}` })) !== "0x") throw new Error("only fresh accounts get a drip");
+  if (dripped.has(address.toLowerCase())) throw new Error("This passkey already got testnet MON from tripwire.");
+  if (dripLog.filter((d) => d.ip === ip).length >= DRIP_PER_IP_DAY) throw new Error("This network has used its testnet MON for today. faucet.monad.xyz sends more.");
+  if (dripLog.length >= DRIP_PER_DAY) throw new Error("Today's testnet MON from tripwire is used up. faucet.monad.xyz sends more.");
+  if ((await pub.getBalance({ address: address as `0x${string}` })) > 0n) throw new Error("This passkey already holds MON, so it can arm a plan now.");
+  if ((await pub.getCode({ address: address as `0x${string}` })) && (await pub.getCode({ address: address as `0x${string}` })) !== "0x") throw new Error("Only a fresh passkey account gets testnet MON from tripwire.");
   dripped.add(address.toLowerCase());
   dripLog.push({ at: Date.now(), ip });
   const w = createWalletClient({ account: dripper, chain, transport: http(net.rpc) });
@@ -319,7 +319,15 @@ Bun.serve({
           sales: p.fills.map((f) => ({ hash: f.hash, index: f.index, amountIn: f.amountIn, minOut: f.minOut, amountOut: f.amountOut ?? null, priceTick: f.priceTick })),
           refused: p.attacks.filter((a) => a.status === "reverted").map((a) => ({ hash: a.hash, attack: a.kind, reason: a.reason })),
         }));
-        return json({ plans, total: state.plans.length });
+        const attempts = state.plans.flatMap((p) => p.attacks);
+        const totals = {
+          plans: state.plans.length,
+          sales: state.plans.reduce((n, p) => n + p.fills.length, 0),
+          forbiddenSent: attempts.length,
+          forbiddenReverted: attempts.filter((a) => a.status === "reverted").length,
+          forbiddenPaidOut: attempts.filter((a) => a.status !== "reverted").length,
+        };
+        return json({ plans, total: state.plans.length, totals });
       }
       if (url.pathname === "/api/history") {
         return json({ points: state.history ?? [] });

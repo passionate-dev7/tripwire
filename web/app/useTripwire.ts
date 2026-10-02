@@ -50,7 +50,8 @@ export function useTripwire() {
   const mine = usePoll<{ plans: PlanView[] } | null>(async () => (account ? keeperApi.plans(account.address) : null), 4000, [account?.address, refresh]);
   const recent = usePoll(keeperApi.recent, 8000, []);
   // the newest plan on chain, shown read-only to anyone not signed in
-  const latestHolder = recent.data?.plans.find((p) => p.sales.length || p.refused.length)?.holder ?? null;
+  // the newest plan that carries refused calls, so the proof never disappears when someone arms a fresh plan
+  const latestHolder = recent.data?.plans.find((p) => p.refused.length > 0)?.holder ?? null;
   const publicPlans = usePoll<{ plans: PlanView[] } | null>(async () => (latestHolder && !account ? keeperApi.plans(latestHolder) : null), 8000, [latestHolder, account?.address]);
   const held = usePoll<Holdings | null>(async () => (account ? holdings(net, account.address) : null), 5000, [account?.address, refresh]);
 
@@ -119,7 +120,7 @@ export function useTripwire() {
     plansLoaded: mine.at > 0,
     holdings: held.data,
     recent: recent.data,
-    publicPlan: publicPlans.data?.plans.find((p) => p.fills.length || p.attacks.length) ?? null,
+    publicPlan: [...(publicPlans.data?.plans ?? [])].reverse().find((p) => p.attacks.length > 0) ?? null,
     busy,
     steps,
     error,

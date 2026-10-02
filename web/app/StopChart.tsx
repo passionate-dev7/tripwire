@@ -7,7 +7,7 @@ import { ColorType, LineSeries, LineStyle, createChart, type IChartApi, type ISe
 import type { Point } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
 
-export type ChartLine = { price: number; floor: number; label: string; state: "draft" | "armed" | "sold" };
+export type ChartLine = { price: number; floor: number; label: string; state: "draft" | "armed" | "sold" | "off" };
 
 const INK = "#f4f4f6";
 const MUTE = "#9c9c9d";
@@ -64,13 +64,13 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
     const made = lines.flatMap((l) => [
       s.createPriceLine({
         price: l.price,
-        color: l.state === "sold" ? MUTE : RED,
+        color: l.state === "sold" || l.state === "off" ? MUTE : RED,
         lineWidth: l.state === "armed" ? 2 : 1,
         lineStyle: l.state === "draft" ? LineStyle.LargeDashed : LineStyle.Solid,
         axisLabelVisible: true,
         title: l.label,
       }),
-      s.createPriceLine({ price: l.floor, color: "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: "floor" }),
+      s.createPriceLine({ price: l.floor, color: l.state === "sold" || l.state === "off" ? "rgba(156,156,157,0.45)" : "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: "floor" }),
     ]);
     // keep every line in view, not just the price
     s.applyOptions({

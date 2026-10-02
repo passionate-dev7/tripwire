@@ -47,7 +47,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
       <Card>
         <div className="px-4 pb-4 pt-5">
           <p className="text-[14px] leading-6 text-body">
-            Sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON when 1 MON is worth
+            Sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once MON&apos;s 60 s average is at or below
           </p>
           <label className="mt-1 flex items-baseline gap-2">
             <span className="sr-only">Line, in aUSD per MON</span>
@@ -68,22 +68,22 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           </p>
           <div className="mt-2 flex gap-2 overflow-x-auto">
             {[["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]].map(([l, v]) => (
-              <button key={l} type="button" onClick={() => preset(v as number)} className="h-9 shrink-0 rounded-lg border border-hairline px-3 text-[13px] text-body hover:border-hairline-strong hover:text-ink">
+              <button key={l} type="button" onClick={() => preset(v as number)} className="h-10 shrink-0 rounded-lg border border-hairline px-3 text-[13px] text-body hover:border-hairline-strong hover:text-ink">
                 {l}
               </button>
             ))}
           </div>
         </div>
         <div className="border-t border-hairline">
-          <div className="grid h-8 grid-cols-[1fr_1fr_1fr_24px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
-            <span>Sell MON</span><span className="text-right">At or below</span><span className="text-right" title="In a fast drop past the floor, that row does not sell">Floor, never less</span><span />
+          <div className="grid h-8 grid-cols-[1fr_1fr_1fr_36px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+            <span>Sell MON</span><span className="text-right">At or below</span><span className="text-right" title="In a fast drop past the floor, that row does not sell">Floor</span><span />
           </div>
           {plan.map((p, i) => (
-            <div key={i} className="grid h-10 grid-cols-[1fr_1fr_1fr_24px] items-center gap-2 border-t border-hairline px-4">
+            <div key={i} className="grid h-10 grid-cols-[1fr_1fr_1fr_36px] items-center gap-2 border-t border-hairline px-4">
               <input aria-label={`Tranche ${i + 1} MON`} inputMode="decimal" value={p.mon} onChange={(e) => set(i, "mon", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-[13px] text-ink outline-none" />
               <input aria-label={`Tranche ${i + 1} line`} inputMode="decimal" value={String(p.line)} onChange={(e) => set(i, "line", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-line outline-none" />
               <input aria-label={`Tranche ${i + 1} floor`} inputMode="decimal" value={String(p.floor)} onChange={(e) => set(i, "floor", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-ink outline-none" />
-              <button type="button" aria-label={`Remove tranche ${i + 1}`} disabled={plan.length === 1} onClick={() => setPlan(plan.filter((_, j) => j !== i))} className="text-[14px] text-mute hover:text-ink disabled:opacity-20">
+              <button type="button" aria-label={`Remove tranche ${i + 1}`} disabled={plan.length === 1} onClick={() => setPlan(plan.filter((_, j) => j !== i))} className="h-9 w-9 text-[16px] text-mute hover:text-ink disabled:opacity-20">
                 ×
               </button>
             </div>
@@ -103,8 +103,10 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
         <Fact label="Pays only to">
           {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
         </Fact>
+        <Fact label="If MON gaps below a floor">that sale does not fire; you keep the MON</Fact>
+        <Fact label="Pool fee">0.3%, Uniswap V3 WMON/aUSD</Fact>
         <Fact label="You receive at least">
-          {checked.tranches ? `${plan.map((p) => fmtAusd(Number(p.mon) * p.floor)).join(" + ")} aUSD` : "check the rows"}
+          {checked.tranches ? `${fmtAusd(plan.reduce((n, p) => n + Number(p.mon) * p.floor, 0))} aUSD` : "check the rows"}
         </Fact>
         <Fact label="Largest single sale">{checked.tranches ? `${fmtMon(largest)} MON` : "check the rows"}</Fact>
         <Fact label="In total, at most">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>

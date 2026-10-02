@@ -34,7 +34,7 @@ export const keeperApi = {
   status: () => get<Status>("/api/status"),
   history: () => get<{ points: Point[] }>("/api/history"),
   plans: (holder: Hex) => get<{ plans: PlanView[] }>(`/api/plans?holder=${holder}`),
-  recent: () => get<{ plans: RecentPlan[]; total: number }>("/api/recent"),
+  recent: () => get<{ plans: RecentPlan[]; total: number; totals?: { plans: number; sales: number; forbiddenSent: number; forbiddenReverted: number; forbiddenPaidOut: number } }>("/api/recent"),
   drip: async (address: Hex): Promise<{ hash: Hex }> => {
     const r = await fetch(`${BASE}/api/drip`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address }) });
     const body = await r.json();
