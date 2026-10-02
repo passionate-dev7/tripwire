@@ -11,6 +11,7 @@ import { Card, Copy, Fact, Ghost, Pill, TxLink, addrUrl, fmtMon, fmtPrice, short
 
 type T = ReturnType<typeof useTripwire>;
 const UNLOCK = "2026-11-24";
+const fmtAusd = (n: number) => n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
 
 export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]; setPlan: (p: PlainTranche[]) => void; price: number | null }) {
   const [expiry, setExpiry] = useState(UNLOCK);
@@ -58,6 +59,13 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             />
             <span className="text-[14px] text-mute">aUSD</span>
           </label>
+          <p className="num mt-1 text-[12px] text-mute">
+            {price === null || !(plan[0]?.line > 0)
+              ? "Reading the price."
+              : plan[0].line >= price
+                ? `At or above today's ${fmtPrice(price)}: the keeper sells this within about a minute of arming.`
+                : `${(((price - plan[0].line) / price) * 100).toFixed(1)}% below today's 60 s average of ${fmtPrice(price)}.`}
+          </p>
           <div className="mt-2 flex gap-2 overflow-x-auto">
             {[["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]].map(([l, v]) => (
               <button key={l} type="button" onClick={() => preset(v as number)} className="h-7 shrink-0 rounded-lg border border-hairline px-3 text-[12px] text-body hover:border-hairline-strong hover:text-ink">
@@ -95,6 +103,9 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
         <Fact label="Pays only to">
           {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
         </Fact>
+        <Fact label="You receive at least">
+          {checked.tranches ? `${plan.map((p) => fmtAusd(Number(p.mon) * p.floor)).join(" + ")} aUSD` : "check the rows"}
+        </Fact>
         <Fact label="Largest single sale">{checked.tranches ? `${fmtMon(largest)} MON` : "check the rows"}</Fact>
         <Fact label="In total, at most">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>
         <Fact label="Stops on">
@@ -103,12 +114,13 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
       </Card>
 
       <div className="flex flex-col gap-3">
-        {checked.error && <p className="text-[13px] text-line">{checked.error}</p>}
+        {checked.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{checked.error}</p>}
         {firesNow && !checked.error && <p className="text-[13px] text-body">MON is already at or below a line in this plan, so the keeper sells that row within about a minute of arming.</p>}
 
         {!t.account ? (
           <div className="flex flex-col gap-2">
             <Pill onClick={t.signIn} disabled={t.busy !== null}>{t.busy === "Signing in" ? "Waiting for your passkey" : "Sign in with passkey"}</Pill>
+            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average is at or below your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
             <div className="flex gap-2">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name a new passkey" aria-label="Name for a new passkey" className="h-[31px] min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-3 text-[13px] text-ink outline-none placeholder:text-mute" />
               <Ghost onClick={() => t.create(name || "tripwire")} disabled={t.busy !== null}>Create</Ghost>
@@ -122,16 +134,16 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             <span className="font-mono text-[12px] text-ink">{short(t.account.address, 8)}</span><Copy text={t.account.address} />
           </div>
         ) : (
-          <Pill onClick={() => t.arm(plan, expiresAt)} disabled={t.busy !== null || !!checked.error}>
-            {t.busy === "Arming" ? t.steps.at(-1)?.label ?? "Signing" : `Sign plan (${plan.length} ${plan.length === 1 ? "sale" : "sales"})`}
-          </Pill>
+          <>
+            <Pill onClick={() => t.arm(plan, expiresAt)} disabled={t.busy !== null || !!checked.error}>
+              {t.busy === "Arming" ? t.steps.at(-1)?.label ?? "Signing" : `Sign plan (${plan.length} ${plan.length === 1 ? "sale" : "sales"})`}
+            </Pill>
+            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average is at or below your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
+          </>
         )}
 
-        <p className="rounded-[10px] border border-hairline px-4 py-3 text-[13px] leading-5 text-mute">
-          A line is not a guaranteed price. The keeper sells at the pool price once the 60 s average is at or below your line, and never below your floor; in a fast drop past the floor, that row does not sell.
-        </p>
 
-        {t.error && <p className="text-[13px] text-line">{t.error}</p>}
+        {t.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{t.error}</p>}
         {t.steps.length > 0 && (
           <ol className="rounded-[10px] border border-hairline">
             {t.steps.map((s, i) => (

@@ -32,7 +32,7 @@ export function Card({ title, aside, children, className = "" }: { title?: strin
 export function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex min-h-[31px] items-start justify-between gap-4 border-b border-hairline px-4 py-[7px] text-[13px] last:border-b-0">
-      <span className="text-mute">{label}</span>
+      <span className="whitespace-nowrap text-mute">{label}</span>
       <span className="num text-right text-ink">{children}</span>
     </div>
   );

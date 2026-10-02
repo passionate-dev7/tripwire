@@ -205,7 +205,9 @@ export function parseMon(mon: string): bigint {
 
 export function toTranches(plain: PlainTranche[], stableDecimals = 6): Tranche[] {
   if (plain.length === 0 || plain.length > 16) throw new Error("a plan has 1 to 16 tranches");
-  return plain.map((p) => {
+  return plain.map((p, i) => {
+    if (!p.mon || !p.mon.trim()) throw new Error(`Enter how much MON sale ${i + 1} sells.`);
+    if (!(p.line > 0) || !(p.floor > 0)) throw new Error(`Sale ${i + 1} needs a line and a floor above zero.`);
     if (!(p.floor <= p.line)) throw new Error(`floor ${p.floor} is above line ${p.line}: the tranche could never fill`);
     const amountIn = parseMon(p.mon);
     if (amountIn === 0n) throw new Error("a tranche sells more than 0 MON");

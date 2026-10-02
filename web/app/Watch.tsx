@@ -75,15 +75,18 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
   if (part === "summary") {
     return (
       <div className="min-h-[88px] px-1 pt-6">
-        <p className="text-[14px] leading-7 text-body">
-          {price === null ? "Reading the pool." : next ? (
-            <>MON <span className="num text-ink">{fmtPrice(price)}</span>. Your next line is <span className="num text-line">{fmtPrice(next.line)}</span>, {price > next.line ? `${(((price - next.line) / price) * 100).toFixed(1)}% below` : "already crossed"}.</>
-          ) : t.plans.length === 0 ? (
-            t.plansLoaded ? "No plan yet. Set your lines on the Plan tab." : "Reading your plans."
-          ) : (
-            <>MON <span className="num text-ink">{fmtPrice(price)}</span>. Every sale in your plans has happened, or the plans are revoked.</>
-          )}
-        </p>
+        {price !== null && next ? (
+          <div className="flex flex-wrap items-baseline gap-x-4">
+            <span className="num text-[28px] font-medium leading-9 text-ink">{price > next.line ? `-${(((price - next.line) / price) * 100).toFixed(1)}%` : "crossed"}</span>
+            <span className="text-[14px] text-body">
+              to your next line, <span className="num text-line">{fmtPrice(next.line)}</span>. MON is <span className="num text-ink">{fmtPrice(price)}</span>.
+            </span>
+          </div>
+        ) : (
+          <p className="text-[14px] leading-7 text-body">
+            {price === null ? "Reading the pool." : t.plans.length === 0 ? (t.plansLoaded ? "No plan yet. Set your lines on the Plan tab." : "Reading your plans.") : <>MON <span className="num text-ink">{fmtPrice(price)}</span>. Every sale in your plans has happened, or the plans are revoked.</>}
+          </p>
+        )}
         <p className="num mt-1 text-[13px] text-mute">
           {(() => { const w = live.reduce((n, p) => n + p.tranches.filter((x) => !x.spent).length, 0); return `${live.length} plan${live.length === 1 ? "" : "s"} armed, ${w} sale${w === 1 ? "" : "s"} waiting`; })()}
           {target ? `, stops on ${new Date(target.expiresAt * 1000).toISOString().slice(0, 10)}` : ""}
@@ -96,16 +99,16 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
     <div className="flex flex-col gap-6">
       {t.plans.map((p) => (
         <Card key={p.id} title={`Plan ${p.id}`} aside={p.revoked ? <span className="text-[12px] text-mute">revoked</span> : <Ghost onClick={() => t.revoke(p)} disabled={t.busy !== null}>Revoke</Ghost>}>
-          <div className="grid h-[25px] grid-cols-[48px_1fr_1fr_1fr_1fr] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+          <div className="grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
             <span>Sale</span><span className="text-right">MON</span><span className="text-right">Line</span><span className="text-right">Floor</span><span className="text-right">State</span>
           </div>
           {p.tranches.map((x) => (
-            <div key={x.index} className="num grid h-[25px] grid-cols-[48px_1fr_1fr_1fr_1fr] items-center gap-2 border-t border-hairline px-4 text-[13px]">
+            <div key={x.index} className="num grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
               <span className="text-mute">{x.index + 1}</span>
               <span className="text-right text-ink">{fmtMon(x.mon)}</span>
               <span className="text-right text-line">{fmtPrice(x.line)}</span>
               <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
-              <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}% away`}</span>
+              <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `-${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}%`}</span>
             </div>
           ))}
           <ul className="border-t border-hairline">
@@ -142,7 +145,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
                     <div className="font-mono text-[12px] leading-5 text-body">
                       <div>sent and mined, status {r.status}</div>
                       <div>
-                        refused by the enforcer: <span className="text-line">{reason}</span> <TxLink hash={r.hash} />
+                        refused by the enforcer: <span className="whitespace-nowrap text-line">{reason}</span> <TxLink hash={r.hash} />
                       </div>
                     </div>
                   )}
@@ -159,7 +162,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
           <Ghost onClick={() => t.takeBack(t.holdings!.wmon)} disabled={t.busy !== null}>Turn back into MON</Ghost>
         </div>
       )}
-      {t.error && <p className="text-[13px] text-line">{t.error}</p>}
+      {t.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{t.error}</p>}
     </div>
   );
 }

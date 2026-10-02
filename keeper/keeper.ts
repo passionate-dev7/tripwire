@@ -167,6 +167,21 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
 }
 
 let lastLoop = 0;
+let loops = 0;
+// Snapshots the API serves: computed here, in the loop, so no request ever waits on (or fails with) the public RPC.
+let statusSnap: Record<string, unknown> | null = null;
+const viewSnap = new Map<number, Awaited<ReturnType<typeof planView>>>();
+
+async function snapshot(head: bigint, twap: number) {
+  const [slot0, gas, poolStable] = await Promise.all([
+    pub.readContract({ address: net.pool, abi: abis.pool, functionName: "slot0" }),
+    pub.getBalance({ address: keeper.address }),
+    pub.readContract({ address: net.stable, abi: erc20Abi, functionName: "balanceOf", args: [net.pool] }),
+  ]);
+  const spotTick = net.wmon.toLowerCase() < net.stable.toLowerCase() ? Number(slot0[1]) : -Number(slot0[1]);
+  statusSnap = { chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds, readAt: Date.now() };
+}
+
 async function loop() {
   for (;;) {
     try {
@@ -175,7 +190,9 @@ async function loop() {
       const tick = await priceTick();
       await sample(tick);
       await readMainnet();
+      await snapshot(head, tick);
       for (const plan of state.plans) await tryFill(plan, decodeDelegation(plan.delegation), tick);
+      if (loops++ % 3 === 0) for (const plan of state.plans) viewSnap.set(plan.id, await planView(plan));
       persist();
       lastLoop = Date.now();
     } catch (e) {
@@ -246,15 +263,17 @@ Bun.serve({
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     try {
       if (url.pathname === "/api/status") {
-        const [head, twap, slot0, gas, poolStable] = await Promise.all([
-          pub.getBlockNumber(),
-          priceTick(),
-          pub.readContract({ address: net.pool, abi: abis.pool, functionName: "slot0" }),
-          pub.getBalance({ address: keeper.address }),
-          pub.readContract({ address: net.stable, abi: erc20Abi, functionName: "balanceOf", args: [net.pool] }),
+        if (!statusSnap) return json({ error: "keeper is starting" }, 503);
+        return json({ ...statusSnap, lastLoop, mainnet: mainnetRead });
+      }
+      if (url.pathname === "/api/recent") {
+        // every sale and every refused call the keeper has indexed, newest first; served from memory, no log scan
+        const rows = state.plans.flatMap((p) => [
+          ...p.fills.map((f) => ({ kind: "sale" as const, plan: p.id, holder: p.holder, hash: f.hash, block: Number(f.block), index: f.index, amountIn: f.amountIn, minOut: f.minOut, priceTick: f.priceTick })),
+          ...p.attacks.filter((a) => a.status === "reverted").map((a) => ({ kind: "refused" as const, plan: p.id, holder: p.holder, hash: a.hash, block: 0, attack: a.kind, reason: a.reason })),
         ]);
-        const spotTick = net.wmon.toLowerCase() < net.stable.toLowerCase() ? Number(slot0[1]) : -Number(slot0[1]);
-        return json({ chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), lastLoop, plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds, mainnet: mainnetRead });
+        rows.sort((a, b) => b.plan - a.plan || b.block - a.block);
+        return json({ rows: rows.slice(0, 12), plans: state.plans.length });
       }
       if (url.pathname === "/api/history") {
         return json({ points: state.history ?? [] });
@@ -263,7 +282,8 @@ Bun.serve({
         const holder = (url.searchParams.get("holder") ?? "").toLowerCase();
         if (!/^0x[0-9a-f]{40}$/.test(holder)) return json({ error: "holder=0x... required" }, 400);
         const mine = state.plans.filter((p) => p.holder.toLowerCase() === holder);
-        return json({ plans: await Promise.all(mine.map(planView)) });
+        // cached views carry the latest fills and attacks from the index; a plan posted since the last snapshot is read once
+        return json({ plans: await Promise.all(mine.map(async (p) => { const v = viewSnap.get(p.id) ?? (await planView(p)); return { ...v, fills: p.fills, attacks: p.attacks, lastError: p.lastError ?? null }; })) });
       }
       if (url.pathname === "/api/attack" && req.method === "POST") {
         const { planId, kind } = (await req.json()) as { planId: number; kind: string };
