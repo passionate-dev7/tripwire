@@ -48,6 +48,10 @@ export function useTripwire() {
   const status = usePoll<Status>(keeperApi.status, 4000, []);
   const history = usePoll<{ points: Point[] }>(keeperApi.history, 15000, []);
   const mine = usePoll<{ plans: PlanView[] } | null>(async () => (account ? keeperApi.plans(account.address) : null), 4000, [account?.address, refresh]);
+  const recent = usePoll(keeperApi.recent, 8000, []);
+  // the newest plan on chain, shown read-only to anyone not signed in
+  const latestHolder = recent.data?.plans.find((p) => p.sales.length || p.refused.length)?.holder ?? null;
+  const publicPlans = usePoll<{ plans: PlanView[] } | null>(async () => (latestHolder && !account ? keeperApi.plans(latestHolder) : null), 8000, [latestHolder, account?.address]);
   const held = usePoll<Holdings | null>(async () => (account ? holdings(net, account.address) : null), 5000, [account?.address, refresh]);
 
   const run = useCallback(async (label: string, fn: () => Promise<void>) => {
@@ -91,6 +95,13 @@ export function useTripwire() {
       setSteps([{ label: "WMON turned back into MON", hash: tx }]);
     });
 
+  const drip = () =>
+    run("Getting testnet MON", async () => {
+      if (!account) throw new Error("Sign in with your passkey first.");
+      const r = await keeperApi.drip(account.address);
+      setSteps([{ label: "0.1 testnet MON received", hash: r.hash }]);
+    });
+
   /** Ask the keeper to break the plan on purpose, then read the revert from the chain ourselves. */
   const cheat = (p: PlanView, kind: Attack["kind"]) =>
     run(`Keeper tries: ${kind}`, async () => {
@@ -107,10 +118,13 @@ export function useTripwire() {
     plans: mine.data?.plans ?? [],
     plansLoaded: mine.at > 0,
     holdings: held.data,
+    recent: recent.data,
+    publicPlan: publicPlans.data?.plans.find((p) => p.fills.length || p.attacks.length) ?? null,
     busy,
     steps,
     error,
     attacks,
+    drip,
     signIn,
     create,
     arm,

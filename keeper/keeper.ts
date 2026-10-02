@@ -41,7 +41,10 @@ import { revertReason as chainRevertReason } from "../web/lib/chain";
 const here = path.dirname(new URL(import.meta.url).pathname);
 const net = { ...TESTNET, rpc: process.env.MONAD_TESTNET_RPC_URL ?? TESTNET.rpc };
 const keyFile = process.env.TRIPWIRE_KEEPER_KEY_FILE ?? path.join(process.env.HOME ?? "", ".config/tripwire/keeper.json");
-const keeper = privateKeyToAccount((JSON.parse(fs.readFileSync(keyFile, "utf8")) as { keeper: Hex }).keeper);
+const keyRing = JSON.parse(fs.readFileSync(keyFile, "utf8")) as { keeper: Hex; drip?: Hex };
+const keeper = privateKeyToAccount(keyRing.keeper);
+// A separate wallet that gives a brand-new passkey account enough testnet MON to arm a small plan. It never signs plans.
+const dripper = keyRing.drip ? privateKeyToAccount(keyRing.drip) : null;
 if (keeper.address.toLowerCase() !== net.keeper.toLowerCase()) {
   throw new Error(`key file holds ${keeper.address}, plans name ${net.keeper} as their keeper`);
 }
@@ -56,7 +59,7 @@ const PORT = Number(process.env.PORT ?? 8787);
 const WINDOW = 100n;
 const LOOP_MS = 2_000;
 
-type Fill = { index: number; hash: Hex; block: string; amountIn: string; minOut: string; priceTick: number };
+type Fill = { index: number; hash: Hex; block: string; amountIn: string; minOut: string; priceTick: number; amountOut?: string };
 type Attack = { kind: string; hash: Hex; status: string; reason: string };
 type PlanRow = { id: number; holder: Address; delegationHash: Hex; postedTx: Hex; delegation: Hex; fills: Fill[]; attacks: Attack[]; lastError?: string };
 type Point = { t: number; twap: number; spot: number };
@@ -75,6 +78,18 @@ const log = (msg: string) => console.log(`${new Date().toISOString()} ${msg}`);
 const revertReason = (hash: Hex) => chainRevertReason(net.rpc, hash);
 
 // ---------- index ----------
+
+/** What the holder actually received in a sale: the stablecoin Transfer logs to the holder in that receipt. */
+async function received(hash: Hex, holder: string): Promise<string> {
+  const r = await pub.getTransactionReceipt({ hash });
+  const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+  let sum = 0n;
+  for (const l of r.logs) {
+    if (l.address.toLowerCase() !== net.stable.toLowerCase() || l.topics[0] !== TRANSFER) continue;
+    if (`0x${l.topics[2]!.slice(26)}`.toLowerCase() === holder.toLowerCase()) sum += BigInt(l.data);
+  }
+  return String(sum);
+}
 
 async function index(head: bigint) {
   let from = BigInt(state.cursor);
@@ -97,7 +112,7 @@ async function index(head: bigint) {
       if (ev.eventName !== "TrancheFilled") continue;
       const plan = state.plans.find((p) => p.delegationHash === ev.args.delegationHash);
       if (!plan || plan.fills.some((f) => f.hash === l.transactionHash)) continue;
-      plan.fills.push({ index: Number(ev.args.index), hash: l.transactionHash!, block: String(l.blockNumber), amountIn: String(ev.args.amountIn), minOut: String(ev.args.amountOutMinimum), priceTick: Number(ev.args.priceTick) });
+      plan.fills.push({ index: Number(ev.args.index), hash: l.transactionHash!, block: String(l.blockNumber), amountIn: String(ev.args.amountIn), minOut: String(ev.args.amountOutMinimum), priceTick: Number(ev.args.priceTick), amountOut: await received(l.transactionHash!, ev.args.recipient) });
     }
     state.cursor = String(to + 1n);
     from = to + 1n;
@@ -183,6 +198,7 @@ async function snapshot(head: bigint, twap: number) {
 }
 
 async function loop() {
+  for (const p of state.plans) for (const f of p.fills) if (f.amountOut === undefined) f.amountOut = await received(f.hash, p.holder).catch(() => undefined);
   for (;;) {
     try {
       const head = await pub.getBlockNumber();
@@ -238,6 +254,34 @@ async function attack(planId: number, kind: string): Promise<Attack> {
   return a;
 }
 
+// ---------- testnet MON drip for empty passkey accounts ----------
+
+const DRIP = parseEther("0.1");
+const DRIP_PER_IP_DAY = 2;
+const DRIP_PER_DAY = 20;
+const dripped = new Set<string>();
+const dripLog: { at: number; ip: string }[] = [];
+
+async function drip(address: string, ip: string) {
+  if (!dripper) throw new Error("drip is off on this keeper");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error("address=0x... required");
+  const day = Date.now() - 86_400_000;
+  while (dripLog.length && dripLog[0].at < day) dripLog.shift();
+  if (dripped.has(address.toLowerCase())) throw new Error("this address already got testnet MON from tripwire");
+  if (dripLog.filter((d) => d.ip === ip).length >= DRIP_PER_IP_DAY) throw new Error("two drips per day from one network; use faucet.monad.xyz");
+  if (dripLog.length >= DRIP_PER_DAY) throw new Error("today's drips are used up; use faucet.monad.xyz");
+  if ((await pub.getBalance({ address: address as `0x${string}` })) > 0n) throw new Error("this address already holds MON");
+  if ((await pub.getCode({ address: address as `0x${string}` })) && (await pub.getCode({ address: address as `0x${string}` })) !== "0x") throw new Error("only fresh accounts get a drip");
+  dripped.add(address.toLowerCase());
+  dripLog.push({ at: Date.now(), ip });
+  const w = createWalletClient({ account: dripper, chain, transport: http(net.rpc) });
+  const hash = await w.sendTransaction({ to: address as `0x${string}`, value: DRIP, ...FEES });
+  const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000, pollingInterval: 1_000 });
+  log(`drip ${address} ${hash} ${r.status}`);
+  if (r.status !== "success") throw new Error(`drip reverted ${hash}`);
+  return { hash, amount: String(DRIP) };
+}
+
 // ---------- API ----------
 
 async function planView(p: PlanRow) {
@@ -267,13 +311,15 @@ Bun.serve({
         return json({ ...statusSnap, lastLoop, mainnet: mainnetRead });
       }
       if (url.pathname === "/api/recent") {
-        // every sale and every refused call the keeper has indexed, newest first; served from memory, no log scan
-        const rows = state.plans.flatMap((p) => [
-          ...p.fills.map((f) => ({ kind: "sale" as const, plan: p.id, holder: p.holder, hash: f.hash, block: Number(f.block), index: f.index, amountIn: f.amountIn, minOut: f.minOut, priceTick: f.priceTick })),
-          ...p.attacks.filter((a) => a.status === "reverted").map((a) => ({ kind: "refused" as const, plan: p.id, holder: p.holder, hash: a.hash, block: 0, attack: a.kind, reason: a.reason })),
-        ]);
-        rows.sort((a, b) => b.plan - a.plan || b.block - a.block);
-        return json({ rows: rows.slice(0, 12), plans: state.plans.length });
+        // one row per plan, newest first: its sales (with what the holder actually received) and every refused call
+        const plans = [...state.plans].sort((a, b) => b.id - a.id).slice(0, 6).map((p) => ({
+          plan: p.id,
+          holder: p.holder,
+          postedTx: p.postedTx,
+          sales: p.fills.map((f) => ({ hash: f.hash, index: f.index, amountIn: f.amountIn, minOut: f.minOut, amountOut: f.amountOut ?? null, priceTick: f.priceTick })),
+          refused: p.attacks.filter((a) => a.status === "reverted").map((a) => ({ hash: a.hash, attack: a.kind, reason: a.reason })),
+        }));
+        return json({ plans, total: state.plans.length });
       }
       if (url.pathname === "/api/history") {
         return json({ points: state.history ?? [] });
@@ -284,6 +330,11 @@ Bun.serve({
         const mine = state.plans.filter((p) => p.holder.toLowerCase() === holder);
         // cached views carry the latest fills and attacks from the index; a plan posted since the last snapshot is read once
         return json({ plans: await Promise.all(mine.map(async (p) => { const v = viewSnap.get(p.id) ?? (await planView(p)); return { ...v, fills: p.fills, attacks: p.attacks, lastError: p.lastError ?? null }; })) });
+      }
+      if (url.pathname === "/api/drip" && req.method === "POST") {
+        const { address } = (await req.json()) as { address: string };
+        const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+        return json(await drip(String(address), ip));
       }
       if (url.pathname === "/api/attack" && req.method === "POST") {
         const { planId, kind } = (await req.json()) as { planId: number; kind: string };

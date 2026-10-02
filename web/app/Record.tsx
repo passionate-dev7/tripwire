@@ -1,60 +1,44 @@
 "use client";
-// The public record, visible before sign-in: every sale the keeper made and every forbidden sale the contract refused,
-// each with its transaction. Served from the keeper's index (/api/recent), each row links to the explorer.
-import { useEffect, useState } from "react";
-import type { Hex } from "viem";
+// The public record, visible before sign-in: one row per plan, its sale with what the holder actually received, and
+// every forbidden sale the contract refused, each linked to its transaction. From the keeper's index (/api/recent).
+import type { RecentPlan } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
-import { TxLink, fmtMon, fmtPrice, fmtUsd } from "./parts";
+import { TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl } from "./parts";
 
-type Row =
-  | { kind: "sale"; plan: number; holder: Hex; hash: Hex; block: number; index: number; amountIn: string; minOut: string; priceTick: number }
-  | { kind: "refused"; plan: number; holder: Hex; hash: Hex; block: number; attack: "line" | "floor" | "recipient"; reason: string };
+const CHIP: Record<string, string> = { line: "before the line", floor: "below the floor", recipient: "to the keeper" };
 
-const TRIED: Record<string, string> = {
-  line: "sell before MON reached the line",
-  floor: "sell for half the floor",
-  recipient: "send the aUSD to itself",
-};
-
-export function Record() {
-  const [rows, setRows] = useState<Row[] | null>(null);
-  useEffect(() => {
-    let live = true;
-    const load = () =>
-      fetch(`${process.env.NEXT_PUBLIC_KEEPER_API ?? ""}/api/recent`, { cache: "no-store" })
-        .then((r) => r.json())
-        .then((b) => live && setRows(b.rows))
-        .catch(() => {});
-    load();
-    const id = setInterval(load, 8000);
-    return () => {
-      live = false;
-      clearInterval(id);
-    };
-  }, []);
-
+export function Record({ plans }: { plans: RecentPlan[] | null }) {
   return (
     <section className="rounded-[10px] border border-hairline bg-surface-card" aria-label="On chain record">
       <header className="flex min-h-10 flex-wrap items-center justify-between gap-x-4 border-b border-hairline px-4 py-2">
-        <h2 className="text-[13px] font-medium text-ink">On chain: what the keeper did, and what the contract refused</h2>
-        <span className="text-[12px] text-mute">Monad testnet, newest first</span>
+        <h2 className="text-[13px] font-medium text-ink">On chain: what the keeper sold, and what the contract refused</h2>
+        <span className="text-[12px] text-mute">Monad testnet, newest plan first</span>
       </header>
-      {rows === null ? (
+      {plans === null ? (
         <p className="px-4 py-3 text-[13px] text-mute">Reading the keeper's record.</p>
       ) : (
         <ul>
-          {rows.map((r) => (
-            <li key={r.hash} className="grid min-h-8 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-hairline px-4 py-[7px] text-[13px] leading-[18px] last:border-b-0">
-              {r.kind === "sale" ? (
-                <span className="text-ink">
-                  <span className="num">Plan {r.plan}</span>: sold <span className="num">{fmtMon(r.amountIn)}</span> MON at a 60 s average of <span className="num">{fmtPrice(tickToPrice(r.priceTick))}</span>, for at least <span className="num">{fmtUsd(r.minOut)}</span> aUSD, to the holder
-                </span>
-              ) : (
-                <span className="text-body">
-                  <span className="num">Plan {r.plan}</span>: keeper tried to {TRIED[r.attack]}. Refused, <span className="num whitespace-nowrap text-ink">{r.reason}</span>
-                </span>
+          {plans.map((p) => (
+            <li key={p.plan} className="border-b border-hairline px-4 py-[9px] text-[13px] leading-[18px] last:border-b-0">
+              {p.sales.map((s) => (
+                <div key={s.hash} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                  <span className="text-ink">
+                    <span className="num text-mute">Plan {p.plan}</span> sold <span className="num">{fmtMon(s.amountIn)}</span> MON at <span className="num">{fmtPrice(tickToPrice(s.priceTick))}</span>;{" "}
+                    {short(p.holder)} received <span className="num">{s.amountOut ? fmtUsd(s.amountOut) : "at least " + fmtUsd(s.minOut)}</span> aUSD, floor <span className="num">{fmtUsd(s.minOut)}</span>
+                  </span>
+                  <TxLink hash={s.hash} />
+                </div>
+              ))}
+              {p.refused.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-mute">Refused:</span>
+                  {p.refused.map((r) => (
+                    <a key={r.hash} href={txUrl(r.hash)} target="_blank" rel="noreferrer" title={`${r.reason}, ${r.hash}`} className="num inline-flex h-7 items-center rounded-md border border-hairline px-2 text-[12px] text-body hover:border-hairline-strong hover:text-ink">
+                      {CHIP[r.attack]} <span className="ml-1.5 text-mute">{r.reason.replace("Tripwire:", "")}</span>
+                    </a>
+                  ))}
+                </div>
               )}
-              <TxLink hash={r.hash} />
             </li>
           ))}
         </ul>

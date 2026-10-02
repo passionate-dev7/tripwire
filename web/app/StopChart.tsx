@@ -70,7 +70,7 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
         axisLabelVisible: true,
         title: l.label,
       }),
-      s.createPriceLine({ price: l.floor, color: "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: false, title: "" }),
+      s.createPriceLine({ price: l.floor, color: "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: "floor" }),
     ]);
     // keep every line in view, not just the price
     s.applyOptions({

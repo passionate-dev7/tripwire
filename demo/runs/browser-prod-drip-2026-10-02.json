@@ -1,0 +1,80 @@
+[
+ {
+  "eval": "JSON.stringify({price:document.querySelector('.text-\\\\[56px\\",
+  "value": "{\"price\":\"0.03352\",\"buttons\":[\"Plan\",\"Watch\",\"Market\",\"-5%\",\"-10%\",\"-20%\",\"×\",\"Add a staged sell\",\"Sign in with passkey\",\"Create\"],\"errs\":[]}"
+ },
+ {
+  "eval": "(()=>{const i=document.querySelector('input[aria-label=\"Name",
+  "value": "qa-holder"
+ },
+ {
+  "click": "Create",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const a=document.querySelector('aside a[href*=\"/addres",
+  "value": "0x46DaeDadBA1FE9E85dA87f88809b67A3E92894e5"
+ },
+ {
+  "click": "Get 0.1 testnet MON",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const set=(l,v)=>{const i=document.querySelector(`inpu",
+  "value": "ok"
+ },
+ {
+  "click": "Add a staged sell",
+  "ok": true
+ },
+ {
+  "eval": "(()=>{const set=(l,v)=>{const i=document.querySelector(`inpu",
+  "value": "ok"
+ },
+ {
+  "eval": "JSON.stringify({facts:[...document.querySelectorAll('section",
+  "value": "{\"facts\":\"MON in aUSD, 60 s average of the testnet pool (what the contract reads)\\n0.03352\\nSpot\\nMON on mainnet\\nKeeper\\n0.03352\\n0.03435\\n5 plans\\nblock 67,545,793\\npool 0x75E6..38F5, liquidity seeded by us\\nmainnet 0.03435, read 11 s ago\\naUSD: Agora's dollar on Monad\\n\\t\\n\\t\\n\\n\\t\\n\\t\\nKeeper checked 3 s ago | Sell 0.02 MON when 1 MON is worth\\n\\nLine, in aUSD per MON\\naUSD\\n\\nAt or above today's 0.03352: the keeper sells this within about a minute of arming.\\n\\nMarket\\n-5%\\n-10%\\n-20%\\nSELL MON\\nAT OR BELOW\\nFLOOR, NEVER LESS\\n×\\n×\\nAdd a staged sell | What the keeper can do\\nSells\\nWMON for aUSD, one sale per row\\nOnly at or below\\n0.03600, 0.02200\\nNever for less than\\n0.03000, 0.02000 aUSD per MON\\nPays only to\\n0x46DaeD..94e5copy\\nYou receive at least\\n0.0006 + 0.0002 aUSD\\nLargest single sale\\n0.02 MON\\nIn total, at most\\n0.03 MON\\nStops on | On chain: what the keeper sold, and what the contract refused\\nMonad testnet, newest plan first\\nPl\",\"sign\":\"Sign plan (2 sales)\",\"errs\":[]}"
+ },
+ {
+  "shot": "plan-1440"
+ },
+ {
+  "click": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({steps:[...document.querySelectorAll('ol li')",
+  "value": "{\"steps\":[],\"links\":[],\"tab\":\"Watch\",\"err\":\"0.02200 / 0.03600 / 0.02200\",\"errs\":[]}"
+ },
+ {
+  "eval": "JSON.stringify({tab:document.querySelector('[aria-current=pa",
+  "value": "{\"tab\":\"Watch\",\"main\":\"MON in aUSD, 60 s average of the testnet pool (what the contract reads)\\n0.03337\\nSpot\\nMON on mainnet\\nKeeper\\n0.03337\\n0.03426\\n6 plans\\nblock 67,546,180\\npool 0x75E6..38F5, liquidity seeded by us\\nmainnet 0.03426, read 8 s ago\\naUSD: Agora's dollar on Monad\\n\\t\\n\\t\\n\\n\\t\\n\\t\\nKeeper checked 4 s ago\\n-34.1%\\nto your next line, 0.02200. MON is 0.03337.\\n\\n1 plan armed, 1 sale waiting, stops on 2026-11-24\",\"errs\":[]}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({cheat:[...document.querySelectorAll('section",
+  "value": "{\"cheat\":\"Try to cheat\\n\\nMake the keeper break plan 5 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell before MON reaches your line\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:above-line 0xeba91cc4..bfc0\\nSell for half your floor\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:min-out 0x9bb1bd75..e5ef\\nSend the aUSD to the keeper\\nDone\\nsent and mined, status reverted\\nrefused by the enforcer: Tripwire:recipient 0x1ab907d2..31c6\",\"links\":[\"https://testnet.monadvision.com/tx/0xb729beaf28c38bc77f83506642b89ae81a2afc16d984c24bdd9809f11447c88d\",\"https://testnet.monadvision.com/tx/0x92c7b2dc19e552b6fac45f08c608f48db0f3c0fb863946904f7f9942058ca202\",\"https://testnet.monadvision.com/tx/0xeba91cc4816370ddef188dd3822105a70af5002c2571f39d9c8df2cf974abfc0\",\"https://testnet.monadvision.com/tx/0x9bb1bd758e78cbafe326a0b69f873ac07b7371c6baeea28e86a527b9deaee5ef\",\"https://testnet.monadvision.com/tx/0x1ab907d2d75f6c3b126036fc2d9c696509a65182e5124bcf4e2703b505dc31c6\",\"https://testnet.monadvision.com/tx/0xeba91cc4816370ddef188dd3822105a70af5002c2571f39d9c8df2cf974abfc0\",\"https://testnet.monadvision.com/tx/0x9bb1bd758e78cbafe326a0b69f873ac07b7371c6baeea28e86a527b9deaee5ef\",\"https://testnet.monadvision.com/tx/0x1ab907d2d75f6c3b126036fc2d9c696509a65182e5124bcf4e2703b505dc31c6\"],\"errs\":[]}"
+ },
+ {
+  "shot": "watch-1440"
+ },
+ {
+  "click": "Revoke",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({plan:[...document.querySelectorAll('section'",
+  "value": "{\"plan\":\"Plan 5\\nrevoked\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03600\\n0.03000\\nsold\\n2\\n0.01\\n0.02200\\n0.02000\\noff\\nPlan posted by 0x46Da..94e5\\n0xb729beaf..c88d\\nSold 0.02 MON at a 60 s average of 0.03352. 0x46Da..94e5 received 0.000666 aUSD (floor 0.0006; sale 1, line 0.03600)\\n0x92c7b2dc..a202\\nKeeper tried to sell before MON reached the line. Refused by the contract: MON is above the line\\n0xeba91cc4..bfc0\\nKeeper tried to sell for half the floor. Refused by the contract: below the floor\\n0x9bb1bd75..e5ef\\nKeeper tried to send the aUSD to itself. Refused by the contract: pays someone other than the holder\\n0x1ab907d2.\",\"err\":\"0.03600 / 0.02200\",\"steps\":[],\"errs\":[]}"
+ }
+]

@@ -1,7 +1,7 @@
 "use client";
 // The Watch screen (LAYOUT.md, Watch): what is armed, how far MON is from each line, every sale and every refused
 // call, and a way to make the keeper misbehave on purpose and watch the enforcer refuse it on chain.
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Attack, PlanView } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
@@ -10,15 +10,15 @@ import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short } from "./parts";
 type T = ReturnType<typeof useTripwire>;
 
 const ATTACKS: { kind: Attack["kind"]; label: string; tried: string }[] = [
-  { kind: "line", label: "Sell before MON reaches your line", tried: "to sell before MON reached your line" },
-  { kind: "floor", label: "Sell for half your floor", tried: "to sell for half your floor" },
+  { kind: "line", label: "Sell before MON reaches your line", tried: "to sell before MON reached the line" },
+  { kind: "floor", label: "Sell for half your floor", tried: "to sell for half the floor" },
   { kind: "recipient", label: "Send the aUSD to the keeper", tried: "to send the aUSD to itself" },
 ];
 
 const REASON_TEXT: Record<string, string> = {
-  "Tripwire:above-line": "MON is above your line",
-  "Tripwire:min-out": "below your floor",
-  "Tripwire:recipient": "pays someone other than you",
+  "Tripwire:above-line": "MON is above the line",
+  "Tripwire:min-out": "below the floor",
+  "Tripwire:recipient": "pays someone other than the holder",
   "Tripwire:spent": "that sale already happened",
   "Tripwire:amount": "not the amount you signed",
 };
@@ -52,7 +52,7 @@ function activity(p: PlanView, holder: string) {
     const tr = p.tranches[f.index];
     rows.push({
       at: Number(f.block),
-      text: `Sold ${fmtMon(f.amountIn)} MON at a 60 s average of ${fmtPrice(tickToPrice(f.priceTick))}, at least ${fmtUsd(f.minOut)} aUSD to ${short(holder)} (sale ${f.index + 1}, line ${fmtPrice(tr?.line ?? 0)})`,
+      text: `Sold ${fmtMon(f.amountIn)} MON at a 60 s average of ${fmtPrice(tickToPrice(f.priceTick))}. ${short(holder)} received ${f.amountOut ? fmtUsd(f.amountOut) : "at least " + fmtUsd(f.minOut)} aUSD (floor ${fmtUsd(f.minOut)}; sale ${f.index + 1}, line ${fmtPrice(tr?.line ?? 0)})`,
       hash: f.hash,
       refused: false,
     });
@@ -63,13 +63,54 @@ function activity(p: PlanView, holder: string) {
   return rows;
 }
 
+export function PlanCard({ p, price, action, title }: { p: PlanView; price: number | null; action?: ReactNode; title?: string }) {
+  return (
+    <Card title={title ?? `Plan ${p.id}`} aside={action}>
+      <div className="grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+        <span>Sale</span><span className="text-right">MON</span><span className="text-right">Line</span><span className="text-right">Floor</span><span className="text-right">State</span>
+      </div>
+      {p.tranches.map((x) => (
+        <div key={x.index} className="num grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
+          <span className="text-mute">{x.index + 1}</span>
+          <span className="text-right text-ink">{fmtMon(x.mon)}</span>
+          <span className="text-right text-line">{fmtPrice(x.line)}</span>
+          <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
+          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `-${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}%`}</span>
+        </div>
+      ))}
+      <ul className="border-t border-hairline">
+        <li className="flex min-h-8 items-center justify-between gap-3 px-4 text-[13px]">
+          <span className="text-mute">Plan posted by {short(p.holder)}</span>
+          <TxLink hash={p.postedTx} />
+        </li>
+        {activity(p, p.holder).map((r) => (
+          <li key={r.hash} className="flex min-h-8 items-start justify-between gap-3 border-t border-hairline px-4 py-[7px] text-[13px] leading-[18px]">
+            <span className={r.refused ? "text-body" : "text-ink"}>{r.text}</span>
+            <TxLink hash={r.hash} />
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 export function Watch({ t, price, part }: { t: T; price: number | null; part: "summary" | "side" }) {
   const live = t.plans.filter((p) => !p.revoked && p.expiresAt * 1000 > Date.now());
   const target = live.find((p) => p.tranches.some((x) => !x.spent)) ?? null;
   const next = target?.tranches.filter((x) => !x.spent).sort((a, b) => b.line - a.line)[0];
 
   if (!t.account) {
-    return part === "side" ? <p className="text-[14px] leading-6 text-body">Sign in with your passkey on the Plan tab to see your plans, sales and the keeper's refused calls.</p> : null;
+    if (part === "summary") return null;
+    return (
+      <div className="flex flex-col gap-4">
+        {t.publicPlan ? (
+          <PlanCard p={t.publicPlan} price={price} title={`Latest plan on chain, plan ${t.publicPlan.id}`} action={<span className="text-[12px] text-mute">read only</span>} />
+        ) : (
+          <p className="text-[13px] text-mute">Reading the latest plan on chain.</p>
+        )}
+        <p className="text-[13px] leading-5 text-body">Each refusal above is a real transaction: the keeper sent a sale the plan forbids and Monad reverted it with the enforcer's reason. Sign in with a passkey on the Plan tab to arm your own plan and try it yourself.</p>
+      </div>
+    );
   }
 
   if (part === "summary") {
@@ -98,32 +139,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
   return (
     <div className="flex flex-col gap-6">
       {t.plans.map((p) => (
-        <Card key={p.id} title={`Plan ${p.id}`} aside={p.revoked ? <span className="text-[12px] text-mute">revoked</span> : <Ghost onClick={() => t.revoke(p)} disabled={t.busy !== null}>Revoke</Ghost>}>
-          <div className="grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
-            <span>Sale</span><span className="text-right">MON</span><span className="text-right">Line</span><span className="text-right">Floor</span><span className="text-right">State</span>
-          </div>
-          {p.tranches.map((x) => (
-            <div key={x.index} className="num grid min-h-[25px] grid-cols-[40px_1fr_1fr_1fr_64px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
-              <span className="text-mute">{x.index + 1}</span>
-              <span className="text-right text-ink">{fmtMon(x.mon)}</span>
-              <span className="text-right text-line">{fmtPrice(x.line)}</span>
-              <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
-              <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && price <= x.line ? "selling" : `-${(((price ?? 0) - x.line) / (price || 1) * 100).toFixed(1)}%`}</span>
-            </div>
-          ))}
-          <ul className="border-t border-hairline">
-            <li className="flex min-h-8 items-center justify-between gap-3 px-4 text-[13px]">
-              <span className="text-mute">Plan posted from your address</span>
-              <TxLink hash={p.postedTx} />
-            </li>
-            {activity(p, p.holder).map((r) => (
-              <li key={r.hash} className="flex min-h-8 items-start justify-between gap-3 border-t border-hairline px-4 py-[7px] text-[13px] leading-[18px]">
-                <span className={r.refused ? "text-body" : "text-ink"}>{r.text}</span>
-                <TxLink hash={r.hash} />
-              </li>
-            ))}
-          </ul>
-        </Card>
+        <PlanCard key={p.id} p={p} price={price} action={p.revoked ? <span className="text-[12px] text-mute">revoked</span> : <Ghost onClick={() => t.revoke(p)} disabled={t.busy !== null}>Revoke</Ghost>} />
       ))}
 
       {target && (

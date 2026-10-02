@@ -68,7 +68,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           </p>
           <div className="mt-2 flex gap-2 overflow-x-auto">
             {[["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]].map(([l, v]) => (
-              <button key={l} type="button" onClick={() => preset(v as number)} className="h-7 shrink-0 rounded-lg border border-hairline px-3 text-[12px] text-body hover:border-hairline-strong hover:text-ink">
+              <button key={l} type="button" onClick={() => preset(v as number)} className="h-9 shrink-0 rounded-lg border border-hairline px-3 text-[13px] text-body hover:border-hairline-strong hover:text-ink">
                 {l}
               </button>
             ))}
@@ -76,7 +76,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
         </div>
         <div className="border-t border-hairline">
           <div className="grid h-8 grid-cols-[1fr_1fr_1fr_24px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
-            <span>Sell MON</span><span className="text-right">At or below</span><span className="text-right">Floor</span><span />
+            <span>Sell MON</span><span className="text-right">At or below</span><span className="text-right" title="In a fast drop past the floor, that row does not sell">Floor, never less</span><span />
           </div>
           {plan.map((p, i) => (
             <div key={i} className="grid h-10 grid-cols-[1fr_1fr_1fr_24px] items-center gap-2 border-t border-hairline px-4">
@@ -109,7 +109,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
         <Fact label="Largest single sale">{checked.tranches ? `${fmtMon(largest)} MON` : "check the rows"}</Fact>
         <Fact label="In total, at most">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>
         <Fact label="Stops on">
-          <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
+          <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num min-h-9 bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
         </Fact>
       </Card>
 
@@ -126,6 +126,11 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
               <Ghost onClick={() => t.create(name || "tripwire")} disabled={t.busy !== null}>Create</Ghost>
             </div>
             <p className="text-[12px] leading-5 text-mute">The passkey is your wallet: no extension, no seed phrase. It signs the plan and the account upgrade with one prompt.</p>
+          </div>
+        ) : short_ && h && h.mon === 0n ? (
+          <div className="flex flex-col gap-2">
+            <Pill onClick={t.drip} disabled={t.busy !== null}>{t.busy === "Getting testnet MON" ? "Sending testnet MON" : "Get 0.1 testnet MON to try it"}</Pill>
+            <p className="text-[12px] leading-5 text-mute">tripwire sends a fresh passkey account enough testnet MON for a small plan and its gas, once. Or use <a className="underline underline-offset-4" href="https://faucet.monad.xyz" target="_blank" rel="noreferrer">faucet.monad.xyz</a>.</p>
           </div>
         ) : short_ ? (
           <div className="rounded-[10px] border border-hairline p-4 text-[13px] leading-6 text-body">

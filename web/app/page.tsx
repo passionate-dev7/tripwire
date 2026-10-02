@@ -43,8 +43,9 @@ export default function Page() {
   const price = s ? s.twapPrice : null;
   const lines: ChartLine[] = useMemo(() => {
     if (tab === "plan") return plan.filter((p) => p.line > 0 && p.floor > 0).map((p) => ({ price: p.line, floor: p.floor, label: `sell ${p.mon}`, state: "draft" as const }));
-    return t.plans.filter((p) => !p.revoked).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, label: x.spent ? `sold ${x.index + 1}` : `plan ${p.id} sale ${x.index + 1}`, state: x.spent ? ("sold" as const) : ("armed" as const) })));
-  }, [tab, plan, t.plans]);
+    const shown = t.account ? t.plans : t.publicPlan ? [t.publicPlan] : [];
+    return shown.filter((p) => !p.revoked || !t.account).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, label: x.spent ? `sold ${x.index + 1}` : `plan ${p.id} sale ${x.index + 1}`, state: x.spent ? ("sold" as const) : ("armed" as const) })));
+  }, [tab, plan, t.plans, t.publicPlan, t.account]);
 
   return (
     <div className="min-h-[100dvh]">
@@ -81,11 +82,14 @@ export default function Page() {
               <dd className="text-ink">{s ? `${s.plans} plans` : "..."}</dd>
             </dl>
           </div>
-          <p className="num pb-4 pt-1 text-[12px] leading-5 text-mute">
-            {s ? <>testnet block {Number(s.head).toLocaleString("en-US")}, pool <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={addrUrl(TESTNET.pool)} target="_blank" rel="noreferrer">{short(TESTNET.pool)}</a> with liquidity we seeded, so its price follows our tests, not the market. </> : null}
-            {s?.mainnet ? <>Mainnet: 60 s average of Monad's WMON/USDC pool at block {Number(s.mainnet.block).toLocaleString("en-US")}, read {Math.max(0, Math.round((Date.now() - s.mainnet.at) / 1000))} s ago. </> : null}
-            aUSD is Agora's dollar stablecoin on Monad.
-          </p>
+          <ul className="num flex flex-wrap gap-x-4 gap-y-1 pb-4 pt-1 text-[12px] text-mute">
+            <li>{s ? `block ${Number(s.head).toLocaleString("en-US")}` : "reading block"}</li>
+            <li>
+              pool <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={addrUrl(TESTNET.pool)} target="_blank" rel="noreferrer">{short(TESTNET.pool)}</a>, liquidity seeded by us
+            </li>
+            <li>{s?.mainnet ? `mainnet ${fmtPrice(s.mainnet.price)}, read ${Math.max(0, Math.round((Date.now() - s.mainnet.at) / 1000))} s ago` : "reading mainnet"}</li>
+            <li>aUSD: Agora's dollar on Monad</li>
+          </ul>
           <div className="rounded-[10px] border border-hairline bg-surface p-2">
             <StopChart points={t.history.data?.points ?? []} lines={lines} height={wide ? 420 : 260} />
           </div>
@@ -105,7 +109,7 @@ export default function Page() {
         </aside>
         {tab === "plan" && (
           <div className="min-w-0 lg:col-start-1">
-            <Record />
+            <Record plans={t.recent?.plans ?? null} />
           </div>
         )}
       </main>
