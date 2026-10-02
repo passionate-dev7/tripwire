@@ -12,13 +12,25 @@ import { Record } from "./Record";
 import { TESTNET } from "../lib/plan";
 import { addrUrl, fmtPrice, short } from "./parts";
 
-// r/Monad's most common written plan: "sell 25% at 0.033, stop losses entered". Testnet-sized amount.
-const DEFAULT_PLAN: PlainTranche[] = [{ mon: "0.5", line: 0.033, floor: 0.03 }];
+// Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
+const DEFAULT_PLAN: PlainTranche[] = [{ mon: "0.02", line: 0.033, floor: 0.03 }];
+const r5 = (n: number) => Number(n.toFixed(5));
+/** A first plan that fits the 0.1 MON drip: one sale just above the market (sells within a minute) and one far below
+ * (the one that must not sell), so a first visit shows both outcomes. */
+const starterPlan = (price: number): PlainTranche[] => [
+  { mon: "0.02", line: r5(price * 1.02), floor: r5(price * 0.9) },
+  { mon: "0.01", line: r5(price * 0.65), floor: r5(price * 0.6) },
+];
 
 export default function Page() {
   const t = useTripwire();
   const [tab, setTab] = useState<"plan" | "watch">("plan");
-  const [plan, setPlan] = useState<PlainTranche[]>(DEFAULT_PLAN);
+  const [plan, setPlanRaw] = useState<PlainTranche[]>(DEFAULT_PLAN);
+  const [touched, setTouched] = useState(false);
+  const setPlan = (p: PlainTranche[]) => {
+    setTouched(true);
+    setPlanRaw(p);
+  };
   const [linkErrors, setLinkErrors] = useState<string[]>([]);
 
   useEffect(() => {
@@ -32,6 +44,9 @@ export default function Page() {
   }, [t.steps]);
 
   const s = t.status.data;
+  useEffect(() => {
+    if (!touched && s?.twapPrice) setPlanRaw(starterPlan(s.twapPrice));
+  }, [touched, s?.twapPrice]);
   const [wide, setWide] = useState(true);
   useEffect(() => {
     const m = window.matchMedia("(min-width: 1024px)");

@@ -134,6 +134,21 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           </div>
         ) : short_ ? (
           <div className="rounded-[10px] border border-hairline p-4 text-[13px] leading-6 text-body">
+            {h && h.mon > SETUP_GAS_BUDGET && (
+              <div className="mb-3">
+                <Ghost
+                  onClick={() => {
+                    // scale every sale by the same factor so the plan plus setup gas fits what the account holds
+                    const room = Number(h.mon - SETUP_GAS_BUDGET - 2_000_000_000_000_000n) / 1e18;
+                    const want = plan.reduce((n, p) => n + Number(p.mon), 0);
+                    const k = Math.min(1, room / want);
+                    setPlan(plan.map((p) => ({ ...p, mon: String(Math.floor(Number(p.mon) * k * 1e4) / 1e4) })));
+                  }}
+                >
+                  Fit to my balance
+                </Ghost>
+              </div>
+            )}
             This plan sets aside {fmtMon(toWrap)} MON and needs about {fmtMon(SETUP_GAS_BUDGET)} MON for gas. Your address holds {fmtMon(h!.mon)} MON.{" "}
             <a className="text-ink underline underline-offset-4" href="https://faucet.monad.xyz" target="_blank" rel="noreferrer">Get testnet MON</a> for{" "}
             <span className="font-mono text-[12px] text-ink">{short(t.account.address, 8)}</span><Copy text={t.account.address} />
