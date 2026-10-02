@@ -24,22 +24,28 @@ const REASON_TEXT: Record<string, string> = {
 };
 
 export function Heartbeat({ lastLoop }: { lastLoop: number | undefined }) {
-  const [beats, setBeats] = useState<boolean[]>([]);
+  // A clock, not the poll, drives the age: if the keeper (or the route to it) dies, lastLoop stops moving and the
+  // age keeps growing, so silence shows as silence instead of a frozen "checked 2 s ago".
   const [now, setNow] = useState(() => Date.now());
+  const [beats, setBeats] = useState<boolean[]>([]);
   useEffect(() => {
-    if (lastLoop === undefined) return;
-    setNow(Date.now());
-    setBeats((b) => [...b.slice(-59), Date.now() - lastLoop < 15_000]);
+    let n = 0;
+    const id = setInterval(() => {
+      const t = Date.now();
+      setNow(t);
+      if (n++ % 4 === 0) setBeats((b) => [...b.slice(-59), lastLoop !== undefined && t - lastLoop < 15_000]);
+    }, 1000);
+    return () => clearInterval(id);
   }, [lastLoop]);
   const age = lastLoop ? Math.max(0, Math.round((now - lastLoop) / 1000)) : null;
   return (
-    <div className="flex items-center gap-3 border-y border-hairline px-1 py-2">
+    <div className="flex items-center gap-3 border-y border-hairline px-1 py-2" data-testid="heartbeat">
       <div className="flex h-6 items-end gap-[2px]" aria-hidden>
         {beats.map((ok, i) => (
           <span key={i} className={`w-[3px] ${ok ? "h-6 bg-ink/70" : "h-6 bg-line"}`} />
         ))}
       </div>
-      <span className="num text-[13px] text-mute">
+      <span className={`num text-[13px] ${age !== null && age >= 15 ? "text-line" : "text-mute"}`}>
         {age === null ? "Reading the keeper" : age < 15 ? `Keeper checked ${age} s ago` : `Keeper silent for ${age} s. Nothing sells until it is back.`}
       </span>
     </div>
