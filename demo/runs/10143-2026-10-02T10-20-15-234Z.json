@@ -1,0 +1,29 @@
+{
+  "chainId": 10143,
+  "rpc": "https://testnet-rpc.monad.xyz",
+  "holder": "0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d",
+  "keeper": "0x8a916555418dC4a8A4b11E2Fc2B8e85127204468",
+  "fund 0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d": "0x1914c1b9e193f4f5d8f2524eaad20e40f5da3172989d95a25b875652798894ab",
+  "priceAtStart": 0.03429935507685876,
+  "delegationHash": "0x23b5b3a241a0a56af39bf6a68e4145cb6b8c51fb32a995d362fa5a1b00524725",
+  "digest": "0x7b46abc3b99d54451e1bacc2f928d22299fb7469561a1bd18df84f8d097933f1",
+  "wrap": {
+    "hash": "0x6153e4a38242b172bf1fd1ae424f5e547770f9aee2b1f4e18c9c0be6b5d09f8b",
+    "status": "success",
+    "gasUsed": "60000"
+  },
+  "setup": {
+    "hash": "0x38ac473a1677667c7fe4a7d5decc4d67a89cb72b5c49fe5e3de1f343e357c04e",
+    "status": "success",
+    "gasUsed": "330000"
+  },
+  "setupReadback": {
+    "code": "0xef010063c0c19a282a1b52b07dd5a65b58948a07dae32b",
+    "planCount": [
+      "0",
+      "1"
+    ],
+    "wmon": "30000000000000000",
+    "allowance": "30000000000000000"
+  }
+}

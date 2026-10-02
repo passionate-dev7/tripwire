@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-02T10:27:15.332Z",
+  "twapPrice": 0.03414194822701796,
+  "report": [
+    {
+      "plan": 0,
+      "tranche": 0,
+      "line": 0.03599658729970552,
+      "floor": 0.03,
+      "spent": true,
+      "fill": "0xc80cd805f0e1f88e743609d891a991ed9e68bdd1bd81a246ff4568049999aadf",
+      "from": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468",
+      "sold": "20000000000000000",
+      "received": "0.000682",
+      "floorOwed": "0.0006",
+      "priceAtFill": 0.03429935507685876
+    },
+    {
+      "plan": 0,
+      "tranche": 1,
+      "line": 0.02199793884467164,
+      "floor": 0.02,
+      "spent": false
+    },
+    {
+      "plan": 0,
+      "attack": "floor",
+      "hash": "0x5053789a5c74addef0a92d3ff7e166d53dee0a457d0993d76dddb19ec4ac2c82",
+      "status": "reverted",
+      "reason": "Tripwire:min-out"
+    },
+    {
+      "plan": 0,
+      "attack": "line",
+      "hash": "0x819043c97c4c814482cf23858bbfd88d76a697d0c75369ea39b028be9aef1bf5",
+      "status": "reverted",
+      "reason": "Tripwire:above-line"
+    },
+    {
+      "plan": 0,
+      "attack": "recipient",
+      "hash": "0xa962ac8e8e8b9cbc5fb31db42f75835fc975b3dedbd40b7866b337600ebab478",
+      "status": "reverted",
+      "reason": "Tripwire:recipient"
+    }
+  ]
+}

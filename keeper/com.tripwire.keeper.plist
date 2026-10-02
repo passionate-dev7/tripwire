@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.tripwire.keeper</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/tesla/.bun/bin/bun</string>
+    <string>run</string>
+    <string>/Users/tesla/tripwire/keeper/keeper.ts</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/tesla/tripwire/keeper</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PORT</key><string>3511</string>
+    <key>TRIPWIRE_KEEPER_KEY_FILE</key><string>/Users/tesla/.config/tripwire/keeper.json</string>
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <key>StandardOutPath</key><string>/Users/tesla/Library/Logs/tripwire-keeper.log</string>
+  <key>StandardErrorPath</key><string>/Users/tesla/Library/Logs/tripwire-keeper.log</string>
+</dict>
+</plist>

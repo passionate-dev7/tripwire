@@ -72,8 +72,8 @@ export const TESTNET: Net = {
   twapSeconds: 60,
   enforcer: getAddress("0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37"),
   planBook: getAddress("0xdd26f52338cc714830e23ff6999961bf2503d77a"),
-  planBookFromBlock: 0n,
-  keeper: "0x0000000000000000000000000000000000000000",
+  planBookFromBlock: 67513065n,
+  keeper: getAddress("0x8a916555418dC4a8A4b11E2Fc2B8e85127204468"),
 };
 
 // Mainnet venue, read only until a mainnet enforcer and plan book are deployed.

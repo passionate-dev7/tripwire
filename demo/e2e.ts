@@ -39,6 +39,7 @@ import {
   tickToPrice,
   toTranches,
 } from "../web/lib/plan";
+import { revertReason as chainRevertReason } from "../web/lib/chain";
 
 const dir = path.dirname(new URL(import.meta.url).pathname);
 const rpc = process.argv[2] ?? TESTNET.rpc;
@@ -59,7 +60,7 @@ const w = (a: typeof holder) => createWalletClient({ account: a, chain, transpor
 const FEES = { maxFeePerGas: 110_000_000_000n, maxPriorityFeePerGas: 2_000_000_000n } as const;
 const WRAP_GAS = 60_000n;
 const SETUP_GAS = 330_000n;
-const REDEEM_GAS = 330_000n;
+const REDEEM_GAS = 500_000n;
 const log: Record<string, unknown> = { chainId, rpc: rpc.includes("127.0.0.1") ? "anvil-fork" : rpc, holder: holder.address, keeper: keeper.address };
 const out = path.join(dir, "runs", `${chainId}-${new Date().toISOString().replace(/[:.]/g, "-")}${rpc.includes("127.0.0.1") ? "-fork" : ""}.json`);
 const save = () => { fs.mkdirSync(path.dirname(out), { recursive: true }); fs.writeFileSync(out, JSON.stringify(log, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2)); };
@@ -72,20 +73,7 @@ const wmonOf = (a: Address) => pub.readContract({ address: net.wmon, abi: abis.w
 const priceTick = async () => Number(await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "monPriceTick", args: [net.pool, net.wmon, net.stable, net.twapSeconds] }));
 
 /** Why a mined, reverted tx reverted: replay its call at the parent block and decode Error(string). */
-async function revertReason(hash: Hex): Promise<string> {
-  const tx = await pub.getTransaction({ hash });
-  try {
-    await pub.call({ account: tx.from, to: tx.to!, data: tx.input, value: tx.value, blockNumber: tx.blockNumber! - 1n });
-    return "replay did not revert";
-  } catch (e) {
-    const data = (e as { cause?: { data?: Hex }; data?: Hex }).cause?.data ?? (e as { data?: Hex }).data;
-    if (data && data.startsWith("0x08c379a0")) {
-      return decodeErrorResult({ abi: [{ type: "error", name: "Error", inputs: [{ type: "string", name: "m" }] }], data }).args[0] as string;
-    }
-    const m = /reverted with reason string '([^']+)'|reverted: ([\w:-]+)/.exec(String((e as Error).message));
-    return m?.[1] ?? m?.[2] ?? String((e as Error).message).slice(0, 200);
-  }
-}
+const revertReason = (hash: Hex) => chainRevertReason(net.rpc, hash);
 
 // ---------- 1. fund ----------
 const PLAN = [
@@ -130,6 +118,8 @@ log.wrap = { hash: wrapHash, status: wrapped.status, gasUsed: wrapped.gasUsed };
 save();
 if (wrapped.status !== "success" || (await wmonOf(holder.address)) < total) throw new Error(`wrap failed ${wrapHash}`);
 console.log(`wrap ${wrapHash}: ${formatEther(total)} MON to WMON`);
+const wPre = await wmonOf(holder.address);
+const aPre = await ausd(holder.address);
 // leave the k = 3 block execution lag behind before the transaction that carries the delegation
 const wrapBlock = wrapped.blockNumber;
 while ((await pub.getBlockNumber()) < wrapBlock + 4n) await new Promise((r) => setTimeout(r, 400));
@@ -155,6 +145,57 @@ if (!code?.toLowerCase().startsWith(`0xef0100${net.statelessDeleGator.slice(2).t
 if (countAfter !== countBefore + 1n) throw new Error("plan not posted");
 if ((await wmonOf(holder.address)) < total || allowance !== total) throw new Error("wrap or approval missing");
 console.log(`setup ${setupHash}: 7702 delegated, plan #${countBefore} posted, ${formatEther(total)} WMON approved to the router`);
+
+// ---------- 3 and 4 against the live keeper (KEEPER_API set): the script never holds the keeper key ----------
+const api = process.env.KEEPER_API;
+if (api) {
+  const planId = Number(countBefore);
+  let seen = false;
+  for (let i = 0; i < 90 && !seen; i++) {
+    const r = (await (await fetch(`${api}/api/plans?holder=${holder.address}`)).json()) as { plans: { id: number }[] };
+    seen = r.plans.some((p) => p.id === planId);
+    if (!seen) await new Promise((res) => setTimeout(res, 2000));
+  }
+  if (!seen) throw new Error("keeper never indexed the plan");
+  // the keeper fills tranche 0 on its own (its line is above the market); wait for the chain to say so
+  let filled = false;
+  for (let i = 0; i < 90 && !filled; i++) {
+    filled = await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [hashOnchain, 0n] });
+    if (!filled) await new Promise((res) => setTimeout(res, 2000));
+  }
+  if (!filled) throw new Error("keeper did not fill tranche 0 within 180 s");
+  const view = (await (await fetch(`${api}/api/plans?holder=${holder.address}`)).json()) as { plans: { id: number; fills: { index: number; hash: Hex }[] }[] };
+  const fill = view.plans.find((p) => p.id === planId)?.fills.find((f) => f.index === 0);
+  if (!fill) throw new Error("fill not in keeper index");
+  const fr = await receipt(fill.hash);
+  const w1 = await wmonOf(holder.address);
+  const a1 = await ausd(holder.address);
+  const floorOwed = (tranches[0].amountIn * tranches[0].minOutPerUnit) / 10n ** 18n;
+  log.fill = { hash: fill.hash, status: fr.status, from: (await pub.getTransaction({ hash: fill.hash })).from, wmonSold: wPre - w1, ausdReceived: a1 - aPre };
+  save();
+  if (fr.status !== "success" || wPre - w1 !== tranches[0].amountIn || a1 - aPre < floorOwed) throw new Error("fill post-conditions failed");
+  console.log(`keeper fill ${fill.hash}: sold ${formatEther(wPre - w1)} WMON for ${formatUnits(a1 - aPre, 6)} aUSD (floor ${formatUnits(floorOwed, 6)})`);
+
+  for (const kind of ["floor", "line", "recipient"]) {
+    const a = (await (await fetch(`${api}/api/attack`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ planId, kind }) })).json()) as { hash: Hex; reason: string; error?: string };
+    if (a.error) throw new Error(`attack ${kind}: ${a.error}`);
+    const r = await receipt(a.hash);
+    const reason = r.status === "reverted" ? await revertReason(a.hash) : "DID NOT REVERT";
+    log[`hostile ${kind}`] = { hash: a.hash, status: r.status, reason, keeperSaid: a.reason };
+    save();
+    console.log(`hostile ${kind}: ${a.hash} ${r.status} ${reason}`);
+    if (r.status !== "reverted") throw new Error(`hostile ${kind} was not stopped`);
+  }
+  const w2 = await wmonOf(holder.address);
+  const a2 = await ausd(holder.address);
+  if (w2 !== w1 || a2 !== a1) throw new Error("a hostile call moved funds");
+  const spent1 = await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "spent", args: [hashOnchain, 1n] });
+  if (spent1) throw new Error("tranche 1 sold before its line");
+  log.negative = { tranche1Spent: spent1, wmonHeld: w2, priceTick: await priceTick(), tranche1LineTick: tranches[1].lineTick };
+  save();
+  console.log(`run log: ${out}`);
+  process.exit(0);
+}
 
 // ---------- 3. hostile keeper ----------
 const hostile = async (label: string, data: Hex) => {
