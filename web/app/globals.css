@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* Tokens from DESIGN.md (raycast, adapted for tripwire): one red accent for the line, nothing else coloured. */
+@theme {
+  --color-canvas: #07080a;
+  --color-surface: #0d0d0d;
+  --color-surface-elevated: #101111;
+  --color-surface-card: #121212;
+  --color-hairline: #242728;
+  --color-hairline-strong: rgb(255 255 255 / 0.16);
+  --color-ink: #f4f4f6;
+  --color-body: #cdcdcd;
+  --color-mute: #9c9c9d;
+  --color-line: #ff6161;
+  --color-line-soft: rgb(255 97 97 / 0.15);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --ease-out-quick: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-feature-settings: "calt", "kern", "liga", "ss03";
+    -webkit-font-smoothing: antialiased;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
