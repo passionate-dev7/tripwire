@@ -67,9 +67,9 @@ contract TripwirePlanTest is Test {
 
     function _tranches(int24 l0, int24 l1, int24 l2) internal pure returns (TripwirePlanEnforcer.Tranche[] memory tr) {
         tr = new TripwirePlanEnforcer.Tranche[](3);
-        tr[0] = TripwirePlanEnforcer.Tranche(l0, AMT0, MIN0);
-        tr[1] = TripwirePlanEnforcer.Tranche(l1, AMT1, MIN1);
-        tr[2] = TripwirePlanEnforcer.Tranche(l2, AMT2, MIN2);
+        tr[0] = TripwirePlanEnforcer.Tranche(l0, AMT0, MIN0, false);
+        tr[1] = TripwirePlanEnforcer.Tranche(l1, AMT1, MIN1, false);
+        tr[2] = TripwirePlanEnforcer.Tranche(l2, AMT2, MIN2, false);
     }
 
     function _sign(TripwirePlanEnforcer.Tranche[] memory tr, uint256 salt) internal view returns (Delegation memory d) {
@@ -238,6 +238,66 @@ contract TripwirePlanTest is Test {
         _fill(d, 1);
         (uint256 w,) = _bal();
         assertEq(w, AMT1 + AMT2, "revoked tranches stay with the holder");
+    }
+
+    // ---------- targets: sell once MON rises to the line ----------
+
+    function _targets(int24 line) internal pure returns (TripwirePlanEnforcer.Tranche[] memory tr) {
+        tr = new TripwirePlanEnforcer.Tranche[](3);
+        tr[0] = TripwirePlanEnforcer.Tranche(line, AMT0, MIN0, true);
+        tr[1] = TripwirePlanEnforcer.Tranche(line, AMT1, MIN1, true);
+        tr[2] = TripwirePlanEnforcer.Tranche(line, AMT2, MIN2, true);
+    }
+
+    function test_target_sells_at_or_above_its_line() public {
+        int24 t0 = _twap();
+        Delegation memory d = _sign(_targets(t0 - 200), 20);
+        (uint256 w0, uint256 u0) = _bal();
+        _fill(d, 0);
+        (uint256 w1, uint256 u1) = _bal();
+        assertEq(w0 - w1, AMT0, "target sold exactly its amount");
+        assertGe(u1 - u0, AMT0 * MIN0 / 1 ether, "and paid at least its floor");
+    }
+
+    function test_target_refused_before_price_reaches_it() public {
+        int24 t0 = _twap();
+        Delegation memory d = _sign(_targets(t0 + 200), 21);
+        (uint256 w0,) = _bal();
+        vm.expectRevert(bytes("Tripwire:below-line"));
+        _fill(d, 0);
+        (uint256 w1,) = _bal();
+        assertEq(w1, w0);
+    }
+
+    function test_stop_and_target_in_one_plan_each_check_their_own_side() public {
+        int24 t0 = _twap();
+        TripwirePlanEnforcer.Tranche[] memory tr = new TripwirePlanEnforcer.Tranche[](2);
+        tr[0] = TripwirePlanEnforcer.Tranche(t0 - 500, AMT0, MIN2, false); // stop far below: must not fire
+        tr[1] = TripwirePlanEnforcer.Tranche(t0 + 500, AMT1, MIN1, true); // target far above: must not fire
+        Delegation memory d = _sign(tr, 22);
+        vm.expectRevert(bytes("Tripwire:above-line"));
+        _redeem(d, abi.encode(uint256(0)), ROUTER, 0, _swap(owner, AMT0, AMT0 * MIN2 / 1 ether));
+        vm.expectRevert(bytes("Tripwire:below-line"));
+        _fill(d, 1);
+    }
+
+    /// A target fills exactly when the MON price tick is at or above its line, and only then.
+    function testFuzz_target_only_at_or_above_the_line(int24 offset) public {
+        offset = int24(bound(int256(offset), -2000, 2000));
+        int24 t0 = _twap();
+        int24 line = t0 + offset;
+        Delegation memory d = _sign(_targets(line), 23);
+        (uint256 w0,) = _bal();
+        if (t0 < line) {
+            vm.expectRevert(bytes("Tripwire:below-line"));
+            _fill(d, 0);
+            (uint256 w1,) = _bal();
+            assertEq(w1, w0);
+        } else {
+            _fill(d, 0);
+            (uint256 w1,) = _bal();
+            assertEq(w0 - w1, AMT0);
+        }
     }
 
     // ---------- the plan book ----------

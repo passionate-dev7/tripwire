@@ -4,14 +4,16 @@ pragma solidity 0.8.30;
 import { ModeCode, IUniV3Pool } from "./Types.sol";
 
 /// @notice Caveat enforcer for MetaMask's DelegationManager. One signed delegation carries a holder's whole exit plan:
-/// up to MAX_TRANCHES sell tranches, each (lineTick, amountIn, minOutPerUnit). A keeper may fill a tranche once, and
+/// up to MAX_TRANCHES sell tranches, each (lineTick, amountIn, minOutPerUnit, atOrAbove). A stop sells once MON falls to
+/// its line; a target (atOrAbove) sells once MON rises to it. A keeper may fill a tranche once, and
 /// only through this exact call:
 ///  - target is the signed Uniswap V3 SwapRouter02, selector exactInputSingle, route WMON to the signed stablecoin at
 ///    the signed fee, native value 0 (WMON is pulled as an ERC-20, so Monad's reserve balance rule never applies);
 ///  - recipient is the signed recipient (the holder);
 ///  - amountIn is exactly the tranche amount;
 ///  - amountOutMinimum pays at least minOutPerUnit stablecoin units per 1 WMON (the floor, so a sandwich cannot fill it);
-///  - the MON price tick, TWAP over twapSeconds (spot when 0), is at or below the tranche's lineTick (the line).
+///  - the MON price tick, TWAP over twapSeconds (spot when 0), is at or below the tranche's lineTick for a stop, or at
+///    or above it for a target (the line).
 /// The keeper names the tranche in the caveat args, which are not signed. Fills are recorded per (delegationHash,
 /// index); a revert anywhere in the redemption rolls the record back. Only the DelegationManager may call beforeHook,
 /// because the hook writes storage and anyone else could otherwise burn a holder's tranches.
@@ -23,6 +25,7 @@ contract TripwirePlanEnforcer {
         int24 lineTick;
         uint256 amountIn;
         uint256 minOutPerUnit;
+        bool atOrAbove;
     }
 
     struct Terms {
@@ -83,7 +86,8 @@ contract TripwirePlanEnforcer {
 
         (uint256 amountIn, uint256 amountOutMin) = _checkSwap(t, tr, _exec);
         int24 priceTick = monPriceTick(t.pool, t.wmon, t.usdc, t.twapSeconds);
-        require(priceTick <= tr.lineTick, "Tripwire:above-line");
+        if (tr.atOrAbove) require(priceTick >= tr.lineTick, "Tripwire:below-line");
+        else require(priceTick <= tr.lineTick, "Tripwire:above-line");
 
         emit TrancheFilled(_delegationHash, t.recipient, index, amountIn, amountOutMin, priceTick);
     }

@@ -1,0 +1,7 @@
+[FAIL: next call did not revert as expected
+[FAIL: next call did not revert as expected] test_stop_and_target_in_one_plan_each_check_their_own_side() (gas
+[FAIL: next call did not revert as expected] test_target_refused_before_price_reaches_it() (gas: 351530)
+Suite result: FAILED. 13 passed; 3 failed; 0 skipped; finished in 17.71s (77.45s CPU time)
+[FAIL: next call did not revert as expected
+[FAIL: next call did not revert as expected] test_stop_and_target_in_one_plan_each_check_their_own_side() (gas
+[FAIL: next call did not revert as expected] test_target_refused_before_price_reaches_it() (gas: 351530)
