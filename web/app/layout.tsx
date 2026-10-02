@@ -8,7 +8,7 @@ const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variabl
 
 export const metadata: Metadata = {
   title: "tripwire: an exit plan your keeper cannot break",
-  description: "Write your MON sell lines once and sign with a passkey. A keeper sells only at or below your line, never below your floor, only to you, and the contract checks every sale.",
+  description: "Write your MON sell lines once and sign with a passkey. Each sale is a stop or a target. A keeper sells only once MON reaches your line in the direction you chose, never below your floor, only to you, and the contract checks every sale.",
   icons: { icon: "/favicon.ico" },
 };
 
