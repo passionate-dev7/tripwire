@@ -1,0 +1,5 @@
+[FAIL: next call did not revert as expected; counterexample: calldata=0x197d40c10000000000000000000000000000000001ef82c728765872eb3b0ca74d18b589 args=[2572839437150026059578691399383037321 [2.572e36]]] testFuzz_never_below_the_floor(uint256) (runs: 1, μ: 326053, ~: 326053)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 424293)
+Suite result: FAILED. 10 passed; 2 failed; 0 skipped; finished in 10.78s (41.14s CPU time)
+[FAIL: next call did not revert as expected; counterexample: calldata=0x197d40c10000000000000000000000000000000001ef82c728765872eb3b0ca74d18b589 args=[2572839437150026059578691399383037321 [2.572e36]]] testFuzz_never_below_the_floor(uint256) (runs: 1, μ: 326053, ~: 326053)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 424293)

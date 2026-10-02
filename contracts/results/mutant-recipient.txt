@@ -1,0 +1,5 @@
+[FAIL: next call did not revert as expected; counterexample: calldata=0x6fff7af500000000000000000000000047b14e13ee2192884261f8264ef6b658ac08ea05 args=[0x47b14E13eE2192884261f8264ef6b658Ac08Ea05]] testFuzz_never_to_anyone_else(address) (runs: 0, μ: 0, ~: 0)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 351240)
+Suite result: FAILED. 10 passed; 2 failed; 0 skipped; finished in 12.25s (47.61s CPU time)
+[FAIL: next call did not revert as expected; counterexample: calldata=0x6fff7af500000000000000000000000047b14e13ee2192884261f8264ef6b658ac08ea05 args=[0x47b14E13eE2192884261f8264ef6b658Ac08Ea05]] testFuzz_never_to_anyone_else(address) (runs: 0, μ: 0, ~: 0)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 351240)

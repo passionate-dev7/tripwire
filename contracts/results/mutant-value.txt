@@ -1,0 +1,3 @@
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 732387)
+Suite result: FAILED. 11 passed; 1 failed; 0 skipped; finished in 12.08s (53.69s CPU time)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 732387)

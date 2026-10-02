@@ -1,0 +1,7 @@
+[FAIL: next call did not revert as expected; counterexample: calldata=0x9401fa640000000000000000000000000000000000000000000000000000000000000e0b args=[3595]] testFuzz_only_at_or_below_the_line(int24) (runs: 0, μ: 0, ~: 0)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 875485)
+[FAIL: next call did not revert as expected] test_staged_plan_fills_as_price_crosses_each_line() (gas: 535384)
+Suite result: FAILED. 9 passed; 3 failed; 0 skipped; finished in 2.51s (10.16s CPU time)
+[FAIL: next call did not revert as expected; counterexample: calldata=0x9401fa640000000000000000000000000000000000000000000000000000000000000e0b args=[3595]] testFuzz_only_at_or_below_the_line(int24) (runs: 0, μ: 0, ~: 0)
+[FAIL: next call did not revert as expected] test_hostile_keeper_reverts() (gas: 875485)
+[FAIL: next call did not revert as expected] test_staged_plan_fills_as_price_crosses_each_line() (gas: 535384)
