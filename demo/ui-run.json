@@ -1,0 +1,128 @@
+[
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[aria-label=\"'+l+'\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};window.__until=async(f,ms)=>{const t=Date.now();while(Date.now()-t<ms){try{if(f())return true}catch(e){}await new Promise(r=>setTimeout(r,1000))}return false};window.__rows=()=>[...document.querySelectorAll('input[aria-label^=\"Tranche\"]')].map(i=>i.getAttribute('aria-label')+'='+i.value);'ready'"
+ },
+ {
+  "eval": "JSON.stringify({title:document.title,price:document.querySelector('.num.h-16')?.innerText,heartbeat:document.querySelector('[data-testid=heartbeat]')?.innerText,rows:__rows(),tab:document.querySelector('[aria-current=page]')?.innerText,vw:innerWidth})"
+ },
+ {
+  "eval": "JSON.stringify({h1:document.querySelector('h1')?.innerText,h1InFirstViewport:(document.querySelector('h1')?.getBoundingClientRect().bottom||9999)<innerHeight,gas:document.querySelector('[data-testid=keeper-gas]')?.innerText,gasRed:document.querySelector('[data-testid=keeper-gas]')?.className.includes('text-line')})"
+ },
+ {
+  "eval": "(()=>{__set('Plan stops on','2026-10-20');return document.querySelector('input[aria-label=\"Plan stops on\"]').value})()"
+ },
+ {
+  "eval": "(()=>{const r=__rows();const line=Number(document.querySelector('input[aria-label=\"Tranche 1 line\"]').value);__set('Tranche 1 floor',String(line*3));return 'floorAboveLine'})()"
+ },
+ {
+  "eval": "JSON.stringify({err:[...document.querySelectorAll('aside p')].map(p=>p.innerText).filter(t=>/could never/.test(t))})"
+ },
+ {
+  "click": "+10%"
+ },
+ {
+  "eval": "JSON.stringify({afterPreset:__rows()})"
+ },
+ {
+  "eval": "(()=>{const p=Number(document.querySelector('.num.h-16').innerText);const r5=n=>String(Number(n.toFixed(5)));__set('Tranche 1 line',r5(p*0.98));__set('Tranche 1 floor',r5(p*0.9));__set('Tranche 2 line',r5(p*0.65));__set('Tranche 2 floor',r5(p*0.6));return JSON.stringify(__rows())})()"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','finish-a');return 'named'})()"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Create"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/\"]'),60000).then(ok=>JSON.stringify({ok,addr:document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop()}))"
+ },
+ {
+  "click": "Get 0.1 testnet MON"
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('button')].some(b=>b.innerText.startsWith('Sign plan')),90000).then(ok=>JSON.stringify({ok,holdings:document.querySelector('aside p.num')?.innerText}))"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Sign plan"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('[aria-current=page]')?.innerText==='Watch',150000).then(ok=>JSON.stringify({ok,tab:document.querySelector('[aria-current=page]')?.innerText}))"
+ },
+ {
+  "eval": "__until(()=>/Sold 0\\./.test(document.querySelector('aside')?.innerText||''),150000).then(ok=>JSON.stringify({sold:ok,plan:(document.querySelector('aside')?.innerText||'').slice(0,700)}))"
+ },
+ {
+  "eval": "JSON.stringify({heartbeat:document.querySelector('[data-testid=heartbeat]')?.innerText,bars:document.querySelectorAll('[data-testid=heartbeat] [aria-hidden] span').length})"
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('section')].some(s=>/Tripwire:/.test(s.innerText)),60000)"
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=3,90000).then(ok=>JSON.stringify({ok,cheat:[...new Set(document.body.innerText.match(/Tripwire:[a-z-]+/g)||[])]}))"
+ },
+ {
+  "click": "Revoke"
+ },
+ {
+  "eval": "__until(()=>/revoked/.test(document.querySelector('aside')?.innerText||''),90000).then(ok=>JSON.stringify({revoked:ok}))"
+ },
+ {
+  "click": "Turn back into MON"
+ },
+ {
+  "eval": "__until(()=>!/WMON set aside/.test(document.body.innerText),90000).then(ok=>JSON.stringify({unwrapped:ok}))"
+ },
+ {
+  "eval": "(()=>{window.__a=document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop();location.reload();return 'reloading'})()"
+ },
+ {
+  "wait": 6000
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[aria-label=\"'+l+'\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};window.__until=async(f,ms)=>{const t=Date.now();while(Date.now()-t<ms){try{if(f())return true}catch(e){}await new Promise(r=>setTimeout(r,1000))}return false};window.__rows=()=>[...document.querySelectorAll('input[aria-label^=\"Tranche\"]')].map(i=>i.getAttribute('aria-label')+'='+i.value);'ready'"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Sign in with passkey"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/\"]'),60000).then(ok=>JSON.stringify({returningAddr:document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop()}))"
+ },
+ {
+  "eval": "JSON.stringify({overflowX:document.documentElement.scrollWidth>innerWidth})"
+ }
+]

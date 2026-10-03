@@ -7,7 +7,7 @@ const BASE = process.env.NEXT_PUBLIC_KEEPER_API ?? "";
 export type MainnetRead = { price: number; tick: number; block: string; at: number } | null;
 export type Status = {
   chainId: number; keeper: Hex; keeperGas: string; head: string; indexed: string; lastLoop: number; plans: number;
-  twapTick: number; twapPrice: number; spotTick: number; spotPrice: number; poolStable: string; twapSeconds: number; mainnet: MainnetRead;
+  loopError?: string | null; fillCost?: string; twapTick: number; twapPrice: number; spotTick: number; spotPrice: number; poolStable: string; twapSeconds: number; mainnet: MainnetRead;
 };
 export type Point = { t: number; twap: number; spot: number };
 export type Fill = { index: number; hash: Hex; block: string; amountIn: string; minOut: string; priceTick: number; amountOut?: string | null };

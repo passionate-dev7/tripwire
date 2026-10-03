@@ -3,6 +3,7 @@
 // call, and a way to make the keeper misbehave on purpose and watch the enforcer refuse it on chain.
 import { useEffect, useState, type ReactNode } from "react";
 import type { Attack, PlanView } from "../lib/api";
+import { salesLeft } from "../lib/keeper-gas";
 import { tickToPrice } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
 import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short } from "./parts";
@@ -23,7 +24,7 @@ const REASON_TEXT: Record<string, string> = {
   "Tripwire:amount": "not the amount you signed",
 };
 
-export function Heartbeat({ lastLoop }: { lastLoop: number | undefined }) {
+export function Heartbeat({ lastLoop, keeperGas, fillCost, loopError }: { lastLoop: number | undefined; keeperGas?: string; fillCost?: string; loopError?: string | null }) {
   // A clock, not the poll, drives the age: if the keeper (or the route to it) dies, lastLoop stops moving and the
   // age keeps growing, so silence shows as silence instead of a frozen "checked 2 s ago".
   const [now, setNow] = useState(() => Date.now());
@@ -38,8 +39,9 @@ export function Heartbeat({ lastLoop }: { lastLoop: number | undefined }) {
     return () => clearInterval(id);
   }, [lastLoop]);
   const age = lastLoop ? Math.max(0, Math.round((now - lastLoop) / 1000)) : null;
+  const left = salesLeft(keeperGas, fillCost);
   return (
-    <div className="flex items-center gap-3 border-y border-hairline px-1 py-2" data-testid="heartbeat">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-hairline px-1 py-2" data-testid="heartbeat">
       <div className="flex h-6 items-end gap-[2px]" aria-hidden>
         {beats.map((ok, i) => (
           <span key={i} className={`w-[3px] ${ok ? "h-6 bg-ink/70" : "h-6 bg-line"}`} />
@@ -48,6 +50,12 @@ export function Heartbeat({ lastLoop }: { lastLoop: number | undefined }) {
       <span className={`num text-[13px] ${age !== null && age >= 15 ? "text-line" : "text-mute"}`}>
         {age === null ? "Reading the keeper" : age < 15 ? `Keeper checked ${age} s ago` : `Keeper silent for ${age} s. Nothing sells until it is back.`}
       </span>
+      {left !== null && (
+        <span className={`num text-[13px] ${left < 3 ? "text-line" : "text-mute"}`} data-testid="keeper-gas">
+          {left === 0 ? "Keeper cannot pay for a sale" : `Keeper can pay for ${left} more ${left === 1 ? "sale" : "sales"}`}
+        </span>
+      )}
+      {loopError && <span className="num text-[13px] text-line">Keeper loop error: {loopError}</span>}
     </div>
   );
 }

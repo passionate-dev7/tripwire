@@ -23,6 +23,7 @@ import {
   toTranches,
   wrapCall,
 } from "./plan";
+import { confirmed } from "./confirm";
 
 // Testnet base fee is 100 gwei. Monad charges the full gas limit, and the sender must hold limit x cap up front.
 export const FEES = { maxFeePerGas: 110_000_000_000n, maxPriorityFeePerGas: 2_000_000_000n } as const;
@@ -102,7 +103,7 @@ export async function createPlan(
     if (r.status !== "success") throw new Error(`Setting aside MON failed (${wrapHash}).`);
     onStep("MON set aside", wrapHash);
     // the delegation transaction must come after Monad's 3-block execution lag has passed the wrap
-    while ((await pub.getBlockNumber()) < r.blockNumber + 4n) await new Promise((res) => setTimeout(res, 400));
+    await confirmed(() => pub.getBlockNumber(), (n) => n >= r.blockNumber + 4n, 30_000, 400);
   }
 
   onStep("Arming the plan");
@@ -116,12 +117,15 @@ export async function createPlan(
   const setupHash = await wallet.sendTransaction({ to: account.address, data, authorizationList, gas, ...FEES });
   const r = await pub.waitForTransactionReceipt({ hash: setupHash, timeout: 60_000, pollingInterval: 800 });
   if (r.status !== "success") throw new Error(`Arming the plan failed (${setupHash}).`);
-  const after = await holdings(net, account.address);
-  const mine = await pub.readContract({ address: net.planBook, abi: abis.planBook, functionName: "plansOf", args: [account.address] });
-  const planId = mine.at(-1);
-  if (!after.delegated || after.allowance < total || planId === undefined || planId < countBefore) {
-    throw new Error(`The transaction landed but the plan did not read back (${setupHash}).`);
-  }
+  const read = await confirmed(
+    async () => ({
+      after: await holdings(net, account.address),
+      planId: (await pub.readContract({ address: net.planBook, abi: abis.planBook, functionName: "plansOf", args: [account.address] })).at(-1),
+    }),
+    ({ after, planId }) => after.delegated && after.allowance >= total && planId !== undefined && planId >= countBefore,
+  );
+  const planId = read.value.planId;
+  if (!read.ok || planId === undefined) throw new Error(`The transaction landed but the plan did not read back (${setupHash}).`);
   onStep("Plan armed", setupHash);
   return { signed, wrapHash, setupHash, planId };
 }
@@ -134,7 +138,10 @@ export async function revokePlan(net: Net, account: LocalAccount, signed: Delega
   const gas = ((await pub.estimateGas({ account: account.address, to: net.delegationManager, data })) * 13n) / 10n;
   const tx = await wallet.sendTransaction({ to: net.delegationManager, data, gas, ...FEES });
   const r = await pub.waitForTransactionReceipt({ hash: tx, timeout: 60_000, pollingInterval: 800 });
-  const off = await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [hash] });
+  const { ok: off } = await confirmed(
+    () => pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [hash] }),
+    (v) => v === true,
+  );
   if (r.status !== "success" || !off) throw new Error(`Revoke not confirmed (${tx}). The plan is still armed.`);
   return tx;
 }

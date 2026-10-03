@@ -1,0 +1,107 @@
+[
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[aria-label=\"'+l+'\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};window.__until=async(f,ms)=>{const t=Date.now();while(Date.now()-t<ms){try{if(f())return true}catch(e){}await new Promise(r=>setTimeout(r,1000))}return false};window.__rows=()=>[...document.querySelectorAll('input[aria-label^=\"Tranche\"]')].map(i=>i.getAttribute('aria-label')+'='+i.value);'ready'"
+ },
+ {
+  "eval": "JSON.stringify({vw:innerWidth,vh:innerHeight,overflowX:document.documentElement.scrollWidth>innerWidth,rows:__rows(),dirs:[...document.querySelectorAll('button[aria-label$=direction]')].map(b=>b.innerText),smallTargets:[...document.querySelectorAll('button')].filter(b=>b.offsetParent&&b.getBoundingClientRect().height<32).map(b=>b.innerText.trim().slice(0,20)),chartAboveTicket:(document.querySelector('svg')?.getBoundingClientRect().top||0)<(document.querySelector('aside')?.getBoundingClientRect().top||0),heartbeat:document.querySelector('[data-testid=heartbeat]')?.innerText})"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','finish-a');return 'named'})()"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Create"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/\"]'),60000).then(ok=>JSON.stringify({ok,addr:document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop()}))"
+ },
+ {
+  "click": "Get 0.1 testnet MON"
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('button')].some(b=>b.innerText.startsWith('Sign plan')),90000).then(ok=>JSON.stringify({ok,holdings:document.querySelector('aside p.num')?.innerText}))"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Sign plan"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('[aria-current=page]')?.innerText==='Watch',150000).then(ok=>JSON.stringify({ok,tab:document.querySelector('[aria-current=page]')?.innerText}))"
+ },
+ {
+  "eval": "__until(()=>/Sold 0\\./.test(document.querySelector('aside')?.innerText||''),150000).then(ok=>JSON.stringify({sold:ok,plan:(document.querySelector('aside')?.innerText||'').slice(0,700)}))"
+ },
+ {
+  "eval": "JSON.stringify({heartbeat:document.querySelector('[data-testid=heartbeat]')?.innerText,bars:document.querySelectorAll('[data-testid=heartbeat] [aria-hidden] span').length})"
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('section')].some(s=>/Tripwire:/.test(s.innerText)),60000)"
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=3,90000).then(ok=>JSON.stringify({ok,cheat:[...new Set(document.body.innerText.match(/Tripwire:[a-z-]+/g)||[])]}))"
+ },
+ {
+  "click": "Revoke"
+ },
+ {
+  "eval": "__until(()=>/revoked/.test(document.querySelector('aside')?.innerText||''),90000).then(ok=>JSON.stringify({revoked:ok}))"
+ },
+ {
+  "click": "Turn back into MON"
+ },
+ {
+  "eval": "__until(()=>!/WMON set aside/.test(document.body.innerText),90000).then(ok=>JSON.stringify({unwrapped:ok}))"
+ },
+ {
+  "eval": "(()=>{window.__a=document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop();location.reload();return 'reloading'})()"
+ },
+ {
+  "wait": 6000
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[aria-label=\"'+l+'\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};window.__until=async(f,ms)=>{const t=Date.now();while(Date.now()-t<ms){try{if(f())return true}catch(e){}await new Promise(r=>setTimeout(r,1000))}return false};window.__rows=()=>[...document.querySelectorAll('input[aria-label^=\"Tranche\"]')].map(i=>i.getAttribute('aria-label')+'='+i.value);'ready'"
+ },
+ {
+  "activate": true
+ },
+ {
+  "front": true
+ },
+ {
+  "tclick": "Sign in with passkey"
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/\"]'),60000).then(ok=>JSON.stringify({returningAddr:document.querySelector('aside a[href*=\"/address/\"]')?.href.split('/').pop()}))"
+ },
+ {
+  "eval": "JSON.stringify({overflowXWatch:document.documentElement.scrollWidth>innerWidth})"
+ }
+]

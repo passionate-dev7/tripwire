@@ -83,7 +83,11 @@ export default function Page() {
 
       <main className="mx-auto grid max-w-[1240px] gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_330px] lg:px-6">
         <section className="min-w-0">
-          <div className="flex flex-wrap items-end gap-x-8 gap-y-2">
+          <h1 className="max-w-[640px] text-[20px] font-medium leading-7 text-ink">
+            An exit plan for your MON that a compromised keeper cannot break.
+            <span className="block text-[14px] font-normal leading-6 text-body">Sign once with a passkey. The keeper sells at your price lines and the contract refuses every other sale: early, below your floor, twice, or paid to anyone but you.</span>
+          </h1>
+          <div className="mt-4 flex flex-wrap items-end gap-x-8 gap-y-2">
             <div>
               <div className="text-[12px] text-mute">MON in aUSD, 60 s average of the testnet pool (what the contract reads)</div>
               <div className="num h-16 text-[56px] font-medium leading-[64px] tracking-[0.2px] text-ink">{price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : fmtPrice(price)}</div>
@@ -108,7 +112,7 @@ export default function Page() {
           <div className="rounded-[10px] border border-hairline bg-surface p-2">
             <StopChart points={t.history.data?.points ?? []} lines={lines} height={wide ? 420 : 260} />
           </div>
-          <Heartbeat lastLoop={s?.lastLoop} />
+          <Heartbeat lastLoop={s?.lastLoop} keeperGas={s?.keeperGas} fillCost={s?.fillCost} loopError={s?.loopError} />
           {tab === "watch" && <Watch t={t} price={price} part="summary" />}
         </section>
 

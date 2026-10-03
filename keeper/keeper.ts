@@ -191,7 +191,10 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
 }
 
 let lastLoop = 0;
+let loopError: string | null = null;
 let loops = 0;
+/** What one fill costs the keeper up front: Monad charges the gas limit (the estimate plus 20%, about 470k) at the fee cap. */
+const FILL_COST = 470_000n * FEES.maxFeePerGas;
 // Snapshots the API serves: computed here, in the loop, so no request ever waits on (or fails with) the public RPC.
 let statusSnap: Record<string, unknown> | null = null;
 const viewSnap = new Map<number, Awaited<ReturnType<typeof planView>>>();
@@ -216,12 +219,22 @@ async function loop() {
       await sample(tick);
       await readMainnet();
       await snapshot(head, tick);
-      for (const plan of state.plans) await tryFill(plan, decodeDelegation(plan.delegation), tick);
+      // one plan's failed send (no gas, RPC error) must not stop the other plans, the views, or the heartbeat
+      for (const plan of state.plans) {
+        try {
+          await tryFill(plan, decodeDelegation(plan.delegation), tick);
+        } catch (e) {
+          plan.lastError = `fill: ${String((e as Error).message).split("\n")[0].slice(0, 160)}`;
+          log(`plan #${plan.id}: ${plan.lastError}`);
+        }
+      }
       if (loops++ % 3 === 0) for (const plan of state.plans) viewSnap.set(plan.id, await planView(plan));
       persist();
       lastLoop = Date.now();
+      loopError = null;
     } catch (e) {
-      log(`loop: ${String((e as Error).message).split("\n")[0]}`);
+      loopError = String((e as Error).message).split("\n")[0].slice(0, 200);
+      log(`loop: ${loopError}`);
     }
     await new Promise((r) => setTimeout(r, LOOP_MS));
   }
@@ -317,7 +330,7 @@ Bun.serve({
     try {
       if (url.pathname === "/api/status") {
         if (!statusSnap) return json({ error: "keeper is starting" }, 503);
-        return json({ ...statusSnap, lastLoop, mainnet: mainnetRead });
+        return json({ ...statusSnap, lastLoop, loopError, fillCost: String(FILL_COST), mainnet: mainnetRead });
       }
       if (url.pathname === "/api/recent") {
         // one row per plan, newest first: its sales (with what the holder actually received) and every refused call

@@ -1,0 +1,126 @@
+[
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[",
+  "value": "ready"
+ },
+ {
+  "eval": "JSON.stringify({title:document.title,price:document.querySel",
+  "value": "{\"title\":\"tripwire: an exit plan your keeper cannot break\",\"price\":\"0.03241\",\"heartbeat\":\"Keeper checked 9 s ago\",\"rows\":[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03176\",\"Tranche 1 floor=0.02917\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02107\",\"Tranche 2 floor=0.01945\"],\"tab\":\"Plan\",\"vw\":390}"
+ },
+ {
+  "eval": "(()=>{__set('Plan stops on','2026-10-20');return document.qu",
+  "value": "2026-10-20"
+ },
+ {
+  "eval": "(()=>{const r=__rows();const line=Number(document.querySelec",
+  "value": "floorAboveLine"
+ },
+ {
+  "eval": "JSON.stringify({err:[...document.querySelectorAll('aside p')",
+  "value": "{\"err\":[\"floor 0.09527999999999999 is above line 0.03176: the tranche could never fill\"]}"
+ },
+ {
+  "click": "+10%",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({afterPreset:__rows()})",
+  "value": "{\"afterPreset\":[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03565\",\"Tranche 1 floor=0.0328\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02107\",\"Tranche 2 floor=0.01945\"]}"
+ },
+ {
+  "eval": "(()=>{const p=Number(document.querySelector('.num.h-16').inn",
+  "value": "[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03176\",\"Tranche 1 floor=0.02917\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02107\",\"Tranche 2 floor=0.01945\"]"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','finish-a');return 'nam",
+  "value": "named"
+ },
+ {
+  "tclick": "Create",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/",
+  "value": "{\"ok\":true,\"addr\":\"0x1EAD1e300E9eEDB169f7fF8152bebeD2A391A6ec\"}"
+ },
+ {
+  "click": "Get 0.1 testnet MON",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('button')].some(b=",
+  "value": "{\"ok\":true,\"holdings\":\"MON is already at or above it (0.03241): the keeper sells this within about a minute of arming.\"}"
+ },
+ {
+  "tclick": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('[aria-current=page]')?.i",
+  "value": "{\"ok\":true,\"tab\":\"Watch\"}"
+ },
+ {
+  "eval": "__until(()=>/Sold 0\\./.test(document.querySelector('aside')?",
+  "value": "{\"sold\":true,\"plan\":\"Plan 13\\nRevoke\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03176\\n0.02917\\nsold\\n2\\n0.01\\n0.02107\\n0.01945\\n35.0% to stop\\nPlan posted by 0x1EAD..A6ec\\n0xf7b312bb..5afd\\nSold 0.02 MON at a 60 s average of 0.03241. 0x1EAD..A6ec received 0.000645 aUSD (floor 0.000584; sale 1, line 0.03176)\\n0x129a4779..e9ba\\nTry to cheat\\n\\nMake the keeper break plan 13 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell before MON reaches your line\\nMake it try\\nSell for half your floor\\nMake it try\\nSend the aUSD to the keeper\\nMake it try\\n0.01 WMON set aside. Revoke first if a plan is still armed.\\nTurn back into MON\"}"
+ },
+ {
+  "eval": "JSON.stringify({heartbeat:document.querySelector('[data-test",
+  "value": "{\"heartbeat\":\"Keeper checked 5 s ago\",\"bars\":10}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('section')].some(s",
+  "value": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-",
+  "value": "{\"ok\":true,\"cheat\":[\"Tripwire:above-line\",\"Tripwire:min-out\",\"Tripwire:recipient\"]}"
+ },
+ {
+  "click": "Revoke",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>/revoked/.test(document.querySelector('aside')?.",
+  "value": "{\"revoked\":true}"
+ },
+ {
+  "click": "Turn back into MON",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>!/WMON set aside/.test(document.body.innerText),",
+  "value": "{\"unwrapped\":true}"
+ },
+ {
+  "eval": "(()=>{window.__a=document.querySelector('aside a[href*=\"/add",
+  "value": "reloading"
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[",
+  "value": "ready"
+ },
+ {
+  "tclick": "Sign in with passkey",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/",
+  "value": "{\"returningAddr\":\"0x1EAD1e300E9eEDB169f7fF8152bebeD2A391A6ec\"}"
+ },
+ {
+  "eval": "JSON.stringify({overflowX:document.documentElement.scrollWid",
+  "value": "{\"overflowX\":false}"
+ }
+]

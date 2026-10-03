@@ -546,7 +546,6 @@ There is no traditional photography. Visual elements are limited to:
 
 **`store-search-bar`**, the store-page search field
 - Background `{colors.surface-elevated}`, text `{colors.on-dark}`, type `{typography.body-md}`, padding `10px 16px`, height ~44px, rounded `{rounded.md}`.
-- Sits at the top of the store page hero with a magnifier icon at the left and "Search the store..." placeholder. Slightly taller than the standard `text-input`.
 
 ### Cards & Containers
 
@@ -681,11 +680,3 @@ The only "imagery" in the system is in-product Raycast UI screenshots and small 
 6. Keep `{colors.primary}` (white CTA pill) scarce per viewport, at most one solid white pill per fold.
 7. When introducing a new component, ask whether it can be expressed with the existing surface-ladder + 8px-radius + ss03-Inter vocabulary before adding new tokens. The system's strength is that it almost never needs new ones.
 
-## Known Gaps
-
-- **Mobile screenshots not captured**, responsive behavior synthesizes Raycast's mobile pattern (hamburger drawer, single-column grid, hero downscale) from desktop evidence and the breakpoint stack.
-- **Hover states not documented** by system policy. Raycast's in-product app has rich hover behavior on command-palette rows that this document doesn't capture.
-- **In-product app chrome** (the actual Raycast launcher running on macOS) is referenced in marketing screenshots but not documented as a separate UI system here. The marketing site is documented; the in-product app surface is its own design system.
-- **Dark mode is the only mode**, no light variant exists in the captured surfaces.
-- **Form validation states** beyond the focused-input border treatment are not present in the captured surfaces.
-- **Authenticated chrome** (account dashboard, billing settings, team management) not in the captured pages.
