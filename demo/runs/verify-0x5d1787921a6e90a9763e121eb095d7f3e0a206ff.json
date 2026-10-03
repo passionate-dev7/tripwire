@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-03T09:52:33.491Z",
+  "twapPrice": 0.0324022996257028,
+  "report": [
+    {
+      "plan": 20,
+      "tranche": 0,
+      "line": 0.03174802175008336,
+      "floor": 0.02916,
+      "spent": true,
+      "fill": "0x376cd2bcc6f272eefecdb2a41a67e9301877352b8526ebd1b02d32e5c279f346",
+      "from": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468",
+      "sold": "20000000000000000",
+      "received": "0.000646",
+      "floorOwed": "0.000583",
+      "priceAtFill": 0.0324022996257028
+    },
+    {
+      "plan": 20,
+      "tranche": 1,
+      "line": 0.021059482630379572,
+      "floor": 0.01944,
+      "spent": false
+    }
+  ]
+}

@@ -54,6 +54,21 @@
   "eval": "__until(()=>[...document.querySelectorAll('button')].some(b=>b.innerText.startsWith('Sign plan')),90000).then(ok=>JSON.stringify({ok,holdings:document.querySelector('aside p.num')?.innerText}))"
  },
  {
+  "eval": "(()=>{__set('Tranche 1 MON','1');return 'one MON'})()"
+ },
+ {
+  "click": "Fit to my balance"
+ },
+ {
+  "eval": "JSON.stringify({fitted:__rows().filter(r=>/ MON=/.test(r)),signLabel:[...document.querySelectorAll('button')].find(b=>/^Sign plan/.test(b.innerText))?.innerText})"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','0.02');__set('Tranche 2 MON','0.01');return 'restored'})()"
+ },
+ {
+  "eval": "fetch('/api/drip',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:document.querySelector('aside a[href*=\"/address/\"]').href.split('/').pop()})}).then(async r=>JSON.stringify({status:r.status,body:await r.text()}))"
+ },
+ {
   "activate": true
  },
  {
@@ -72,19 +87,31 @@
   "eval": "JSON.stringify({heartbeat:document.querySelector('[data-testid=heartbeat]')?.innerText,bars:document.querySelectorAll('[data-testid=heartbeat] [aria-hidden] span').length})"
  },
  {
-  "click": "Make it try"
- },
- {
-  "eval": "__until(()=>[...document.querySelectorAll('section')].some(s=>/Tripwire:/.test(s.innerText)),60000)"
+  "wait": 1500
  },
  {
   "click": "Make it try"
  },
  {
-  "wait": 3000
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=1,90000)"
+ },
+ {
+  "wait": 1500
  },
  {
   "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=2,90000)"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "click": "Make it try"
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=3,90000)"
  },
  {
   "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-line|min-out|recipient)/g)||[]).length>=3,90000).then(ok=>JSON.stringify({ok,cheat:[...new Set(document.body.innerText.match(/Tripwire:[a-z-]+/g)||[])]}))"

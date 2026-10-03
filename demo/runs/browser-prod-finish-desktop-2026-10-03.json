@@ -1,0 +1,158 @@
+[
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[",
+  "value": "ready"
+ },
+ {
+  "eval": "JSON.stringify({title:document.title,price:document.querySel",
+  "value": "{\"title\":\"tripwire: an exit plan your keeper cannot break\",\"price\":\"0.03240\",\"heartbeat\":\"Keeper checked 8 s ago\\nKeeper can pay for 101 more sales\",\"rows\":[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03175\",\"Tranche 1 floor=0.02916\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02106\",\"Tranche 2 floor=0.01944\"],\"tab\":\"Plan\",\"vw\":1440}"
+ },
+ {
+  "eval": "JSON.stringify({h1:document.querySelector('h1')?.innerText,h",
+  "value": "{\"h1\":\"An exit plan for your MON that a compromised keeper cannot break.\\nSign once with a passkey. The keeper sells at your price lines and the contract refuses every other sale: early, below your floor, twice, or paid to anyone but you.\",\"h1InFirstViewport\":true,\"gas\":\"Keeper can pay for 101 more sales\",\"gasRed\":false}"
+ },
+ {
+  "eval": "(()=>{__set('Plan stops on','2026-10-20');return document.qu",
+  "value": "2026-10-20"
+ },
+ {
+  "eval": "(()=>{const r=__rows();const line=Number(document.querySelec",
+  "value": "floorAboveLine"
+ },
+ {
+  "eval": "JSON.stringify({err:[...document.querySelectorAll('aside p')",
+  "value": "{\"err\":[\"floor 0.09525 is above line 0.03175: the tranche could never fill\"]}"
+ },
+ {
+  "click": "+10%",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({afterPreset:__rows()})",
+  "value": "{\"afterPreset\":[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03564\",\"Tranche 1 floor=0.03279\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02106\",\"Tranche 2 floor=0.01944\"]}"
+ },
+ {
+  "eval": "(()=>{const p=Number(document.querySelector('.num.h-16').inn",
+  "value": "[\"Tranche 1 MON=0.02\",\"Tranche 1 line=0.03175\",\"Tranche 1 floor=0.02916\",\"Tranche 2 MON=0.01\",\"Tranche 2 line=0.02106\",\"Tranche 2 floor=0.01944\"]"
+ },
+ {
+  "eval": "(()=>{__set('Name for a new passkey','finish-a');return 'nam",
+  "value": "named"
+ },
+ {
+  "tclick": "Create",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/",
+  "value": "{\"ok\":true,\"addr\":\"0x1017f1fF71B320cf513311cBa5785EEc17899553\"}"
+ },
+ {
+  "click": "Get 0.1 testnet MON",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>[...document.querySelectorAll('button')].some(b=",
+  "value": "{\"ok\":true,\"holdings\":\"MON is already at or above it (0.03240): the keeper sells this within about a minute of arming.\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','1');return 'one MON'})()",
+  "value": "one MON"
+ },
+ {
+  "click": "Fit to my balance",
+  "ok": true
+ },
+ {
+  "eval": "JSON.stringify({fitted:__rows().filter(r=>/ MON=/.test(r)),s",
+  "value": "{\"fitted\":[\"Tranche 1 MON=0.0447\",\"Tranche 2 MON=0.0004\"],\"signLabel\":\"Sign plan (2 sales)\"}"
+ },
+ {
+  "eval": "(()=>{__set('Tranche 1 MON','0.02');__set('Tranche 2 MON','0",
+  "value": "restored"
+ },
+ {
+  "eval": "fetch('/api/drip',{method:'POST',headers:{'content-type':'ap",
+  "value": "{\"status\":400,\"body\":\"{\\\"error\\\":\\\"This passkey already got testnet MON from tripwire.\\\"}\"}"
+ },
+ {
+  "tclick": "Sign plan",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('[aria-current=page]')?.i",
+  "value": "{\"ok\":true,\"tab\":\"Watch\"}"
+ },
+ {
+  "eval": "__until(()=>/Sold 0\\./.test(document.querySelector('aside')?",
+  "value": "{\"sold\":true,\"plan\":\"Plan 21\\nRevoke\\nSALE\\nMON\\nLINE\\nFLOOR\\nSTATE\\n1\\n0.02\\n0.03175\\n0.02916\\nsold\\n2\\n0.01\\n0.02106\\n0.01944\\n35.0% to stop\\nPlan posted by 0x1017..9553\\n0x3e91630c..f96e\\nSold 0.02 MON at a 60 s average of 0.03240. 0x1017..9553 received 0.000646 aUSD (floor 0.000584; sale 1, line 0.03175)\\n0x5a6b045b..eb42\\nTry to cheat\\n\\nMake the keeper break plan 21 on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.\\n\\nSell before MON reaches your line\\nMake it try\\nSell for half your floor\\nMake it try\\nSend the aUSD to the keeper\\nMake it try\\n0.01 WMON set aside. Revoke first if a plan is still armed.\\nTurn back into MON\"}"
+ },
+ {
+  "eval": "JSON.stringify({heartbeat:document.querySelector('[data-test",
+  "value": "{\"heartbeat\":\"Keeper checked 6 s ago\\nKeeper can pay for 100 more sales\",\"bars\":15}"
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-",
+  "value": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-",
+  "value": true
+ },
+ {
+  "click": "Make it try",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-",
+  "value": true
+ },
+ {
+  "eval": "__until(()=>(document.body.innerText.match(/Tripwire:(above-",
+  "value": "{\"ok\":true,\"cheat\":[\"Tripwire:above-line\",\"Tripwire:min-out\",\"Tripwire:recipient\"]}"
+ },
+ {
+  "click": "Revoke",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>/revoked/.test(document.querySelector('aside')?.",
+  "value": "{\"revoked\":true}"
+ },
+ {
+  "click": "Turn back into MON",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>!/WMON set aside/.test(document.body.innerText),",
+  "value": "{\"unwrapped\":true}"
+ },
+ {
+  "eval": "(()=>{window.__a=document.querySelector('aside a[href*=\"/add",
+  "value": "reloading"
+ },
+ {
+  "eval": "window.__set=(l,v)=>{const el=document.querySelector('input[",
+  "value": "ready"
+ },
+ {
+  "tclick": "Sign in with passkey",
+  "ok": true
+ },
+ {
+  "eval": "__until(()=>document.querySelector('aside a[href*=\"/address/",
+  "value": "{\"returningAddr\":\"0x1017f1fF71B320cf513311cBa5785EEc17899553\"}"
+ },
+ {
+  "eval": "JSON.stringify({overflowX:document.documentElement.scrollWid",
+  "value": "{\"overflowX\":false}"
+ }
+]
