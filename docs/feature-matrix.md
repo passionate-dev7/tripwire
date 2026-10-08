@@ -1,4 +1,4 @@
-# tripwire feature matrix (Monad testnet, https://tripwire-three.vercel.app, updated 2026-10-03)
+# tripwire feature matrix (Monad testnet, https://tripwire-three.vercel.app, updated 2026-10-08)
 
 PASS = exercised through the real UI on the live deploy, as a holder would, with the result read back from chain
 (`demo/plan-state.ts`, `demo/verify-live.ts`) or from the keeper API. Click-through logs are in `demo/runs/`; the
@@ -6,8 +6,8 @@ scripted steps are `demo/ui-run.json` (desktop 1440 and phone 390x844) and `demo
 
 | # | Feature | How a holder does it | Status | Evidence |
 |---|---|---|---|---|
-| 1 | Live price, keeper heartbeat and keeper gas | open the site | PASS | 60 s average 0.0324, "Keeper checked 5 s ago", "Keeper can pay for 102 more sales"; `/api/status` carries `keeperGas` and `fillCost`; progress crit keeper-gas |
-| 2 | Heartbeat goes silent and recovers | keeper stopped for 45 s while the page is open | PASS | "Keeper silent for 36 s. Nothing sells until it is back.", red text and red bars, then "Keeper checked 9 s ago" after the keeper resumed |
+| 1 | Live price, keeper heartbeat and keeper gas | open the site | PASS | 2026-10-08 read-only proof: heartbeat age 5,702 ms, `loopError=null`, keeperGas 5.125757462 MON. Fill `0x5a6b045b9f6389e857bb1dbbedb610f93ecbc9943068b6f9cfbb6a331319eb42` succeeded on TESTNET.keeper with receipt gasUsed 467,538 and tx gas limit 467,538. At its 110 gwei max fee, the receipt-derived conservative fill cost is 0.05142918 MON and runway is 99 fills, above the five-holder target. The live status uses the more conservative configured 0.0517 MON estimate and also displays 99; evidence: `demo/runs/keeper-health-2026-10-08.json` |
+| 2 | Heartbeat goes silent and recovers | isolated local status fixture, values swapped while app is open | PASS | At 390x844 the fixture first showed "Keeper silent for 67 s. Nothing sells until it is back." and 96 sales from fixture gas values. After changing only `lastLoop`, it showed "Keeper checked 5 s ago"; document width remained 390/390. The shared keeper was untouched; evidence: `demo/runs/keeper-health-2026-10-08.json` |
 | 3 | Create a passkey wallet | name it, Create | PASS | address shown, no extension, no seed phrase (plan 21 holder `0x1017f1fF71B320cf513311cBa5785EEc17899553`) |
 | 4 | Testnet MON for a new passkey | Get 0.1 testnet MON | PASS | balance read on the ticket; a second request returns 400 "This passkey already got testnet MON from tripwire." |
 | 5 | Plan from a link | open `?sell=<MON>@<line>/<floor>` (add `up` for a target) | PASS | five per-holder links open with their own rows and directions (`demo/runs/plan-links-2026-10-03.json`); a link on a phone arms a plan (plan 12) |

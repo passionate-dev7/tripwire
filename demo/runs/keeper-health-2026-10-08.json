@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-10-08T11:19:56.217Z",
+  "network": "Monad testnet",
+  "source": {
+    "status": "https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire/api/status",
+    "recent": "https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire/api/recent"
+  },
+  "live": {
+    "chainId": 10143,
+    "heartbeatAgeMs": 5702,
+    "lastLoop": 1791458390027,
+    "loopError": null,
+    "keeperGas": "5125757462000000000",
+    "apiFillCost": "51700000000000000",
+    "planCount": 22,
+    "selectedFill": {
+      "plan": 21,
+      "index": 0,
+      "hash": "0x5a6b045b9f6389e857bb1dbbedb610f93ecbc9943068b6f9cfbb6a331319eb42",
+      "status": "success",
+      "from": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468",
+      "gasUsed": "467538",
+      "transactionGasLimit": "467538",
+      "maxFeePerGas": "110000000000",
+      "effectiveGasPrice": "102000000000",
+      "receiptCost": "47688876000000000",
+      "receiptDerivedConservativeFillCost": "51429180000000000"
+    },
+    "conservativeRunwayFills": 99,
+    "fiveHolderTarget": 5,
+    "checks": {
+      "heartbeatAgeAtMost15s": true,
+      "loopErrorNull": true,
+      "keeperGasPositive": true,
+      "apiFillCostPositive": true,
+      "recentDataNonEmpty": true,
+      "receiptSuccess": true,
+      "receiptGasUsedPositive": true,
+      "receiptSenderIsConfiguredTestnetKeeper": true,
+      "receiptDerivedRunwayAtLeastFive": true
+    }
+  },
+  "deployedBrowser": {
+    "url": "https://tripwire-three.vercel.app/",
+    "viewport": "390x844",
+    "heartbeat": "Keeper checked 7 s ago",
+    "gasRunway": "Keeper can pay for 99 more sales",
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "screenshots": false
+  },
+  "negativeFixture": {
+    "app": "http://localhost:3108/",
+    "fixture": "http://127.0.0.1:4108/api/status",
+    "viewport": "390x844",
+    "staleLastLoopAgeSeconds": 67,
+    "staleText": "Keeper silent for 67 s. Nothing sells until it is back.",
+    "recovery": "Changed only fixture lastLoop through /fixture/recover",
+    "recoveredText": "Keeper checked 5 s ago",
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "screenshots": false,
+    "sharedKeeperChanged": false
+  },
+  "sourceComparison": {
+    "keeper/keeper.ts": "Publishes chainId, keeperGas, lastLoop, loopError, and fillCost. fillCost is a conservative configured estimate of 470000 gas at the fee cap.",
+    "web/lib/api.ts": "Status types lastLoop, loopError, keeperGas, and fillCost.",
+    "web/app/Watch.tsx": "Heartbeat displays stale at age >=15 seconds and computes whole sales from keeperGas/fillCost.",
+    "docs/feature-matrix.md": "Rows 1 and 2 updated with this live and isolated-fixture evidence.",
+    "measurementNote": "Receipt-derived conservative cost uses transaction gas limit multiplied by maxFeePerGas. Receipt gasUsed and actual receipt cost are recorded separately. Both measured and configured conservative runway floor to 99 fills."
+  }
+}
