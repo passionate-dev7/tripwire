@@ -1,0 +1,255 @@
+{
+  "startedAt": "2026-10-08T11:40:35.520Z",
+  "chainId": 10143,
+  "holder": "0xd661b663c2e9fc4f7a07563de9fb97ca345fb05d",
+  "keeper": "0x8a916555418dC4a8A4b11E2Fc2B8e85127204468",
+  "keeperApi": "https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire",
+  "terms": [
+    {
+      "mon": "0.005",
+      "line": 0.029,
+      "floor": 0.028,
+      "up": true
+    },
+    {
+      "mon": "0.005",
+      "line": 0.02,
+      "floor": 0.019
+    }
+  ],
+  "priceBefore": {
+    "tick": -310621,
+    "price": 0.0324022996257028
+  },
+  "priorRevoked": [
+    {
+      "id": 0,
+      "delegationHash": "0x23b5b3a241a0a56af39bf6a68e4145cb6b8c51fb32a995d362fa5a1b00524725",
+      "revokeTx": "0x898c7e0ba3bb2edc4f2ba63923ef48bfe90f7988b155f873c87c7f594e80b3e8",
+      "status": "success"
+    }
+  ],
+  "newPlan": {
+    "planId": "13",
+    "delegationHash": "0x111baf7c9b0d0c224e9d9c38c48130dd623ab5c39e276b09f63c65619683f1a9",
+    "setupTx": "0xdfc2783a3924c0b1c31598e0e1a1f158c42e074c881382632c43686c491cf026",
+    "setupStatus": "success",
+    "wrapTx": null,
+    "expiresAt": 1792064439,
+    "countBefore": "13",
+    "countAfter": "14"
+  },
+  "fill": {
+    "hash": "0x651e1ffa620c6c876483bd4768d4e2fdb4c24955b011c4f4dab83195ea67df6d",
+    "status": "success",
+    "from": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468",
+    "priceTick": -310621,
+    "wmonDelta": "5000000000000000",
+    "stableDelta": "0.000161",
+    "floorOwed": "0.00014",
+    "balances": {
+      "wmon": "5000000000000000",
+      "stable": "843",
+      "mon": "41030680000000000"
+    }
+  },
+  "negativeWindow": {
+    "observedMs": 50643,
+    "spent1": false,
+    "fills": [
+      {
+        "index": 0,
+        "hash": "0x651e1ffa620c6c876483bd4768d4e2fdb4c24955b011c4f4dab83195ea67df6d",
+        "block": "69245479",
+        "amountIn": "5000000000000000",
+        "minOut": "140",
+        "priceTick": -310621,
+        "amountOut": "161"
+      }
+    ],
+    "balances": {
+      "wmon": "5000000000000000",
+      "stable": "843",
+      "mon": "41030680000000000"
+    }
+  },
+  "revoke": {
+    "revokeTx": "0xc5814914c81965f0ac524798f9f0983e7d5ae80254a540d2af8a26b39c5fa2de",
+    "status": "success",
+    "balances": {
+      "wmon": "5000000000000000",
+      "stable": "843",
+      "mon": "29944810000000000"
+    }
+  },
+  "finishedAt": "2026-10-08T11:42:02.641Z",
+  "assertions": [
+    {
+      "name": "holder key resolves to the persisted holder",
+      "ok": true,
+      "detail": "0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d"
+    },
+    {
+      "name": "connected to Monad testnet",
+      "ok": true,
+      "detail": "chainId 10143"
+    },
+    {
+      "name": "holder gas top-up is logged in demo/owners.log",
+      "ok": true
+    },
+    {
+      "name": "holder holds exactly 0.01 WMON",
+      "ok": true,
+      "detail": "0.01 WMON"
+    },
+    {
+      "name": "native balance covers setup gas",
+      "ok": true,
+      "detail": "0.08812 MON"
+    },
+    {
+      "name": "plan totals exactly 0.01 MON",
+      "ok": true,
+      "detail": "0.01 MON"
+    },
+    {
+      "name": "planned amount covered by existing WMON",
+      "ok": true
+    },
+    {
+      "name": "target line already crossed",
+      "ok": true,
+      "detail": "price 0.0324022996257028 line 0.029"
+    },
+    {
+      "name": "stop line not crossed",
+      "ok": true,
+      "detail": "price 0.0324022996257028 line 0.02"
+    },
+    {
+      "name": "prior revoke receipt succeeded",
+      "ok": true,
+      "detail": "0 0x898c7e0ba3bb2edc4f2ba63923ef48bfe90f7988b155f873c87c7f594e80b3e8"
+    },
+    {
+      "name": "prior plan delegation disabled",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "setup wrapped no MON",
+      "ok": true
+    },
+    {
+      "name": "setup receipt succeeded",
+      "ok": true,
+      "detail": "0xdfc2783a3924c0b1c31598e0e1a1f158c42e074c881382632c43686c491cf026"
+    },
+    {
+      "name": "PlanBook count increments by exactly one",
+      "ok": true,
+      "detail": "13 to 14"
+    },
+    {
+      "name": "plansOf includes the new plan",
+      "ok": true,
+      "detail": "plan 13"
+    },
+    {
+      "name": "PlanBook read-back holder matches",
+      "ok": true,
+      "detail": "0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d"
+    },
+    {
+      "name": "PlanBook read-back keeper matches",
+      "ok": true,
+      "detail": "0x8a916555418dC4a8A4b11E2Fc2B8e85127204468"
+    },
+    {
+      "name": "PlanBook read-back delegation hash matches",
+      "ok": true,
+      "detail": "0x111baf7c9b0d0c224e9d9c38c48130dd623ab5c39e276b09f63c65619683f1a9"
+    },
+    {
+      "name": "signed terms match both tranches exactly",
+      "ok": true
+    },
+    {
+      "name": "tranche 0 spent within 180 seconds",
+      "ok": true
+    },
+    {
+      "name": "tranche 0 fill indexed by the keeper API",
+      "ok": true
+    },
+    {
+      "name": "fill receipt succeeded",
+      "ok": true,
+      "detail": "0x651e1ffa620c6c876483bd4768d4e2fdb4c24955b011c4f4dab83195ea67df6d"
+    },
+    {
+      "name": "fill sender is the testnet keeper",
+      "ok": true,
+      "detail": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468"
+    },
+    {
+      "name": "TrancheFilled for the new delegation is on chain",
+      "ok": true,
+      "detail": "0x651e1ffa620c6c876483bd4768d4e2fdb4c24955b011c4f4dab83195ea67df6d"
+    },
+    {
+      "name": "fill event is tranche 0",
+      "ok": true
+    },
+    {
+      "name": "fill event carries the exact WMON tranche amount",
+      "ok": true,
+      "detail": "5000000000000000"
+    },
+    {
+      "name": "fill event pays the holder",
+      "ok": true
+    },
+    {
+      "name": "holder WMON falls by exactly 0.005",
+      "ok": true,
+      "detail": "0.005 WMON"
+    },
+    {
+      "name": "holder stablecoin meets the signed floor",
+      "ok": true,
+      "detail": "0.000161 aUSD floor 0.00014"
+    },
+    {
+      "name": "no tranche 1 fill in the keeper API",
+      "ok": true
+    },
+    {
+      "name": "holder balances unchanged while the stop waits",
+      "ok": true
+    },
+    {
+      "name": "revoke receipt succeeded",
+      "ok": true,
+      "detail": "0xc5814914c81965f0ac524798f9f0983e7d5ae80254a540d2af8a26b39c5fa2de"
+    },
+    {
+      "name": "new plan delegation disabled",
+      "ok": true,
+      "detail": "0xc5814914c81965f0ac524798f9f0983e7d5ae80254a540d2af8a26b39c5fa2de"
+    },
+    {
+      "name": "no later fill after revoke",
+      "ok": true
+    },
+    {
+      "name": "keeper fill list unchanged after revoke",
+      "ok": true
+    },
+    {
+      "name": "balances unchanged after revoke",
+      "ok": true
+    }
+  ]
+}
