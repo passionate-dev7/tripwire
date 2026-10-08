@@ -166,6 +166,7 @@ async function readMainnet() {
 const priceTick = async () => Number(await pub.readContract({ address: net.enforcer, abi: abis.enforcer, functionName: "monPriceTick", args: [net.pool, net.wmon, net.stable, net.twapSeconds] }));
 
 async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
+  plan.lastError = undefined;
   const { tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const expiry = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
   if (expiry * 1000 < Date.now()) return;
