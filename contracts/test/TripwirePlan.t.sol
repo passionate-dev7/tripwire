@@ -222,9 +222,15 @@ contract TripwirePlanTest is Test {
     function test_expired_plan_reverts() public {
         int24 t0 = _twap();
         Delegation memory d = _sign(_tranches(t0 + 200, t0 + 200, t0 + 200), 5);
+        bytes32 h = DM.getDelegationHash(d);
+        (uint256 w0, uint256 u0) = _bal();
         vm.warp(block.timestamp + 1 days + 1);
         vm.expectRevert();
         _fill(d, 0);
+        (uint256 w1, uint256 u1) = _bal();
+        assertEq(w1, w0, "expired attempt leaves WMON with the holder");
+        assertEq(u1, u0, "expired attempt pays no stablecoin");
+        assertFalse(enforcer.spent(h, 0), "expired attempt does not consume the tranche");
     }
 
     function test_holder_revokes_half_filled_plan() public {
@@ -279,6 +285,66 @@ contract TripwirePlanTest is Test {
         _redeem(d, abi.encode(uint256(0)), ROUTER, 0, _swap(owner, AMT0, AMT0 * MIN2 / 1 ether));
         vm.expectRevert(bytes("Tripwire:below-line"));
         _fill(d, 1);
+    }
+
+    function test_exact_line_is_inclusive_for_stop_and_target() public {
+        int24 line = _twap();
+        TripwirePlanEnforcer.Tranche[] memory stop = new TripwirePlanEnforcer.Tranche[](1);
+        stop[0] = TripwirePlanEnforcer.Tranche(line, 1 ether, MIN0, false);
+        Delegation memory stopPlan = _sign(stop, 24);
+        (uint256 w0, uint256 u0) = _bal();
+        _redeem(stopPlan, abi.encode(uint256(0)), ROUTER, 0, _swap(owner, 1 ether, MIN0));
+        bytes32 stopHash = DM.getDelegationHash(stopPlan);
+        assertTrue(enforcer.spent(stopHash, 0), "stop fills at equality");
+        (uint256 w1, uint256 u1) = _bal();
+        assertEq(w0 - w1, 1 ether);
+        assertGe(u1 - u0, MIN0);
+        assertEq(_twap(), line, "the target check uses the same boundary tick");
+
+        TripwirePlanEnforcer.Tranche[] memory target = new TripwirePlanEnforcer.Tranche[](1);
+        target[0] = TripwirePlanEnforcer.Tranche(line, 1 ether, MIN0, true);
+        Delegation memory targetPlan = _sign(target, 25);
+        _redeem(targetPlan, abi.encode(uint256(0)), ROUTER, 0, _swap(owner, 1 ether, MIN0));
+        bytes32 targetHash = DM.getDelegationHash(targetPlan);
+        assertTrue(enforcer.spent(targetHash, 0), "target fills at equality");
+        (uint256 w2, uint256 u2) = _bal();
+        assertEq(w1 - w2, 1 ether);
+        assertGe(u2 - u1, MIN0);
+    }
+
+    function test_changed_swap_assets_and_fee_revert_without_spending() public {
+        int24 t0 = _twap();
+        Delegation memory d = _sign(_tranches(t0 + 200, t0 + 200, t0 + 200), 26);
+        bytes32 h = DM.getDelegationHash(d);
+        (uint256 w0, uint256 u0) = _bal();
+        uint256 minOut = AMT0 * MIN0 / 1 ether;
+
+        vm.expectRevert(bytes("Tripwire:route"));
+        _redeem(d, abi.encode(uint256(0)), ROUTER, 0, abi.encodeCall(
+            ISwapRouter02.exactInputSingle,
+            (ISwapRouter02.ExactInputSingleParams(address(0x1234), USDC, FEE, owner, AMT0, minOut, 0))
+        ));
+        assertFalse(enforcer.spent(h, 0), "wrong input asset does not consume the tranche");
+
+        vm.expectRevert(bytes("Tripwire:route"));
+        _redeem(d, abi.encode(uint256(0)), ROUTER, 0, abi.encodeCall(
+            ISwapRouter02.exactInputSingle,
+            (ISwapRouter02.ExactInputSingleParams(WMON, address(0x5678), FEE, owner, AMT0, minOut, 0))
+        ));
+        assertFalse(enforcer.spent(h, 0), "wrong output asset does not consume the tranche");
+
+        vm.expectRevert(bytes("Tripwire:route"));
+        _redeem(d, abi.encode(uint256(0)), ROUTER, 0, abi.encodeCall(
+            ISwapRouter02.exactInputSingle,
+            (ISwapRouter02.ExactInputSingleParams(WMON, USDC, uint24(FEE + 1), owner, AMT0, minOut, 0))
+        ));
+        assertFalse(enforcer.spent(h, 0), "changed pool fee does not consume the tranche");
+
+        (uint256 w1, uint256 u1) = _bal();
+        assertEq(w1, w0, "route attacks move no WMON");
+        assertEq(u1, u0, "route attacks pay no stablecoin");
+        _fill(d, 0);
+        assertTrue(enforcer.spent(h, 0), "the signed route still fills");
     }
 
     /// A target fills exactly when the MON price tick is at or above its line, and only then.
