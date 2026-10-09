@@ -1,0 +1,26 @@
+{
+  "network": "Monad testnet 10143",
+  "enforcer": "0x754ef1eb3D5b5513649C5FE4dB4dB53C2E9D53b2",
+  "planBook": "0x30EE5D42489aaE4a633820Cf54D6ee40e77562E0",
+  "planId": 23,
+  "perplAccountId": "5429",
+  "perplMarketId": 10,
+  "armTx": "0x7a6bfe36e689f3eb4e27718f3058c76a1bb14faa6645a0ddd2393a6054f925e2",
+  "attacks": {
+    "line": {
+      "hash": "0x0ea6fef3009c8f15db44944d3bf9344c09cf260be66fa4e759d1a8d88a03ed1a",
+      "reason": "execution reverted",
+      "gas": "900000"
+    },
+    "recipient": {
+      "hash": "0xbc15f8e7dbbd1d8116054ac973ccd8cbeda1eb5167f42fb1bcc6c737636482b4",
+      "reason": "execution reverted",
+      "gas": "900000"
+    },
+    "expiry": {
+      "hash": "0xc985ef99f2eeb95716ae1749c0853a2f085b723790d3260ea064a6805391d4ad",
+      "reason": "execution reverted",
+      "gas": "900000"
+    }
+  }
+}

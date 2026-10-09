@@ -10,6 +10,7 @@ import { Heartbeat, Watch } from "./Watch";
 import { useTripwire } from "./useTripwire";
 import { Record } from "./Record";
 import { TESTNET } from "../lib/plan";
+import { PERPL_ANCHOR } from "../lib/perplAnchor";
 import { addrUrl, fmtPrice, short } from "./parts";
 
 // Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
@@ -18,8 +19,9 @@ const r5 = (n: number) => Number(n.toFixed(5));
 /** A first plan that fits the 0.1 MON drip and shows both outcomes: a target just under the market (MON is already
  * above it, so it sells within a minute) and a stop far below (the one that must not sell). */
 const starterPlan = (price: number): PlainTranche[] => [
-  { mon: "0.02", line: r5(price * 0.98), floor: r5(price * 0.9), up: true },
-  { mon: "0.01", line: r5(price * 0.65), floor: r5(price * 0.6) },
+  { mon: "0.02", line: r5(price * 0.92), floor: r5(price * 0.88) },
+  { mon: "0.01", line: r5(price * 0.85), floor: r5(price * 0.8) },
+  { mon: "0.005", line: r5(price * 1.05), floor: r5(price * 0.98), up: true },
 ];
 
 export default function Page() {
@@ -84,8 +86,12 @@ export default function Page() {
       <main className="mx-auto grid max-w-[1240px] gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_330px] lg:px-6">
         <section className="min-w-0">
           <h1 className="max-w-[640px] text-[20px] font-medium leading-7 text-ink">
-            An exit plan for your MON that a compromised keeper cannot break.
-            <span className="block text-[14px] font-normal leading-6 text-body">Sign once with a passkey. The keeper sells at your price lines and the contract refuses every other sale: early, below your floor, twice, or paid to anyone but you.</span>
+            A Perpl risk plan your keeper cannot break.
+            <span className="block text-[14px] font-normal leading-6 text-body">One signature, three lines: hedge the Perp with a spot stop, stage the next sell, then rebalance into stable at your vault line. The enforcer refuses early sales, wrong recipients, and fills after expiry.</span>
+            <span className="mt-2 block text-[12px] font-normal leading-5 text-mute">MON unlock 2026-11-24 is optional context only, not the product.</span>
+            <p className="mt-2 font-mono text-[12px] text-body" data-perpl-account-id={PERPL_ANCHOR.accountId}>
+              Line 1 hedges Perpl account {PERPL_ANCHOR.accountId} ({PERPL_ANCHOR.side} {PERPL_ANCHOR.symbol} market {PERPL_ANCHOR.marketId}, {PERPL_ANCHOR.size} lots on Monad mainnet).
+            </p>
           </h1>
           <div className="mt-4 flex flex-wrap items-end gap-x-8 gap-y-2">
             <div>

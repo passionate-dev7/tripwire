@@ -11,17 +11,20 @@ import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short } from "./parts";
 type T = ReturnType<typeof useTripwire>;
 
 const ATTACKS: { kind: Attack["kind"]; label: string; tried: string }[] = [
-  { kind: "line", label: "Sell before MON reaches your line", tried: "to sell before MON reached the line" },
-  { kind: "floor", label: "Sell for half your floor", tried: "to sell for half the floor" },
-  { kind: "recipient", label: "Send the aUSD to the keeper", tried: "to send the aUSD to itself" },
+  { kind: "line", label: "Sell above your Perpl hedge line", tried: "to sell before the line was reached" },
+  { kind: "recipient", label: "Send proceeds to the keeper", tried: "to send proceeds to someone other than you" },
+  { kind: "expiry", label: "Fire after the plan expired", tried: "to sell after the signed end date" },
 ];
 
 const REASON_TEXT: Record<string, string> = {
-  "Tripwire:above-line": "MON is above the line",
+  "Tripwire:above-line": "MON is above the stop line",
+  "Tripwire:below-line": "MON is below the target line",
   "Tripwire:min-out": "below the floor",
   "Tripwire:recipient": "pays someone other than the holder",
   "Tripwire:spent": "that sale already happened",
   "Tripwire:amount": "not the amount you signed",
+  "TimestampEnforcer:expired-delegation": "after the signed end date",
+  "TimestampEnforcer:expired": "after the signed end date",
 };
 
 export function Heartbeat({ lastLoop, keeperGas, fillCost, loopError }: { lastLoop: number | undefined; keeperGas?: string; fillCost?: string; loopError?: string | null }) {
@@ -196,7 +199,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
       {target && (
         <Card title="Try to cheat">
           <p className="px-4 pt-3 text-[13px] leading-5 text-body">
-            Make the keeper break plan {target.id} on purpose. It sends the forbidden sale to Monad testnet; the contract refuses it, and this page reads the reason from the mined transaction.
+            Make the keeper break plan {target.id} on purpose. These are real testnet transactions: sell above your hedge line, pay the keeper, or fill after expiry.
           </p>
           <div className="mt-2">
             {ATTACKS.map((a) => {

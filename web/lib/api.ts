@@ -14,9 +14,9 @@ export type Fill = { index: number; hash: Hex; block: string; amountIn: string; 
 export type RecentPlan = {
   plan: number; holder: Hex; postedTx: Hex;
   sales: { hash: Hex; index: number; amountIn: string; minOut: string; amountOut: string | null; priceTick: number }[];
-  refused: { hash: Hex; attack: "line" | "floor" | "recipient"; reason: string }[];
+  refused: { hash: Hex; attack: "line" | "floor" | "recipient" | "expiry"; reason: string }[];
 };
-export type Attack = { kind: "floor" | "line" | "recipient"; hash: Hex; status: string; reason: string };
+export type Attack = { kind: "floor" | "line" | "recipient" | "expiry"; hash: Hex; status: string; reason: string };
 export type TrancheView = { index: number; line: number; lineTick: number; mon: string; floorPerMon: number; atOrAbove?: boolean; spent: boolean };
 export type PlanView = {
   id: number; holder: Hex; delegationHash: Hex; postedTx: Hex; delegation: Hex; revoked: boolean; expiresAt: number;

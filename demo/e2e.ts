@@ -101,7 +101,9 @@ console.log(`holder ${holder.address} ${formatEther(await pub.getBalance({ addre
 const t0 = await priceTick();
 log.priceAtStart = tickToPrice(t0);
 const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 3600;
-const unsigned = buildDelegation(net, holder.address, keeper.address, tranches, expiresAt, BigInt(Date.now()));
+const { perplBindFromAnchor } = await import("../web/lib/perplAnchor");
+const perpl = perplBindFromAnchor();
+const unsigned = buildDelegation(net, holder.address, keeper.address, tranches, expiresAt, BigInt(Date.now()), perpl);
 const signed = await signDelegation(net, holder, unsigned);
 const hashOnchain = await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "getDelegationHash", args: [signed] });
 log.delegationHash = hashOnchain;

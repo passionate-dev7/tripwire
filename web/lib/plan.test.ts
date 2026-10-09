@@ -6,6 +6,7 @@ import {
   abis,
   buildDelegation,
   decodeDelegation,
+  decodePerplPosition,
   decodeTranches,
   delegationDigest,
   encodeDelegation,
@@ -15,8 +16,13 @@ import {
   priceToTick,
   signDelegation,
   tickToPrice,
+  requirePerplPosition,
   toTranches,
+  type PerplPositionBind,
 } from "./plan";
+import { perplBindFromAnchor } from "./perplAnchor";
+
+const TEST_PERPL: PerplPositionBind = perplBindFromAnchor();
 
 const holder = privateKeyToAccount("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d");
 const keeper = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" as const;
@@ -55,13 +61,21 @@ describe("delegation", () => {
     { mon: "0.05", line: 0.033, floor: 0.03 },
     { mon: "0.03", line: 0.028, floor: 0.025 },
   ]);
-  const d = buildDelegation(TESTNET, holder.address, keeper, tranches, 1_800_000_000, 7n);
+  const d = buildDelegation(TESTNET, holder.address, keeper, tranches, 1_800_000_000, 7n, TEST_PERPL);
+
+  test("refuses to encode without a Perpl position id", () => {
+    expect(() => requirePerplPosition({ accountId: 0n, marketId: 10n, positionLots: 1n })).toThrow();
+    expect(() => buildDelegation(TESTNET, holder.address, keeper, tranches, 1_800_000_000, 8n, { accountId: 0n, marketId: 10n, positionLots: 5753n })).toThrow();
+  });
 
   test("terms decode back to the plan", () => {
-    const back = decodeTranches(d.caveats[0].terms);
+    const back = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
     expect(back.recipient).toBe(holder.address);
     expect(back.tranches).toEqual(tranches);
     expect(planTotal(tranches)).toBe(parseMon("0.08"));
+    const perpl = decodePerplPosition(d.caveats[0].terms, d.caveats[0].enforcer);
+    expect(perpl?.accountId).toBe(TEST_PERPL.accountId);
+    expect(Number(perpl?.marketId)).toBe(Number(TEST_PERPL.marketId));
   });
 
   test("encode and decode are inverse", async () => {

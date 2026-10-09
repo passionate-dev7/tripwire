@@ -77,7 +77,8 @@ export function useTripwire() {
       if (!account) throw new Error("Sign in with your passkey first.");
       const id = ++nonce.current;
       setSteps([]);
-      await createPlan(net, account, plain, expiresAt, (label, hash) => {
+      const { perplBindFromAnchor } = await import("../lib/perplAnchor");
+      await createPlan(net, account, plain, expiresAt, perplBindFromAnchor(), (label, hash) => {
         if (id === nonce.current) setSteps((s) => [...s, { label, hash }]);
       });
     });

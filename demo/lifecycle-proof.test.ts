@@ -6,6 +6,9 @@ import {
   buildDelegation,
   toTranches,
 } from "../web/lib/plan";
+import { perplBindFromAnchor } from "../web/lib/perplAnchor";
+
+const PERPL = perplBindFromAnchor();
 import {
   EXPECTED_HOLDER,
   LIFECYCLE_TERMS,
@@ -15,7 +18,7 @@ import {
 
 const keeper = TESTNET.keeper;
 const tranches = toTranches(LIFECYCLE_TERMS);
-const signed = buildDelegation(TESTNET, EXPECTED_HOLDER, keeper, tranches, 1_800_000_000, 7n);
+const signed = buildDelegation(TESTNET, EXPECTED_HOLDER, keeper, tranches, 1_800_000_000, 7n, PERPL);
 
 describe("assertSignedTermsMatch", () => {
   test("passes on identical signed terms", () => {
@@ -30,13 +33,14 @@ describe("assertSignedTermsMatch", () => {
       toTranches([{ ...LIFECYCLE_TERMS[0], mon: "0.006" }, LIFECYCLE_TERMS[1]]),
       1_800_000_000,
       7n,
+      PERPL,
     );
     expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
 
   test("fails when the recipient is mutated", () => {
     const stranger = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" as Address;
-    const mutated = buildDelegation(TESTNET, stranger, keeper, tranches, 1_800_000_000, 7n);
+    const mutated = buildDelegation(TESTNET, stranger, keeper, tranches, 1_800_000_000, 7n, PERPL);
     expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
 
@@ -48,6 +52,7 @@ describe("assertSignedTermsMatch", () => {
       toTranches([{ ...LIFECYCLE_TERMS[0], up: false }, LIFECYCLE_TERMS[1]]),
       1_800_000_000,
       7n,
+      PERPL,
     );
     expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
@@ -60,6 +65,7 @@ describe("assertSignedTermsMatch", () => {
       toTranches([{ ...LIFECYCLE_TERMS[0], line: 0.03 }, LIFECYCLE_TERMS[1]]),
       1_800_000_000,
       7n,
+      PERPL,
     );
     expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
@@ -72,12 +78,22 @@ describe("assertSignedTermsMatch", () => {
       toTranches([{ ...LIFECYCLE_TERMS[0], floor: 0.027 }, LIFECYCLE_TERMS[1]]),
       1_800_000_000,
       7n,
+      PERPL,
     );
     expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
 
   test("fails when the signed tranche count differs", () => {
     expect(() => assertSignedTermsMatch(signed, [LIFECYCLE_TERMS[0]], EXPECTED_HOLDER)).toThrow();
+  });
+
+  test("fails when Perpl account id does not match the live anchor", () => {
+    const mutated = buildDelegation(TESTNET, EXPECTED_HOLDER, keeper, tranches, 1_800_000_000, 7n, {
+      accountId: 1n,
+      marketId: 10n,
+      positionLots: 5753n,
+    });
+    expect(() => assertSignedTermsMatch(mutated, LIFECYCLE_TERMS, EXPECTED_HOLDER)).toThrow();
   });
 });
 

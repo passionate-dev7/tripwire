@@ -18,5 +18,13 @@
   "enforcer2": "0xc66cc7b7b91b893abfd0661c0312f6c45ead056b",
   "enforcer2Tx": "0x617ecf79bf07d8d626479200a47d01b958d7082b4aa91e99439ec7e3d57550ab",
   "planBook2": "0x6a1fcb214a1c43f53afb9d31014e1cdc92fa593e",
-  "planBook2Tx": "0x2d1eb4c70d04ea0945fb4b60cf8634d1a7e73cc0a2b43bc227ae932a4b08df7f"
+  "planBook2Tx": "0x2d1eb4c70d04ea0945fb4b60cf8634d1a7e73cc0a2b43bc227ae932a4b08df7f",
+  "enforcer3": "0x754ef1eb3d5b5513649c5fe4db4db53c2e9d53b2",
+  "enforcer3Tx": "0xaced98c2c9376a867fbd43dae3116b3e575a2fa535f3312370471a23a3d8a5c0",
+  "planBook3": "0x30ee5d42489aae4a633820cf54d6ee40e77562e0",
+  "planBook3Tx": "0xa572e2742a1188bc202c333bc6d4ba438bb8e1b8e963a598b17470fdb48961ee",
+  "enforcer4": "0xc603753555255ca5bcde5361625a1a130201df80",
+  "enforcer4Tx": "0x9596a5ec0ecdf0186aeebfd2da7f38b4a4445428e65fae06fd3710d8cf2bb7f1",
+  "planBook4": "0xb57a6f17261579455ff4869e729c9e74f1753382",
+  "planBook4Tx": "0x836d75edc1fe23ebfde1d1335a04b7659c9a65bcf7d0ebb636b67bdb55c9e5a4"
 }

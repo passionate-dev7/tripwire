@@ -18,9 +18,11 @@ import {
   abis,
   buildDelegation,
   planTotal,
+  requirePerplPosition,
   setupCalldata,
   signDelegation,
   toTranches,
+  type PerplPositionBind,
   wrapCall,
 } from "./plan";
 import { confirmed } from "./confirm";
@@ -79,6 +81,7 @@ export async function createPlan(
   account: LocalAccount,
   plain: PlainTranche[],
   expiresAt: number,
+  perpl: PerplPositionBind,
   onStep: Progress,
 ): Promise<{ signed: Delegation; wrapHash: Hex | null; setupHash: Hex; planId: bigint }> {
   const { chain, pub } = clients(net);
@@ -90,7 +93,11 @@ export async function createPlan(
   if (blocker) throw new Error(blocker);
 
   onStep("Signing the plan");
-  const signed = await signDelegation(net, account, buildDelegation(net, account.address, net.keeper, tranches, expiresAt, BigInt(Date.now())));
+  const signed = await signDelegation(
+    net,
+    account,
+    buildDelegation(net, account.address, net.keeper, tranches, expiresAt, BigInt(Date.now()), requirePerplPosition(perpl)),
+  );
 
   let wrapHash: Hex | null = null;
   const toWrap = total > before.wmon ? total - before.wmon : 0n;

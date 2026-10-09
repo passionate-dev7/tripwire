@@ -1,0 +1,49 @@
+{
+  "chainId": 10143,
+  "rpc": "https://testnet-rpc.monad.xyz",
+  "holder": "0xC63b525FD945B94Ddf9e9eaBc37FB3FC113a885a",
+  "keeper": "0x8a916555418dC4a8A4b11E2Fc2B8e85127204468",
+  "fund 0xC63b525FD945B94Ddf9e9eaBc37FB3FC113a885a": "0x789ab5f690ffecb9dfecd6cfbf43a8e1024c1197206086b901657060f1c7fade",
+  "priceAtStart": 0.0324022996257028,
+  "delegationHash": "0xf494f0b25c4fddd87689b3db4dde0f3989c1f8fee18b33144036263f68e43b17",
+  "digest": "0x02dfdc5351b7fb68fe48a2afac1d5d6421f79524a1d68d28d36399b8f8c1360d",
+  "wrap": {
+    "hash": "0x25fc1802b5e9dd29c036dd94288ef1a49e21e660a3b88d0f1cbb2221b54a8cbc",
+    "status": "success",
+    "gasUsed": "60000"
+  },
+  "setup": {
+    "hash": "0x09a0e76591b8edb33acdf91ebac695fe1e9e33e75441add7f93f82e66ed9b462",
+    "status": "success",
+    "gasUsed": "330000"
+  },
+  "setupReadback": {
+    "code": "0xef010063c0c19a282a1b52b07dd5a65b58948a07dae32b",
+    "planCount": [
+      "6",
+      "7"
+    ],
+    "wmon": "30000000000000000",
+    "allowance": "30000000000000000"
+  },
+  "hostile: tranche 0 for half its floor": {
+    "hash": "0x2232db812bc2c3a6ffdf8f47d9717cfe46efdc172ad1223b363399886c31b14e",
+    "status": "reverted",
+    "reason": "execution reverted"
+  },
+  "hostile: tranche 1 before its line is crossed": {
+    "hash": "0xff4e5ab2fe59e5e52f8662ca72c7ade53fc3e93ad56e20be682e4d1a0f91f12a",
+    "status": "reverted",
+    "reason": "execution reverted"
+  },
+  "hostile: tranche 0 paid to the keeper": {
+    "hash": "0x2f53263498343b598e2ce6c0a0216fb4f034de37989f94968e8beef1a5b8ae04",
+    "status": "reverted",
+    "reason": "execution reverted"
+  },
+  "hostile: fill after expiry": {
+    "hash": "0x4dc7ff767ee2086f13f24312fd06e6b9e52b6f04cc6544614ef47c287bef129a",
+    "status": "reverted",
+    "reason": "execution reverted"
+  }
+}

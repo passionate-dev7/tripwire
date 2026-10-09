@@ -22,7 +22,10 @@ const fund = await createWalletClient({ account: privateKeyToAccount(keys.deploy
 await pub.waitForTransactionReceipt({ hash: fund });
 console.log(`holder ${holder.address} funded ${fund}`);
 
-const res = await createPlan(TESTNET, holder, plain, Math.floor(Date.now() / 1000) + 86400, (s, h) => console.log(`  ${s}${h ? ` ${h}` : ""}`));
+const { perplBindFromAnchor } = await import("../web/lib/perplAnchor");
+const res = await createPlan(TESTNET, holder, plain, Math.floor(Date.now() / 1000) + 86400, perplBindFromAnchor(), (s, h) =>
+  console.log(`  ${s}${h ? ` ${h}` : ""}`),
+);
 const hash = await pub.readContract({ address: TESTNET.delegationManager, abi: abis.delegationManager, functionName: "getDelegationHash", args: [res.signed] });
 console.log(`plan #${res.planId} delegation ${hash}`);
 

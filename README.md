@@ -1,8 +1,8 @@
 # tripwire
 
-An exit plan for your MON that a compromised keeper cannot break.
+A Perpl risk plan your keeper cannot break.
 
-A holder writes up to three sales (how much MON, the price line, the floor), each one a stop (sell once MON falls to the line) or a target (sell once MON rises to it), signs once with a passkey, and a keeper sells each one when MON's 60 second average reaches its line. The keeper is allowed exactly that and nothing else: the contract refuses a sale before its line is reached, for less than the floor, of any amount other than the one signed, a second time, or paid to anyone but the holder.
+One signed MetaMask delegation, three enforced lines: (1) a spot stop that hedges your Perpl book when MON hits your line, (2) a staged sell, (3) a vault rebalance target that pays aUSD to you only if the fill is inside the signed line. A holder signs once with a passkey; a keeper may fill each row once when the pool TWAP crosses the line. The contract refuses selling above a stop line, paying anyone but the holder, or firing after expiry. The November 2026 MON unlock is footnote context, not the product.
 
 Live on Monad testnet: https://tripwire-three.vercel.app
 

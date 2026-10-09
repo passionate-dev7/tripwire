@@ -1,1 +1,1 @@
-Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 15.84s (49.85s CPU time)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 9.70s (38.80s CPU time)

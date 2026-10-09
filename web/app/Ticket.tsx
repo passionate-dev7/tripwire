@@ -6,15 +6,16 @@ import { useMemo, useState } from "react";
 import type { Hex } from "viem";
 import { type PlainTranche, priceToTick, toTranches } from "../lib/plan";
 import { SETUP_GAS_BUDGET } from "../lib/holder";
+import { PERPL_ANCHOR } from "../lib/perplAnchor";
 import type { useTripwire } from "./useTripwire";
 import { Card, Copy, Fact, Ghost, Pill, TxLink, addrUrl, fmtMon, fmtPrice, short } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
-const UNLOCK = "2026-11-24";
+const DEFAULT_END = "2026-10-20";
 const fmtAusd = (n: number) => n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
 
 export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]; setPlan: (p: PlainTranche[]) => void; price: number | null }) {
-  const [expiry, setExpiry] = useState(UNLOCK);
+  const [expiry, setExpiry] = useState(DEFAULT_END);
   const [name, setName] = useState("");
 
   const checked = useMemo(() => {
@@ -50,7 +51,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
       <Card>
         <div className="px-4 pb-4 pt-5">
           <p className="text-[14px] leading-6 text-body">
-            Sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once MON&apos;s 60 s average{" "}
+            Line 1 hedges your Perpl book: sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once the 60 s average{" "}
             <button type="button" onClick={() => flip(0)} className="rounded-md border border-hairline px-1.5 text-ink hover:border-hairline-strong" aria-label="Switch sale 1 between falls to and rises to">
               {up0 ? "rises to" : "falls to"}
             </button>
@@ -106,7 +107,9 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
       </Card>
 
       <Card title="What the keeper can do">
-        <Fact label="Sells">WMON for aUSD, one sale per row</Fact>
+        <Fact label="Perpl position">account {PERPL_ANCHOR.accountId}, market {PERPL_ANCHOR.marketId}, {PERPL_ANCHOR.side} {PERPL_ANCHOR.size} {PERPL_ANCHOR.symbol} lots (mainnet read {PERPL_ANCHOR.fetchedAt.slice(0, 10)})</Fact>
+        <Fact label="Lines">1 spot stop at your line hedges that book, then staged sells, then vault target</Fact>
+        <Fact label="Sells">WMON for aUSD on Monad testnet, one fill per row</Fact>
         {plan.some((p) => !p.up) && <Fact label="Stops: once MON falls to">{plan.filter((p) => !p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
         {plan.some((p) => p.up) && <Fact label="Targets: once MON rises to">{plan.filter((p) => p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
         <Fact label="Never for less than">{plan.map((p) => `${fmtPrice(p.floor)}`).join(", ")} aUSD per MON</Fact>

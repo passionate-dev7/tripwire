@@ -1,0 +1,14 @@
+{
+  "network": "mainnet",
+  "chainId": 143,
+  "exchange": "0x34B6552d57a35a1D042CcAe1951BD1C370112a6F",
+  "accountId": "5429",
+  "marketId": 10,
+  "positionLots": "5753",
+  "symbol": "MON",
+  "side": "long",
+  "size": 5753,
+  "entryPrice": 0.023536,
+  "markPrice": 0.024641,
+  "fetchedAt": "2026-10-09T07:55:02.833Z"
+}

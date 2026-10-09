@@ -38,6 +38,9 @@ contract TripwirePlanTest is Test {
     uint256 constant MIN0 = 30_000; // USDC raw units per 1 MON; the pool pays about 34,276 at the pinned block
     uint256 constant MIN1 = 28_000;
     uint256 constant MIN2 = 25_000;
+    uint256 constant PERPL_ACCOUNT = 741;
+    uint256 constant PERPL_MARKET = 1;
+    int256 constant PERPL_LOTS = 1_000_000_000;
 
     TripwirePlanEnforcer enforcer;
     PlanBook book;
@@ -73,8 +76,9 @@ contract TripwirePlanTest is Test {
     }
 
     function _sign(TripwirePlanEnforcer.Tranche[] memory tr, uint256 salt) internal view returns (Delegation memory d) {
-        bytes memory terms =
-            abi.encode(TripwirePlanEnforcer.Terms(ROUTER, POOL, WMON, USDC, FEE, TWAP, owner, tr));
+        bytes memory terms = abi.encode(
+            TripwirePlanEnforcer.Terms(ROUTER, POOL, WMON, USDC, FEE, TWAP, owner, PERPL_ACCOUNT, PERPL_MARKET, PERPL_LOTS, tr)
+        );
         Caveat[] memory cv = new Caveat[](2);
         cv[0] = Caveat(address(enforcer), terms, "");
         cv[1] = Caveat(TIMESTAMP, abi.encodePacked(bytes16(0), bytes16(uint128(block.timestamp + 1 days))), "");
@@ -202,6 +206,20 @@ contract TripwirePlanTest is Test {
         _fill(d, 0);
     }
 
+    function test_perpl_position_required() public {
+        int24 t0 = _twap();
+        TripwirePlanEnforcer.Tranche[] memory tr = _tranches(t0 + 200, t0 + 200, t0 - 1000);
+        bytes memory terms =
+            abi.encode(TripwirePlanEnforcer.Terms(ROUTER, POOL, WMON, USDC, FEE, TWAP, owner, 0, PERPL_MARKET, PERPL_LOTS, tr));
+        Caveat[] memory cv = new Caveat[](2);
+        cv[0] = Caveat(address(enforcer), terms, "");
+        cv[1] = Caveat(TIMESTAMP, abi.encodePacked(bytes16(0), bytes16(uint128(block.timestamp + 1 days))), "");
+        bytes32 h = keccak256("perpl-position-test");
+        vm.prank(address(DM));
+        vm.expectRevert(bytes("Tripwire:perpl-position"));
+        enforcer.beforeHook(cv[0].terms, abi.encode(uint256(0)), ModeCode.wrap(0), "", h, owner, keeper);
+    }
+
     function test_stranger_cannot_burn_tranches() public {
         Delegation memory d = _sign(_tranches(0, 0, 0), 3);
         bytes32 h = DM.getDelegationHash(d);
@@ -214,7 +232,9 @@ contract TripwirePlanTest is Test {
         int24 t0 = _twap();
         Delegation memory d = _sign(_tranches(t0 + 200, t0 + 200, t0 + 200), 4);
         TripwirePlanEnforcer.Tranche[] memory evil = _tranches(t0 + 200, t0 + 200, t0 + 200);
-        d.caveats[0].terms = abi.encode(TripwirePlanEnforcer.Terms(ROUTER, POOL, WMON, USDC, FEE, TWAP, keeper, evil));
+        d.caveats[0].terms = abi.encode(
+            TripwirePlanEnforcer.Terms(ROUTER, POOL, WMON, USDC, FEE, TWAP, keeper, PERPL_ACCOUNT, PERPL_MARKET, PERPL_LOTS, evil)
+        );
         vm.expectRevert();
         _redeem(d, abi.encode(uint256(0)), ROUTER, 0, _swap(keeper, AMT0, AMT0 * MIN0 / 1 ether));
     }

@@ -6,11 +6,13 @@ import type { Address } from "viem";
 import {
   type Delegation,
   type PlainTranche,
+  decodePerplPosition,
   decodeTranches,
   floorToMinOutPerUnit,
   parseMon,
   priceToTick,
 } from "../web/lib/plan";
+import { PERPL_ANCHOR } from "../web/lib/perplAnchor";
 
 /** The only holder this proof may act for, already persisted in demo/.keys.json. */
 export const EXPECTED_HOLDER =
@@ -80,5 +82,12 @@ export function assertSignedTermsMatch(
         `tranche ${i} floor ${t.minOutPerUnit} is not ${wantFloor}`,
       );
     }
+  }
+  const perpl = decodePerplPosition(signed.caveats[0].terms, signed.caveats[0].enforcer);
+  if (!perpl || perpl.accountId !== BigInt(PERPL_ANCHOR.accountId)) {
+    throw new Error(`signed plan missing Perpl account ${PERPL_ANCHOR.accountId}`);
+  }
+  if (Number(perpl.marketId) !== PERPL_ANCHOR.marketId) {
+    throw new Error(`Perpl market ${perpl.marketId} is not ${PERPL_ANCHOR.marketId}`);
   }
 }

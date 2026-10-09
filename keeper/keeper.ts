@@ -266,7 +266,12 @@ async function attack(planId: number, kind: string): Promise<Attack> {
     const above = live.find(({ t }) => !lineReached(t, tick));
     if (!above) throw new Error("every live line is already crossed, so there is no early sale to attempt");
     data = fillCalldata(net, d, above.i);
-  } else throw new Error("kind is floor, line or recipient");
+  } else if (kind === "expiry") {
+    const expiry = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
+    if (Math.floor(Date.now() / 1000) <= expiry) throw new Error("plan has not expired yet");
+    const { i } = live[0];
+    data = fillCalldata(net, d, i);
+  } else throw new Error("kind is floor, line, recipient or expiry");
   if ((await pub.getBalance({ address: keeper.address })) < ATTACK_GAS * FEES.maxFeePerGas + parseEther("0.002")) throw new Error("keeper is out of testnet gas");
   const hash = await wallet.sendTransaction({ to: net.delegationManager, data, gas: ATTACK_GAS, ...FEES });
   const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000, pollingInterval: 1_000 });

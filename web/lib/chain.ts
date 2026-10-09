@@ -16,8 +16,22 @@ export function decodeReason(data: Hex | undefined): string | null {
   return decodeErrorResult({ abi: ERROR_STRING, data }).args[0];
 }
 
+function reasonFromTrace(node: { output?: Hex; revertReason?: string; calls?: unknown[] } | undefined): string | null {
+  if (!node) return null;
+  if (node.revertReason) return node.revertReason;
+  const fromOutput = decodeReason(node.output);
+  if (fromOutput) return fromOutput;
+  for (const c of (node.calls ?? []) as { output?: Hex; revertReason?: string; calls?: unknown[] }[]) {
+    const nested = reasonFromTrace(c);
+    if (nested) return nested;
+  }
+  return null;
+}
+
 export async function revertReason(url: string, hash: Hex): Promise<string> {
-  const trace = await rpc<{ revertReason?: string; output?: Hex; error?: string }>(url, "debug_traceTransaction", [hash, { tracer: "callTracer" }]);
+  const trace = await rpc<{ revertReason?: string; output?: Hex; error?: string; calls?: unknown[] }>(url, "debug_traceTransaction", [hash, { tracer: "callTracer" }]);
+  const fromTrace = reasonFromTrace(trace.result);
+  if (fromTrace) return fromTrace;
   if (trace.result?.revertReason) return trace.result.revertReason;
   const fromOutput = decodeReason(trace.result?.output);
   if (fromOutput) return fromOutput;

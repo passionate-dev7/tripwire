@@ -1,0 +1,30 @@
+{
+  "network": "Monad testnet 10143",
+  "enforcer": "0xC603753555255Ca5BcDe5361625a1A130201dF80",
+  "planBook": "0xB57a6f17261579455fF4869e729C9e74f1753382",
+  "planId": 32,
+  "planBookLocalId": "2",
+  "perplAccountId": "5429",
+  "perplMarketId": 10,
+  "holder": "0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d",
+  "delegationHash": "0x989bad75c82062f06a8ea55e6fb233379b0541ebc825c048f8938780726968d5",
+  "armTx": "0x024df992fc4fd518293f6f1bb4e1057076816caaf6bb4c03c005bc81ca289430",
+  "wrapTx": null,
+  "attacks": {
+    "line": {
+      "hash": "0xd5cb822189f1261ac555ca2eb43a756db58392e065c728b8c8770b54fac9804e",
+      "reason": "Tripwire:above-line",
+      "status": "reverted"
+    },
+    "recipient": {
+      "hash": "0x82764f9fbb09601667ef1628e0760cb311cf0d1c156b135b8812872515c864e3",
+      "reason": "Tripwire:recipient",
+      "status": "reverted"
+    },
+    "expiry": {
+      "hash": "0x45f500de80022f04dbd692deec5a52959040e65eed4b06d581ddbc9accf17268",
+      "reason": "TimestampEnforcer:expired-delegation",
+      "status": "reverted"
+    }
+  }
+}

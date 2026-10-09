@@ -1,0 +1,23 @@
+{
+  "line": {
+    "network": "Monad testnet 10143",
+    "command": "curl -sf -X POST https://tripwire-three.vercel.app/api/attack -d '{\"planId\":17,\"kind\":\"line\"}'",
+    "hash": "0xf3a819b5c4b12a9a5473a368b69d5ac5ea8bdcf9c7993c047aa2a6365e285b0a",
+    "status": "reverted",
+    "reason": "Tripwire:above-line"
+  },
+  "recipient": {
+    "network": "Monad testnet 10143",
+    "command": "curl -sf -X POST https://tripwire-three.vercel.app/api/attack -d '{\"planId\":17,\"kind\":\"recipient\"}'",
+    "hash": "0x566b01f52fc16bb9f3d50f0f13d73f5e09adccaa2668bbff381fe85e52e330e6",
+    "status": "reverted",
+    "reason": "Tripwire:recipient"
+  },
+  "expiry": {
+    "network": "Monad testnet 10143",
+    "command": "bun run demo/risk-hostile-three.ts (local fill after expiresAt=1791532386)",
+    "hash": "0x6509b9c8210fdfe861957f9374adfe9cc100183ed453c6f6f51716d1286cc655",
+    "status": "reverted",
+    "reason": "execution reverted"
+  }
+}

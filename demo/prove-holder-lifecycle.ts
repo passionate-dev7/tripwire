@@ -183,7 +183,8 @@ async function main(): Promise<void> {
 
     const countBefore = await pub.readContract({ address: net.planBook, abi: abis.planBook, functionName: "count" });
     const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 3600;
-    const res = await createPlan(net, account, LIFECYCLE_TERMS, expiresAt, (s, h) =>
+    const { perplBindFromAnchor } = await import("../web/lib/perplAnchor");
+    const res = await createPlan(net, account, LIFECYCLE_TERMS, expiresAt, perplBindFromAnchor(), (s, h) =>
       console.log(`  ${s}${h ? ` ${h}` : ""}`),
     );
     need(res.wrapHash === null, "setup wrapped no MON");

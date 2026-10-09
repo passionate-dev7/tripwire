@@ -72,11 +72,15 @@ export const TESTNET: Net = {
   stableDecimals: 6,
   fee: 3000,
   twapSeconds: 60,
-  enforcer: getAddress("0xc66cc7b7b91b893abfd0661c0312f6c45ead056b"),
-  planBook: getAddress("0x6a1fcb214a1c43f53afb9d31014e1cdc92fa593e"),
-  planBookFromBlock: 67630820n,
+  enforcer: getAddress("0xc603753555255ca5bcde5361625a1a130201df80"),
+  planBook: getAddress("0xb57a6f17261579455ff4869e729c9e74f1753382"),
+  planBookFromBlock: 69501712n,
   keeper: getAddress("0x8a916555418dC4a8A4b11E2Fc2B8e85127204468"),
-  legacy: [{ enforcer: getAddress("0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37"), planBook: getAddress("0xdd26f52338cc714830e23ff6999961bf2503d77a"), planBookFromBlock: 67513065n }],
+  legacy: [
+    { enforcer: getAddress("0xc66cc7b7b91b893abfd0661c0312f6c45ead056b"), planBook: getAddress("0x6a1fcb214a1c43f53afb9d31014e1cdc92fa593e"), planBookFromBlock: 67630820n },
+    { enforcer: getAddress("0x9643f0ab360c5e10838e3bdf3a4a203e3c5cff37"), planBook: getAddress("0xdd26f52338cc714830e23ff6999961bf2503d77a"), planBookFromBlock: 67513065n },
+    { enforcer: getAddress("0x754ef1eb3d5b5513649c5fe4db4db53c2e9d53b2"), planBook: getAddress("0x30ee5d42489aae4a633820cf54d6ee40e77562e0"), planBookFromBlock: 69482000n },
+  ],
 };
 
 // Mainnet venue, read only until a mainnet enforcer and plan book are deployed.
@@ -183,7 +187,8 @@ const TERMS_TUPLE_V1 = {
   ],
 } as const;
 
-const TERMS_TUPLE = {
+/** enforcer2 on testnet: stops/targets without a Perpl bind. */
+const TERMS_TUPLE_V2 = {
   type: "tuple",
   components: [
     { name: "router", type: "address" },
@@ -205,6 +210,59 @@ const TERMS_TUPLE = {
     },
   ],
 } as const;
+
+/** Current enforcer: line 1 is hedged against a named live Perpl position; spot WMON sells enforce the stop price. */
+const TERMS_TUPLE_V3 = {
+  type: "tuple",
+  components: [
+    { name: "router", type: "address" },
+    { name: "pool", type: "address" },
+    { name: "wmon", type: "address" },
+    { name: "usdc", type: "address" },
+    { name: "fee", type: "uint24" },
+    { name: "twapSeconds", type: "uint32" },
+    { name: "recipient", type: "address" },
+    { name: "perplAccountId", type: "uint256" },
+    { name: "perplMarketId", type: "uint256" },
+    { name: "perplPositionLots", type: "int256" },
+    {
+      name: "tranches",
+      type: "tuple[]",
+      components: [
+        { name: "lineTick", type: "int24" },
+        { name: "amountIn", type: "uint256" },
+        { name: "minOutPerUnit", type: "uint256" },
+        { name: "atOrAbove", type: "bool" },
+      ],
+    },
+  ],
+} as const;
+
+export type PerplPositionBind = {
+  accountId: bigint;
+  marketId: bigint;
+  positionLots: bigint;
+  symbol?: string;
+  side?: "long" | "short";
+  size?: number;
+};
+
+export function requirePerplPosition(perpl: PerplPositionBind | null | undefined): PerplPositionBind {
+  if (!perpl || perpl.accountId === 0n || perpl.marketId === 0n || perpl.positionLots === 0n) {
+    throw new Error("Line 1 needs a live Perpl position id in the signed plan.");
+  }
+  return perpl;
+}
+
+function termsTupleForEnforcer(enforcer: Address) {
+  if (usesPerplTerms(enforcer)) return TERMS_TUPLE_V3;
+  if (TESTNET.legacy.some((l) => l.enforcer.toLowerCase() === enforcer.toLowerCase())) return TERMS_TUPLE_V1;
+  return TERMS_TUPLE_V2;
+}
+
+export function usesPerplTerms(enforcer: Address): boolean {
+  return enforcer.toLowerCase() === TESTNET.enforcer.toLowerCase();
+}
 
 // ---------- price units ----------
 // The enforcer's tick is oriented so higher always means a pricier MON. For WMON (18 decimals) against a 6-decimal
@@ -254,9 +312,29 @@ export function planTotal(tranches: Tranche[]): bigint {
 
 // ---------- the delegation ----------
 
-export function encodeTerms(net: Net, recipient: Address, tranches: Tranche[]): Hex {
+export function encodeTerms(net: Net, recipient: Address, tranches: Tranche[], perpl: PerplPositionBind): Hex {
+  const p = requirePerplPosition(perpl);
+  const tr = tranches.map((t) => ({ lineTick: t.lineTick, amountIn: t.amountIn, minOutPerUnit: t.minOutPerUnit, atOrAbove: t.atOrAbove }));
+  if (usesPerplTerms(net.enforcer)) {
+    return encodeAbiParameters(
+      [TERMS_TUPLE_V3],
+      [{
+        router: net.router,
+        pool: net.pool,
+        wmon: net.wmon,
+        usdc: net.stable,
+        fee: net.fee,
+        twapSeconds: net.twapSeconds,
+        recipient,
+        perplAccountId: p.accountId,
+        perplMarketId: p.marketId,
+        perplPositionLots: p.positionLots,
+        tranches: tr,
+      }],
+    );
+  }
   return encodeAbiParameters(
-    [TERMS_TUPLE],
+    [TERMS_TUPLE_V2],
     [{
       router: net.router,
       pool: net.pool,
@@ -265,9 +343,16 @@ export function encodeTerms(net: Net, recipient: Address, tranches: Tranche[]): 
       fee: net.fee,
       twapSeconds: net.twapSeconds,
       recipient,
-      tranches: tranches.map((t) => ({ lineTick: t.lineTick, amountIn: t.amountIn, minOutPerUnit: t.minOutPerUnit, atOrAbove: t.atOrAbove })),
+      tranches: tr,
     }],
   );
+}
+
+export function decodePerplPosition(terms: Hex, enforcer?: Address): PerplPositionBind | null {
+  if (enforcer !== undefined && !usesPerplTerms(enforcer)) return null;
+  const [t] = decodeAbiParameters([TERMS_TUPLE_V3], terms);
+  if (t.perplAccountId === 0n) return null;
+  return { accountId: t.perplAccountId, marketId: t.perplMarketId, positionLots: t.perplPositionLots };
 }
 
 /** Decodes a plan's terms. Plans signed for a legacy enforcer carry no direction bit; every tranche there is a stop. */
@@ -277,10 +362,16 @@ export function decodeTranches(terms: Hex, enforcer?: Address): { recipient: Add
     const [t] = decodeAbiParameters([TERMS_TUPLE_V1], terms);
     return { recipient: t.recipient, tranches: t.tranches.map((x) => ({ lineTick: Number(x.lineTick), amountIn: x.amountIn, minOutPerUnit: x.minOutPerUnit, atOrAbove: false })) };
   }
-  const [t] = decodeAbiParameters([TERMS_TUPLE], terms);
+  const tuple = enforcer !== undefined ? termsTupleForEnforcer(enforcer) : TERMS_TUPLE_V2;
+  const [t] = decodeAbiParameters([tuple], terms);
   return {
     recipient: t.recipient,
-    tranches: t.tranches.map((x) => ({ lineTick: Number(x.lineTick), amountIn: x.amountIn, minOutPerUnit: x.minOutPerUnit, atOrAbove: x.atOrAbove })),
+    tranches: t.tranches.map((x) => ({
+      lineTick: Number(x.lineTick),
+      amountIn: x.amountIn,
+      minOutPerUnit: x.minOutPerUnit,
+      atOrAbove: "atOrAbove" in x ? x.atOrAbove : false,
+    })),
   };
 }
 
@@ -300,13 +391,14 @@ export function buildDelegation(
   tranches: Tranche[],
   expiresAt: number,
   salt: bigint,
+  perpl: PerplPositionBind,
 ): Delegation {
   return {
     delegate: keeper,
     delegator: holder,
     authority: ROOT_AUTHORITY,
     caveats: [
-      { enforcer: net.enforcer, terms: encodeTerms(net, holder, tranches), args: "0x" },
+      { enforcer: net.enforcer, terms: encodeTerms(net, holder, tranches, perpl), args: "0x" },
       { enforcer: net.timestampEnforcer, terms: timestampTerms(expiresAt), args: "0x" },
     ],
     salt,

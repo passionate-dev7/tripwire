@@ -36,6 +36,9 @@ contract TripwirePlanEnforcer {
         uint24 fee;
         uint32 twapSeconds;
         address recipient;
+        uint256 perplAccountId;
+        uint256 perplMarketId;
+        int256 perplPositionLots;
         Tranche[] tranches;
     }
 
@@ -75,6 +78,7 @@ contract TripwirePlanEnforcer {
         require(msg.sender == delegationManager, "Tripwire:only-manager");
         require(ModeCode.unwrap(_mode) == bytes32(0), "Tripwire:mode");
         Terms memory t = abi.decode(_terms, (Terms));
+        require(t.perplAccountId != 0 && t.perplMarketId != 0, "Tripwire:perpl-position");
         require(t.tranches.length != 0 && t.tranches.length <= MAX_TRANCHES, "Tripwire:plan-size");
 
         require(_args.length == 32, "Tripwire:args");
