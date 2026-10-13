@@ -7,7 +7,8 @@ import type { Hex, LocalAccount } from "viem";
 import { type Attack, type PlanView, type Point, type Status, keeperApi } from "../lib/api";
 import { type Holdings, createPlan, holdings, revokePlan, revokedOnChain, unwrap } from "../lib/holder";
 import { createPasskeyAccount, signInWithPasskey } from "../lib/passkey";
-import { type PlainTranche, decodeDelegation } from "../lib/plan";
+import { apiBase } from "../lib/net";
+import { MAINNET, type PlainTranche, decodeDelegation } from "../lib/plan";
 import { revertReason } from "../lib/chain";
 import { useNet } from "./parts";
 
@@ -54,6 +55,13 @@ export function useTripwire() {
 
   const status = usePoll<Status>(keeperApi.status, 4000, [net.key], live);
   const history = usePoll<{ points: Point[] }>(keeperApi.history, 15000, [net.key], live);
+  // Testnet's chart also draws mainnet's average as a reference line, read from the mainnet keeper.
+  const reference = usePoll<{ points: Point[] }>(async () => {
+    const r = await fetch(`${apiBase(MAINNET)}/history`, { cache: "no-store" });
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.error ?? `keeper ${r.status}`);
+    return body as { points: Point[] };
+  }, 30000, [net.key], live && net.key === "testnet");
   // A revoke is read from the DelegationManager as well: the keeper's snapshot of a plan can trail it.
   const mine = usePoll<{ plans: PlanView[] } | null>(async () => {
     if (!account) return null;
@@ -131,6 +139,7 @@ export function useTripwire() {
     account,
     status,
     history,
+    reference,
     plans: mine.data?.plans ?? [],
     plansLoaded: mine.at > 0,
     holdings: held.data,

@@ -3,13 +3,14 @@
 // every forbidden sale the contract refused, each linked to its transaction. From the keeper's index (/api/recent).
 import type { RecentPlan } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
-import { Check, TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl, useNet } from "./parts";
+import { Check, TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl, useFresh, useNet } from "./parts";
 
 const CHIP: Record<string, string> = { line: "before the line", floor: "below the floor", recipient: "to the keeper", expiry: "after the end date" };
 
 export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: string | null }) {
   const net = useNet();
   const sym = net.stableSymbol;
+  const fresh = useFresh((plans ?? []).flatMap((p) => [`plan ${p.plan}`, ...p.refused.map((r) => r.hash)]), plans !== null);
   return (
     <section className="rounded-[10px] border border-hairline bg-surface-card" aria-label="On chain record">
       <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 border-b border-hairline px-4 py-2">
@@ -19,11 +20,11 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
       {plans === null ? (
         <p className="px-4 py-3 text-[13px] text-mute">{error ? `The keeper's record is not reachable right now: ${error}.` : "Reading the keeper's record."}</p>
       ) : plans.length === 0 ? (
-        <p className="px-4 py-3 text-[13px] leading-5 text-body">No plan on {net.name} yet. Set your lines above: the first plan posted lands here with its sale and every cheat the chain refuses.</p>
+        <p className="px-4 py-3 text-[13px] leading-5 text-body">Plans posted on {net.name} land here, each with its sale and every cheat the chain refuses.</p>
       ) : (
         <ul>
           {plans.map((p) => (
-            <li key={p.plan} className="border-b border-hairline px-4 py-3 text-[13px] leading-[20px] last:border-b-0">
+            <li key={p.plan} className={`border-b border-hairline px-4 py-3 text-[13px] leading-[20px] last:border-b-0 ${fresh.has(`plan ${p.plan}`) ? "animate-row-in" : ""}`}>
               {p.sales.map((s) => (
                 <div key={s.hash} className="grid items-start gap-x-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <span className="flex items-start gap-2 text-ink">
@@ -45,7 +46,7 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <span className="text-mute">The chain refused</span>
                   {p.refused.map((r) => (
-                    <a key={r.hash} href={txUrl(r.hash)} target="_blank" rel="noreferrer" title={`${r.reason}, ${r.hash}`} className="num inline-flex h-9 items-center rounded-md border border-hairline px-2 text-[12px] text-body transition-colors duration-150 hover:border-hairline-strong hover:text-ink">
+                    <a key={r.hash} href={txUrl(r.hash)} target="_blank" rel="noreferrer" title={`${r.reason}, ${r.hash}`} className={`num inline-flex h-9 items-center rounded-md border border-hairline px-2 text-[12px] text-body transition-colors duration-150 hover:border-hairline-strong hover:text-ink ${fresh.has(r.hash) ? "animate-row-in" : ""}`}>
                       {CHIP[r.attack] ?? r.attack} <span className="ml-1.5 text-mute">{r.reason.replace("Tripwire:", "")}</span>
                     </a>
                   ))}

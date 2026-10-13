@@ -6,7 +6,7 @@ import type { Attack, PlanView } from "../lib/api";
 import { salesLeft } from "../lib/keeper-gas";
 import { tickToPrice } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
-import { Card, Ghost, StepList, TxLink, fmtMon, fmtPrice, fmtUsd, short, useNet } from "./parts";
+import { Card, Ghost, StepList, TxLink, fmtMon, fmtPrice, fmtUsd, short, useFresh, useNet } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 
@@ -89,6 +89,7 @@ function Proof({ t }: { t: T }) {
   const plans = t.recent?.plans ?? [];
   const rows = plans.flatMap((p) => p.refused.map((r) => ({ ...r, plan: p.plan })));
   const tot = t.recent?.totals;
+  const fresh = useFresh(rows.map((r) => r.hash), t.recent !== null);
   if (rows.length === 0) return null;
   return (
     <section id="refusals" className="mt-6 scroll-mt-4 rounded-[10px] border border-hairline bg-surface-card" aria-label="Forbidden sales">
@@ -98,11 +99,11 @@ function Proof({ t }: { t: T }) {
           {tot ? `${tot.forbiddenSent} attempts, ${tot.forbiddenReverted} reverted, ${tot.forbiddenPaidOut} paid out. ` : ""}Each row is a mined transaction with status 0. Newest plans first.
         </p>
       </header>
-      <div className="grid min-h-8 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+      <div className="grid min-h-8 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 px-4 text-[11px] uppercase tracking-[0.06em] text-mute">
         <span>Plan</span><span>Keeper tried to</span><span>Contract said</span><span>Tx</span>
       </div>
       {rows.slice(0, 12).map((r) => (
-        <div key={r.hash} className="num grid min-h-9 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline px-4 text-[13px]">
+        <div key={r.hash} className={`num grid min-h-9 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline px-4 text-[13px] ${fresh.has(r.hash) ? "animate-row-in" : ""}`}>
           <span className="text-mute">{r.plan}</span>
           <span className="font-sans text-body">{TRIED_SHORT[r.attack]}</span>
           <span className="text-ink">{r.reason}</span>
@@ -113,20 +114,27 @@ function Proof({ t }: { t: T }) {
   );
 }
 
-export function PlanCard({ p, price, action, title }: { p: PlanView; price: number | null; action?: ReactNode; title?: string }) {
+export function PlanCard({ p, price, action, title, note }: { p: PlanView; price: number | null; action?: ReactNode; title?: string; note?: string }) {
   const sym = useNet().stableSymbol;
   return (
     <Card title={title ?? `Plan ${p.id}`} aside={action}>
-      <div className="grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
+      <p className="border-b border-hairline px-4 py-2 text-[12px] leading-5 text-mute">State is how far MON is from that line.{note ? ` ${note}` : ""}</p>
+      <div className="grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_72px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.06em] text-mute">
         <span>Sale</span><span className="text-right">MON</span><span className="text-right">Line</span><span className="text-right">Floor</span><span className="text-right">State</span>
       </div>
       {p.tranches.map((x) => (
-        <div key={x.index} className="num grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
+        <div key={x.index} className="num grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_72px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
           <span className="text-mute">{x.index + 1}</span>
           <span className="text-right text-ink">{fmtMon(x.mon)}</span>
           <span className={`text-right ${x.atOrAbove ? "text-ink" : "text-line"}`}>{fmtPrice(x.line)}</span>
           <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
-          <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && (x.atOrAbove ? price >= x.line : price <= x.line) ? "selling" : `${((Math.abs((price ?? 0) - x.line) / (price || 1)) * 100).toFixed(1)}% to ${x.atOrAbove ? "target" : "stop"}`}</span>
+          {(() => {
+            const open = !x.spent && !p.revoked;
+            const hit = price !== null && (x.atOrAbove ? price >= x.line : price <= x.line);
+            const gap = price ? ((x.line - price) / price) * 100 : 0;
+            const text = x.spent ? "sold" : p.revoked ? "off" : hit ? "selling" : price === null ? "..." : `${gap > 0 ? "+" : "−"}${Math.abs(gap).toFixed(1)}%`;
+            return <span className={`min-w-[72px] whitespace-nowrap text-right ${open && !hit && !x.atOrAbove ? "text-line" : "text-body"}`}>{text}</span>;
+          })()}
         </div>
       ))}
       <ul className="border-t border-hairline">
@@ -145,53 +153,36 @@ export function PlanCard({ p, price, action, title }: { p: PlanView; price: numb
   );
 }
 
+/** The line under the holder's next-line figure on the chart: what is armed, or why nothing is. */
+export function armedNote(t: T): string {
+  const live = t.plans.filter((p) => !p.revoked && p.expiresAt * 1000 > Date.now());
+  const target = live.find((p) => p.tranches.some((x) => !x.spent)) ?? null;
+  if (t.plans.length === 0) return t.plansLoaded ? "No plan yet. Set your lines on the Plan tab." : "Reading your plans.";
+  if (!target) return "Every sale in your plans has happened, or the plans are revoked.";
+  const w = live.reduce((n, p) => n + p.tranches.filter((x) => !x.spent).length, 0);
+  return `${live.length} plan${live.length === 1 ? "" : "s"} armed, ${w} sale${w === 1 ? "" : "s"} waiting, stops on ${new Date(target.expiresAt * 1000).toISOString().slice(0, 10)}`;
+}
+
 export function Watch({ t, price, part }: { t: T; price: number | null; part: "summary" | "side" }) {
   const live = t.plans.filter((p) => !p.revoked && p.expiresAt * 1000 > Date.now());
   const target = live.find((p) => p.tranches.some((x) => !x.spent)) ?? null;
-  // the unsold line closest to the price, from either side
-  const next = target?.tranches.filter((x) => !x.spent).sort((a, b) => Math.abs((price ?? 0) - a.line) - Math.abs((price ?? 0) - b.line))[0];
 
   if (!t.account) {
     if (part === "summary") return <Proof t={t} />;
     return (
       <div className="flex flex-col gap-4">
         {t.publicPlan ? (
-          <PlanCard p={t.publicPlan} price={price} title={`Latest plan on chain, plan ${t.publicPlan.id}`} action={<span className="text-[12px] text-mute">read only</span>} />
+          <PlanCard p={t.publicPlan} price={price} title={`Latest plan on chain, plan ${t.publicPlan.id}`} action={<span className="text-[12px] text-mute">read only</span>} note="Each refusal is a mined transaction the keeper sent and the enforcer reverted. Set your own plan on the Plan tab to try it yourself." />
         ) : t.recent && t.recent.plans.every((p) => p.refused.length === 0) ? (
-          <p className="text-[13px] leading-5 text-body">No plan on {t.net.name} has been tested yet. Sign the first one on the Plan tab, then make the keeper try to break it and read the chain's answer here.</p>
+          <p className="text-[13px] leading-5 text-body">Sign a plan on the Plan tab, then make the keeper try to break it and read the chain's answer here.</p>
         ) : (
           <p className="text-[13px] text-mute">Reading the latest plan on chain.</p>
         )}
-        {t.publicPlan && t.publicPlan.attacks.length > 0 && (
-          <p className="text-[13px] leading-5 text-body">Each refusal above is a real transaction: the keeper sent a sale the plan forbids and Monad reverted it with the enforcer's reason.</p>
-        )}
-        <p className="text-[13px] leading-5 text-body">Set your own plan on the Plan tab. Once it is signed, this screen lets you make the keeper try to break it.</p>
       </div>
     );
   }
 
-  if (part === "summary") {
-    return (
-      <div className="min-h-[88px] px-1 pt-6">
-        {price !== null && next ? (
-          <div className="flex flex-wrap items-baseline gap-x-4">
-            <span className="num text-[28px] font-medium leading-9 text-ink">{(next.atOrAbove ? price >= next.line : price <= next.line) ? "reached" : `${next.atOrAbove ? "+" : "-"}${((Math.abs(price - next.line) / price) * 100).toFixed(1)}%`}</span>
-            <span className="text-[14px] text-body">
-              to your next line, <span className="num text-line">{fmtPrice(next.line)}</span>. MON is <span className="num text-ink">{fmtPrice(price)}</span>.
-            </span>
-          </div>
-        ) : (
-          <p className="text-[14px] leading-7 text-body">
-            {price === null ? "Reading the pool." : t.plans.length === 0 ? (t.plansLoaded ? "No plan yet. Set your lines on the Plan tab." : "Reading your plans.") : <>MON <span className="num text-ink">{fmtPrice(price)}</span>. Every sale in your plans has happened, or the plans are revoked.</>}
-          </p>
-        )}
-        <p className="num mt-1 text-[13px] text-mute">
-          {(() => { const w = live.reduce((n, p) => n + p.tranches.filter((x) => !x.spent).length, 0); return `${live.length} plan${live.length === 1 ? "" : "s"} armed, ${w} sale${w === 1 ? "" : "s"} waiting`; })()}
-          {target ? `, stops on ${new Date(target.expiresAt * 1000).toISOString().slice(0, 10)}` : ""}
-        </p>
-      </div>
-    );
-  }
+  if (part === "summary") return null;
 
   return (
     <div className="flex flex-col gap-6">

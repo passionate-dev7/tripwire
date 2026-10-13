@@ -9,7 +9,7 @@ import { ColorType, LineSeries, LineStyle, createChart, type IChartApi, type ISe
 import type { Point } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
 
-export type ChartLine = { price: number; floor: number; label: string; up?: boolean; state: "draft" | "armed" | "sold" | "off" };
+export type ChartLine = { price: number; floor: number; label: string; n: number; up?: boolean; state: "draft" | "armed" | "sold" | "off" };
 
 const INK = "#f4f4f6";
 const MUTE = "#9c9c9d";
@@ -19,11 +19,12 @@ const QUIET = "rgba(156,156,157,0.55)";
 const PLATE = "#1a1b1c";
 const HAIR = "#242728";
 
-export function StopChart({ points, lines, height = 280 }: { points: Point[]; lines: ChartLine[]; height?: number }) {
+export function StopChart({ points, lines, reference = [], height = 280 }: { points: Point[]; lines: ChartLine[]; reference?: Point[]; height?: number }) {
   const host = useRef<HTMLDivElement>(null);
   const chart = useRef<IChartApi | null>(null);
   const twap = useRef<ISeriesApi<"Line"> | null>(null);
   const spot = useRef<ISeriesApi<"Line"> | null>(null);
+  const ref = useRef<ISeriesApi<"Line"> | null>(null);
 
   useEffect(() => {
     if (!host.current) return;
@@ -38,6 +39,8 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
       handleScroll: false,
       autoSize: true,
     });
+    // mainnet's 60 s average on the same price axis, so a flat testnet line is read against a market that moves
+    ref.current = c.addSeries(LineSeries, { color: MUTE, lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, priceFormat: { type: "price", precision: 5, minMove: 0.00001 } });
     spot.current = c.addSeries(LineSeries, { color: "rgba(244,244,246,0.28)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, priceFormat: { type: "price", precision: 5, minMove: 0.00001 } });
     twap.current = c.addSeries(LineSeries, { color: INK, lineWidth: 2, priceLineVisible: false, lastValueVisible: true, priceFormat: { type: "price", precision: 5, minMove: 0.00001 } });
     chart.current = c;
@@ -62,6 +65,17 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
     spot.current.setData(rows.map((r) => ({ time: r.t, value: r.spot })));
     chart.current?.timeScale().fitContent();
   }, [points]);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const seen = new Set<number>();
+    ref.current.setData(
+      reference
+        .map((p) => ({ time: Math.floor(p.t / 1000) as UTCTimestamp, value: tickToPrice(p.twap) }))
+        .filter((r) => (seen.has(r.time) ? false : (seen.add(r.time), true))),
+    );
+    chart.current?.timeScale().fitContent();
+  }, [reference]);
 
   useEffect(() => {
     const s = twap.current;

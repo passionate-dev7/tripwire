@@ -7,11 +7,11 @@ import { parsePlanLink } from "../lib/link";
 import type { Net, PlainTranche } from "../lib/plan";
 import { StopChart, type ChartLine } from "./StopChart";
 import { Ticket } from "./Ticket";
-import { Heartbeat, Watch } from "./Watch";
+import { Heartbeat, Watch, armedNote } from "./Watch";
 import { useTripwire } from "./useTripwire";
 import { Record } from "./Record";
 import { ChainDetails, ComingOnline, Hero, ProofStrip } from "./Front";
-import { NetSwitch, fmtPrice, useNet } from "./parts";
+import { Digits, NetSwitch, fmtPrice, useNet } from "./parts";
 
 // Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
 const DEFAULT_PLAN: PlainTranche[] = [{ mon: "0.02", line: 0.033, floor: 0.03 }];
@@ -32,12 +32,13 @@ const starterPlan = (price: number, net: Net["key"]): PlainTranche[] =>
         { mon: "0.25", line: r5(price * 1.05), floor: r5(price * 0.98), up: true },
       ];
 
-function Legend({ hasTarget, hasDone }: { hasTarget: boolean; hasDone: boolean }) {
+function Legend({ hasTarget, hasDone, reference }: { hasTarget: boolean; hasDone: boolean; reference: number | null }) {
   const swatch = "inline-block h-0 w-5 shrink-0 border-t-2 align-middle";
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-mute" aria-label="Chart key">
       <li className="flex items-center gap-2"><span className={`${swatch} border-ink`} />60 s average, the price a sale is judged on</li>
       <li className="flex items-center gap-2"><span className={`${swatch} border-line`} />Stop-loss line</li>
+      {reference !== null && <li className="flex items-center gap-2"><span className="inline-block h-0 w-5 shrink-0 border-t border-mute align-middle" />Mainnet MON, reference <span className="num text-body">{fmtPrice(reference)}</span></li>}
       {hasTarget && <li className="flex items-center gap-2"><span className={`${swatch} border-dashed border-body`} />Take-profit line</li>}
       {hasDone && <li className="flex items-center gap-2"><span className={`${swatch} border-mute`} />Sold or switched off</li>}
       <li className="flex items-center gap-2"><span className={`${swatch} border-dotted border-mute`} />Floor, the lowest price it may sell at</li>
@@ -81,10 +82,22 @@ export default function Page() {
   }, []);
   const price = s ? s.twapPrice : null;
   const lines: ChartLine[] = useMemo(() => {
-    if (tab === "plan") return plan.filter((p) => p.line > 0 && p.floor > 0).map((p) => ({ price: p.line, floor: p.floor, up: p.up === true, label: `${p.up ? "Target" : "Stop"} ${p.mon} MON`, state: "draft" as const }));
+    if (tab === "plan") return plan.map((p, i) => ({ p, i })).filter(({ p }) => p.line > 0 && p.floor > 0).map(({ p, i }) => ({ price: p.line, floor: p.floor, up: p.up === true, n: i + 1, label: `${p.up ? "Target" : "Stop"} ${p.mon} MON`, state: "draft" as const }));
     const shown = t.account ? t.plans : t.publicPlan ? [t.publicPlan] : [];
-    return shown.filter((p) => !p.revoked || !t.account).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, up: x.atOrAbove === true, label: x.spent ? `Sold ${x.index + 1}` : p.revoked ? `Off ${x.index + 1}` : `Plan ${p.id} ${x.atOrAbove ? "target" : "stop"} ${x.index + 1}`, state: x.spent ? ("sold" as const) : p.revoked ? ("off" as const) : ("armed" as const) })));
+    return shown.filter((p) => !p.revoked || !t.account).flatMap((p) => p.tranches.map((x) => ({ price: x.line, floor: x.floorPerMon, up: x.atOrAbove === true, n: x.index + 1, label: x.spent ? `Sold ${x.index + 1}` : p.revoked ? `Off ${x.index + 1}` : `Plan ${p.id} ${x.atOrAbove ? "target" : "stop"} ${x.index + 1}`, state: x.spent ? ("sold" as const) : p.revoked ? ("off" as const) : ("armed" as const) })));
   }, [tab, plan, t.plans, t.publicPlan, t.account]);
+
+  // The holder's key number: how far MON is from the nearest line it has yet to cross. Never shown for someone else's plan.
+  const next = useMemo(() => {
+    if (price === null || (tab === "watch" && !t.account)) return null;
+    const open = lines.filter((l) => l.state === "draft" || l.state === "armed");
+    const crossed = (l: ChartLine) => (l.up ? price >= l.price : price <= l.price);
+    const pool = open.some((l) => !crossed(l)) ? open.filter((l) => !crossed(l)) : open;
+    if (pool.length === 0) return null;
+    const l = pool.reduce((a, b) => (Math.abs(price - b.price) < Math.abs(price - a.price) ? b : a));
+    return { line: l, crossed: crossed(l), pct: ((l.price - price) / price) * 100 };
+  }, [lines, price, tab, t.account]);
+  const note = tab === "watch" && t.account ? armedNote(t) : null;
 
   // "Try to cheat" goes where the cheating happens: the holder's own plan once signed in, the keeper's recorded refusals before.
   // With no refusal recorded yet (a network's first plan is still to come) it goes to the sign step instead.
@@ -132,7 +145,7 @@ export default function Page() {
     <div className="min-h-[100dvh]">
       {header}
 
-      <main className="mx-auto grid max-w-[1240px] gap-x-8 gap-y-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:px-6 lg:py-8">
+      <main className="mx-auto grid max-w-[1240px] gap-x-8 gap-y-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:gap-y-6 lg:px-6 lg:py-8">
         {tab === "plan" && (
           <div className="min-w-0 lg:col-start-1">
             <Hero />
@@ -155,22 +168,32 @@ export default function Page() {
 
         <section className="min-w-0 lg:col-start-1" aria-label="Price and your lines">
           <div className="rounded-[10px] border border-hairline bg-surface">
-            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 px-4 pt-4">
+            <div className="flex flex-wrap items-end gap-x-10 gap-y-3 px-4 pt-4">
               <div>
                 <div className="text-[12px] text-mute">MON in {net.stableSymbol}, 60 s average of the {net.name} pool</div>
                 <div className="num h-12 text-[44px] font-medium leading-[48px] tracking-[0.2px] text-ink lg:h-16 lg:text-[56px] lg:leading-[64px]">
-                  {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : fmtPrice(price)}
+                  {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : <Digits value={fmtPrice(price)} />}
                 </div>
               </div>
-              <p className="num pb-2 text-[12px] text-mute">
-                {net.key === "testnet" && (s?.mainnet ? <>Mainnet MON price, for reference <span className="text-body">{fmtPrice(s.mainnet.price)}</span></> : "Reading the mainnet price")}
-              </p>
+              {(next || note) && (
+                <div className="min-w-0 pb-1.5" data-testid="next-line">
+                  {next && (
+                    <>
+                      <div className={`num text-[28px] font-medium leading-9 ${next.line.up ? "text-ink" : "text-line"}`}>{next.crossed ? "reached" : `${next.pct > 0 ? "+" : "−"}${Math.abs(next.pct).toFixed(1)}%`}</div>
+                      <div className="text-[12px] leading-5 text-mute">
+                        to {next.line.up ? "target" : "stop"} {next.line.n} · <span className="num text-body">{fmtPrice(next.line.price)}</span>
+                      </div>
+                    </>
+                  )}
+                  {note && <div className="num text-[12px] leading-5 text-mute">{note}</div>}
+                </div>
+              )}
             </div>
             <div className="px-4 pb-2 pt-3">
-              <Legend hasTarget={lines.some((l) => l.up && l.state !== "sold" && l.state !== "off")} hasDone={lines.some((l) => l.state === "sold" || l.state === "off")} />
+              <Legend hasTarget={lines.some((l) => l.up && l.state !== "sold" && l.state !== "off")} hasDone={lines.some((l) => l.state === "sold" || l.state === "off")} reference={net.key === "testnet" && (t.reference.data?.points.length ?? 0) > 0 ? (s?.mainnet?.price ?? null) : null} />
             </div>
             <div className="px-2">
-              <StopChart points={t.history.data?.points ?? []} lines={lines} height={wide ? 360 : 260} />
+              <StopChart points={t.history.data?.points ?? []} lines={lines} reference={net.key === "testnet" ? t.reference.data?.points : undefined} height={wide ? 360 : 260} />
             </div>
             <Heartbeat lastLoop={s?.lastLoop} keeperGas={s?.keeperGas} fillCost={s?.fillCost} loopError={s?.loopError} />
           </div>
