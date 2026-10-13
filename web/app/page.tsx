@@ -28,7 +28,7 @@ function Legend({ hasTarget, hasDone }: { hasTarget: boolean; hasDone: boolean }
   const swatch = "inline-block h-0 w-5 shrink-0 border-t-2 align-middle";
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-mute" aria-label="Chart key">
-      <li className="flex items-center gap-2"><span className={`${swatch} border-ink`} />60 s average, what the contract reads</li>
+      <li className="flex items-center gap-2"><span className={`${swatch} border-ink`} />60 s average, the price a sale is judged on</li>
       <li className="flex items-center gap-2"><span className={`${swatch} border-line`} />Stop-loss line</li>
       {hasTarget && <li className="flex items-center gap-2"><span className={`${swatch} border-dashed border-body`} />Take-profit line</li>}
       {hasDone && <li className="flex items-center gap-2"><span className={`${swatch} border-mute`} />Sold or switched off</li>}

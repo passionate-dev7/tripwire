@@ -90,9 +90,9 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
   return (
     <div className="flex flex-col gap-4">
       <Card title="Your plan" aside={<span className="text-[12px] text-mute">prices in aUSD per MON</span>}>
-        <div className="px-4 pb-3 pt-2.5">
-          <p className="mb-1.5 text-[12px] text-mute">Set row 1 to</p>
-          <div className="grid grid-cols-4 gap-2">
+        <div className="flex flex-col gap-1.5 px-4 pb-3 pt-2.5 sm:flex-row sm:items-center sm:gap-3">
+          <p className="shrink-0 text-[12px] text-mute">Set row 1 to</p>
+          <div className="grid flex-1 grid-cols-4 gap-2">
             {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
               <button key={l} type="button" onClick={() => preset(v as number)} className="h-10 rounded-md border border-hairline px-1 text-[13px] lg:h-9 text-body transition-colors duration-150 ease-out hover:border-hairline-strong hover:text-ink active:scale-[0.97]">
                 {l}

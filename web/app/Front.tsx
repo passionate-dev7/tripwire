@@ -16,8 +16,16 @@ export function Hero() {
         A stop-loss on your MON that the bot can&apos;t break.
       </h1>
       <p className="mt-3 max-w-[600px] text-[16px] leading-7 text-body">
-        Your MON stays in your wallet. A bot sells only at your price, never under your floor, only to you. Anything else, the chain refuses.
+        Your MON stays in your wallet. A bot sells it only on your terms. Anything else, the chain refuses.
       </p>
+      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[14px] leading-5 text-ink">
+        {["Only at your line", "Never under your floor", "Only to your address", "Only until your end date"].map((rule) => (
+          <li key={rule} className="flex items-center gap-1.5">
+            <Check className="shrink-0 text-body" />
+            {rule}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
