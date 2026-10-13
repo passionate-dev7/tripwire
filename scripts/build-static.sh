@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Builds tripwire as plain static files for Vercel with zero serverless functions. /api/* is proxied by Vercel's CDN
-# (an external rewrite, not a function) to the keeper on the Mac mini behind Tailscale Funnel. Output: web/out-static/
+# (an external rewrite, not a function) to the keepers on the Mac mini behind Tailscale Funnel: /api/mainnet/* to the
+# mainnet keeper (funnel path /tripwire-mainnet, port 3512), /api/* to the testnet keeper (/tripwire, port 3511).
+# Output: web/out-static/
 set -euo pipefail
 API_ORIGIN=${API_ORIGIN:-https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire}
+API_ORIGIN_MAINNET=${API_ORIGIN_MAINNET:-https://teslas-mac-mini.tail57f771.ts.net:10000/tripwire-mainnet}
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 cd "$HERE/web"
 rm -rf out
@@ -15,7 +18,10 @@ cat > out-static/vercel.json <<JSON
   "\$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": null,
-  "rewrites": [{ "source": "/api/:path*", "destination": "$API_ORIGIN/api/:path*" }],
+  "rewrites": [
+    { "source": "/api/mainnet/:path*", "destination": "$API_ORIGIN_MAINNET/api/:path*" },
+    { "source": "/api/:path*", "destination": "$API_ORIGIN/api/:path*" }
+  ],
   "headers": [{ "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }, { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }] }]
 }
 JSON
