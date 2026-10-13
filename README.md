@@ -1,8 +1,8 @@
 # tripwire
 
-A Perpl risk plan your keeper cannot break.
+Let a bot sell for you. The chain makes sure it can only make the sale you signed.
 
-One signed MetaMask delegation carries three enforced lines: a spot stop that hedges a live Perpl position when MON falls to your line, a staged sell, and a vault rebalance target that pays aUSD to you only if the fill is inside the signed line. A holder signs once with a passkey. A keeper may fill each row once, when the pool's 60 second TWAP crosses the line. The contract refuses a sale above a stop line, a payout to anyone but the holder, a price under the floor, a changed amount, and any fill after expiry.
+A MON holder signs one plan with a passkey: sell this much if MON falls to my line, never under this floor, only to me, until this date. A keeper watches the pool's 60 second TWAP and makes the sale when the line is crossed. Tokens stay in the holder's own wallet until then. The keeper is untrusted by design: `TripwirePlanEnforcer` reverts any sale above the stop line, under the floor, for a different amount, to anyone but the holder, or after expiry. The live site's Try to cheat button has the keeper send exactly those sales, and every one reverts on chain.
 
 Live on Monad testnet: https://tripwire-three.vercel.app
 
