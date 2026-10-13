@@ -28,8 +28,8 @@ S.push({ eval: "window.scrollTo(0,0)" }, { rec: "H" }, { mark: "start" });
   const b = st("s01");
   S.push({ at: r(st("s02") - b + 0.3), ...call(`()=>document.querySelector('section[aria-labelledby=claim] ul')`, "the chain checks all four, on every sale", "below", "rules") });
   S.push({ at: r(st("s03") - b + 0.3), eval: "__uncall('rules')" });
-  S.push({ at: r(st("s04") - b), eval: "document.querySelector('[data-testid=proof-first]')?.scrollIntoView({behavior:'smooth',block:'center'})" });
-  S.push({ at: r(st("s04") - b + 0.9), ...call(`()=>document.querySelector('[data-testid=proof-first]')`, "live on Monad mainnet", "right", "live", 8) });
+  S.push({ at: r(st("s04") - b), eval: "document.querySelector('section[aria-label=\\'Live proof\\']')?.scrollIntoView({behavior:'smooth',block:'center'})" });
+  S.push({ at: r(st("s04") - b + 0.9), ...call(`()=>document.querySelector('section[aria-label="Live proof"]')`, "live on Monad mainnet", "right", "live", 8) });
   S.push({ at: r(L ? L.s04.end - b + 0.6 : 20), eval: "__clear()" }, { rec: false });
 }
 // ---- P: the plan, s05-s07
@@ -108,5 +108,8 @@ xclip("X2", "cheat1", "fail: refused by the enforcer", 4200);
 xclip("X3", "cheat2", "fail: refused by the enforcer", 3200);
 xclip("X4", "cheat3", "fail: refused by the enforcer", 3200);
 fs.mkdirSync("work2", { recursive: true });
-fs.writeFileSync(`work2/steps-${net}.json`, JSON.stringify(S, null, 1));
+if (process.argv[3] === "H") {
+  const end = S.findIndex((x) => x.rec === false);
+  fs.writeFileSync(`work2/steps-${net}-H.json`, JSON.stringify(S.slice(0, end + 1), null, 1));
+} else fs.writeFileSync(`work2/steps-${net}.json`, JSON.stringify(S, null, 1));
 console.log(net, S.length, "steps", L ? "(timed to narration)" : "(default timings)");

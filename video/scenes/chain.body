@@ -12,13 +12,13 @@
 <script src="engine.js"></script>
 <script>
 // cues: title, big, rows [[label, value]], step, t0, foot
-const R = cue("rows", []), step = cue("step", 1.0), t0 = cue("t0", 0.3);
+const R = cue("rows", []), step = cue("step", 1.0), t0 = cue("t0", 0.3), r0 = cue("r0", t0 + 0.8);
 $("#ttl").textContent = cue("title", ""); $("#big").textContent = cue("big", ""); $("#foot").innerHTML = cue("foot", "");
 R.forEach(([l, v], i) => { const d = document.createElement("div"); d.className = "row"; d.id = "r" + i; d.innerHTML = `<span class="m">&#10003;</span><span class="l">${l}</span><span class="v">${v}</span>`; $("#rows").append(d); });
 window.render = (t) => {
   $("#ttl").style.opacity = eo(seg(t, t0, t0 + 0.4));
   $("#big").style.opacity = eo(seg(t, t0 + 0.2, t0 + 0.7));
-  R.forEach((_, i) => { const s = t0 + 0.8 + i * step, r = $("#r" + i); r.style.opacity = eo(seg(t, s, s + 0.4)); r.style.transform = `translateY(${10 * (1 - eo(seg(t, s, s + 0.4)))}px)`; });
-  $("#foot").style.opacity = eo(seg(t, t0 + 1.0 + R.length * step, t0 + 1.5 + R.length * step));
+  R.forEach((_, i) => { const s = r0 + i * step, r = $("#r" + i); r.style.opacity = eo(seg(t, s, s + 0.4)); r.style.transform = `translateY(${10 * (1 - eo(seg(t, s, s + 0.4)))}px)`; });
+  $("#foot").style.opacity = eo(seg(t, r0 + 0.2 + R.length * step, r0 + 0.7 + R.length * step));
 };
 </script>

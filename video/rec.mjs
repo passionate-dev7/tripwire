@@ -160,6 +160,7 @@ try {
       if (!okv && !s.soft) throw new Error("typeInto failed: " + s.typeInto);
     }
     if (s.hoverSel) { const r = await rectOf(`document.querySelector(${JSON.stringify(s.hoverSel)})`); if (r) { const p = JSON.parse(r); await glide(p.x, p.y); log.push({ hoverSel: s.hoverSel }); } else if (!s.soft) throw new Error("no el: " + s.hoverSel); }
+    if (s.clickAt) await clickAt(s.clickAt[0], s.clickAt[1]);
     if (s.move) await glide(s.move[0], s.move[1], s.ms ?? 700);
     if (s.type) { const t = sub(s.type); if (s.slow) { for (const ch of t) { await send("Input.insertText", { text: ch }); await sleep(110); } } else await send("Input.insertText", { text: t }); }
     if (s.key) { const enter = s.key === "Enter" ? { windowsVirtualKeyCode: 13, text: "\r" } : {}; await send("Input.dispatchKeyEvent", { type: "keyDown", key: s.key, code: s.key, ...enter }); await send("Input.dispatchKeyEvent", { type: "keyUp", key: s.key, code: s.key, ...enter }); }

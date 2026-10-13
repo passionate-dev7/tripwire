@@ -1,134 +1,134 @@
 [
 {
 "id": "s01",
-"text": "This is tripwire, a stop-loss for your Mon: if the price falls, a bot sells it for you, and only on your terms.",
-"cap": "tripwire is a stop-loss for your MON: if the price falls, a bot sells it for you, and only on your terms.",
-"gap": 0.4
+"text": "This is tripwire, a stop-loss for your Mon: if the price falls, a bot sells it for you, only on your terms.",
+"cap": "tripwire is a stop-loss for your MON: if the price falls, a bot sells it for you, only on your terms.",
+"gap": 0.35
 },
 {
 "id": "s02",
-"text": "I'm Dan. I hold Mon, a crypto coin. What if the bot selling it for me gets hacked?",
-"cap": "I'm Dan. I hold MON, a crypto coin. What if the bot selling it for me gets hacked?",
-"gap": 0.45
+"text": "I'm Dan. I hold Mon, a crypto coin, on Monad. What if the bot selling it for me gets hacked?",
+"cap": "I'm Dan. I hold MON, a crypto coin, on Monad. What if the bot selling it for me gets hacked?",
+"gap": 0.35
 },
 {
 "id": "s03",
-"text": "Other stop-loss bots can sell however they like once you grant them. With tripwire, the chain refuses any sale I did not sign.",
-"cap": "Other stop-loss bots can sell however they like once you grant them. With tripwire, the chain refuses any sale I did not sign.",
-"gap": 0.45
+"text": "Other bots get full control once you give them access. Here, the blockchain, the chain for short, checks every sale against the plan I signed.",
+"cap": "Other bots get full control once you give them access. Here, the blockchain, the chain for short, checks every sale against the plan I signed.",
+"gap": 0.35
 },
 {
 "id": "s04",
-"text": "This is live on the real Monad network, with real money, kept small.",
-"cap": "Live on Monad mainnet. Real money, kept small.",
-"gap": 0.45
+"text": "This is live on the real Monad network. Real money, but a small amount.",
+"cap": "Live on Monad mainnet. Real money, a small amount.",
+"gap": 0.35
 },
 {
 "id": "s05",
-"text": "First, my plan. A stop sells when the price falls to a line I pick. The price is the average over the last sixty seconds, so one spike cannot trip it.",
-"cap": "A stop sells when the price falls to a line I pick. The price is the average over the last 60 seconds, so one spike cannot trip it.",
-"gap": 0.45
+"text": "First, my plan. A stop sells when the price falls to a line I pick, using the average over sixty seconds, so one spike cannot trip it.",
+"cap": "First, my plan. A stop sells when the price falls to a line I pick, using the average over 60 seconds, so one spike cannot trip it.",
+"gap": 0.35
 },
 {
 "id": "s06",
-"text": "Row one sells zero point three Mon. I set its line above today's price, only so you can watch it sell. A real stop sits below.",
-"cap": "Row 1 sells 0.3 MON. Its line, 0.02479, sits above today's price of 0.02430, only so you can watch it sell. A real stop sits below.",
-"gap": 0.45
+"text": "Row one sells zero point three Mon. I set its line above today's price, so you can watch it sell.",
+"cap": "Row 1 sells 0.3 MON. Its line, 0.02479, sits above today's price of 0.02430, so you can watch it sell.",
+"gap": 0.35
 },
 {
 "id": "s07",
-"text": "Every row has a floor, the lowest price it may sell at. Row two, zero point two Mon, sits ten percent below, so it should never sell.",
-"cap": "Every row has a floor: the lowest price it may sell at. Row 2, 0.2 MON, line 0.02187, sits 10% below, so it should never sell.",
-"gap": 0.45
+"text": "Each row has a floor, the lowest price it may sell at. Row two, zero point two Mon, sits ten percent below, so it should never sell.",
+"cap": "Each row has a floor: the lowest price it may sell at. Row 2, 0.2 MON, sits 10% below today's price, so it should never sell.",
+"gap": 0.35
 },
 {
 "id": "s08",
-"text": "Now a wallet. A pass key is the wallet. It opens with my fingerprint, with no extension and no seed phrase.",
-"cap": "A passkey is the wallet. It opens with my fingerprint: no extension, no seed phrase.",
-"gap": 0.45
+"text": "Now a wallet. A pass key is the wallet: it opens with my fingerprint, no seed phrase.",
+"cap": "A passkey is the wallet: it opens with my fingerprint. No seed phrase.",
+"gap": 0.35
 },
 {
 "id": "s09",
 "text": "I put one Mon into it.",
 "cap": "I put 1 MON into it.",
-"gap": 0.45
+"gap": 0.35
 },
 {
 "id": "s10",
-"text": "One pass key prompt signs the plan, and the signed plan goes to Monad.",
-"cap": "One passkey prompt signs the plan, and the signed plan goes to Monad.",
-"gap": 0.45
+"text": "One pass key prompt signs the plan: this bot may sell my Mon, only on these terms. It is posted to the chain.",
+"cap": "One passkey prompt signs the plan: this bot may sell my MON, only on these terms. It is posted to the chain.",
+"gap": 0.35
 },
 {
 "id": "s11",
 "text": "Now the keeper, the bot that sells for me, is watching. Row one's line is already crossed.",
 "cap": "The keeper is the bot that sells for me. Row 1's line is already crossed.",
-"gap": 0.45
+"gap": 0.35
 },
 {
 "id": "s12",
-"text": "It sells exactly zero point three Mon, once, and the money lands in my own wallet.",
-"cap": "It sells exactly 0.3 MON, once, for 0.007267 USDC, and the money lands in my own wallet.",
-"gap": 0.45
+"text": "It sells exactly zero point three Mon, once, and pays me in USDC, a dollar coin, straight to my wallet.",
+"cap": "It sells exactly 0.3 MON, once, and pays me 0.007267 USDC, a dollar coin, straight to my wallet.",
+"gap": 0.35
 },
 {
 "id": "s13",
-"text": "Here is that sale on the explorer. Status success.",
-"cap": "The sale on the explorer: status success.",
-"gap": 0.45
+"text": "Here it is on the explorer, a public record anyone can check. Status success.",
+"cap": "On the explorer, a public record anyone can check: status success.",
+"gap": 0.35
 },
 {
 "id": "s14",
-"text": "Read straight from the chain: the money from the sale is there, and row two is still unsold.",
-"cap": "Read straight from the chain: 0.007267 USDC from the sale is in my wallet, and row 2 is still unsold.",
-"gap": 0.45
+"text": "I check the chain itself: the money is there, and row two is still unsold.",
+"cap": "I check the chain itself: 0.007267 USDC is there, and row 2 is still unsold.",
+"gap": 0.35
 },
 {
 "id": "s15",
-"text": "Now the bad day: the keeper is hacked. This button makes the real keeper try a forbidden sale.",
-"cap": "The bad day: the keeper is hacked. This button makes the real keeper try a forbidden sale.",
-"gap": 0.45
+"text": "Now, a bot that has been hacked. These buttons make the real keeper try three cheats, and failing is the right result.",
+"cap": "Now, a bot that has been hacked. These buttons make the real keeper try three cheats, and failing is the right result.",
+"gap": 0.35
 },
 {
 "id": "s16",
-"text": "First, it sells before the price reaches my line.",
-"cap": "1. Sell before the price reaches my line.",
-"gap": 0.45
+"text": "First, it sells before the price reaches my line. The chain says: above the line.",
+"cap": "1. Sell before the price reaches my line. The chain says: Tripwire:above-line",
+"gap": 0.35
 },
 {
 "id": "s17",
-"text": "Second, it sells for half my floor.",
-"cap": "2. Sell for half my floor.",
-"gap": 0.45
+"text": "Second, it sells for half my floor. The chain says: below the floor.",
+"cap": "2. Sell for half my floor. The chain says: Tripwire:min-out",
+"gap": 0.35
 },
 {
 "id": "s18",
-"text": "Third, it pays the proceeds to itself.",
-"cap": "3. Pay the proceeds to the keeper itself.",
-"gap": 0.45
+"text": "Third, it pays the proceeds to itself. The chain says: wrong recipient.",
+"cap": "3. Pay the proceeds to itself. The chain says: Tripwire:recipient",
+"gap": 0.35
 },
 {
 "id": "s19",
-"text": "Each one failed, and that is the point. The chain refused it, said why, and paid out nothing.",
-"cap": "Each one failed, and that is the point. The chain refused it, said why, and paid out nothing.",
-"gap": 0.45
+"text": "Each refusal names the rule it broke. Nothing was paid out.",
+"cap": "Each refusal names the rule it broke. Nothing was paid out.",
+"gap": 0.35
 },
 {
 "id": "s20",
-"text": "Why can't it cheat? My signed plan lives on the blockchain, and the chain checks every sale against it: the price line, the lowest price, the amount, and where the money goes. Break any rule and the sale fails.",
-"cap": "Why can't it cheat? My signed plan lives on the blockchain, and the chain checks every sale against it: the price line, the lowest price, the amount, and where the money goes. Break any rule and the sale fails.",
-"gap": 0.45
+"text": "Why can't it cheat? The chain checks every sale against my signed plan: the line, the floor, the amount, and who gets paid. Break any rule and the sale fails.",
+"cap": "The chain checks every sale against my signed plan: the line, the floor, the amount, and who gets paid. Break any rule and the sale fails.",
+"gap": 0.35
 },
 {
 "id": "s21",
-"text": "When I am done, I revoke the plan and take my unsold Mon back.",
-"cap": "Done: I revoke the plan and take my unsold MON back.",
-"gap": 0.45
+"text": "Done: I revoke the plan, which switches it off, and take my unsold Mon back.",
+"cap": "Done: I revoke the plan, which switches it off, and take my unsold MON back.",
+"gap": 0.35
 },
 {
 "id": "s22",
 "text": "A stop-loss on your Mon that the bot can't break. tripwire, live on Monad.",
 "cap": "A stop-loss on your MON that the bot can't break. tripwire, live on Monad.",
-"gap": 0.45
+"gap": 0.35
 }
 ]
