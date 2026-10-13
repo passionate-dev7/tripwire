@@ -4,7 +4,7 @@ Let a bot sell for you. The chain makes sure it can only make the sale you signe
 
 A MON holder signs one plan with a passkey: sell this much if MON falls to my line, never under this floor, only to me, until this date. A keeper watches the pool's 60 second TWAP and makes the sale when the line is crossed. Tokens stay in the holder's own wallet until then. The keeper is untrusted by design: `TripwirePlanEnforcer` reverts any sale above the stop line, under the floor, for a different amount, to anyone but the holder, or after expiry. The live site's Try to cheat button has the keeper send exactly those sales, and every one reverts on chain.
 
-Live on Monad testnet: https://tripwire-three.vercel.app
+Live on Monad mainnet: https://tripwire-three.vercel.app/?net=mainnet (real MON, the WMON/USDC Uniswap V3 pool). The same app runs on Monad testnet at https://tripwire-three.vercel.app with free test MON.
 
 ![tripwire architecture](docs/architecture.png)
 
@@ -39,6 +39,18 @@ The web app (web/) is a static export with zero serverless functions. Vercel's C
 - Gas limits come from Monad's `eth_estimateGas`. A fill costs about 407k gas on Monad testnet against 289k on an Ethereum-priced fork, and Monad charges the full limit.
 - Testnet has no Uniswap V3 deployment, so the factory and SwapRouter02 are deployed from Uniswap's published npm artifacts (the router's pool init-code hash matches the published pool bytecode) with a WMON/aUSD pool. The same enforcer and keeper point at Monad mainnet's WMON/USDC pool by address.
 
+## Contracts on Monad mainnet (chain 143)
+
+Read from contracts/deployments/143.json; bytecode at both addresses matches the compiled contracts (`cast code` against https://rpc1.monad.xyz).
+
+| Contract | Address |
+|---|---|
+| TripwirePlanEnforcer | `0x4c594690108f808d9e5603df548740b22e82703e` (deployed at block 113042447, tx `0x4cd0069d11b5932aba49902ed34ac2f0305a1595d1cae1b9f8173fb4a0a571b4`) |
+| PlanBook | `0xa3157a5a011404a70c033834a19826a9628e6928` (block 113042454, tx `0x4383696d693f402379be2770eaf3a6f8e51025f2946b51d3ebcfdc8def0805f9`) |
+| DelegationManager (MetaMask v1.3.0) | `0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3` |
+| WMON/USDC pool (Uniswap V3, 0.3%) | `0x659bD0BC4167BA25c62E05656F78043E7eD4a9da` |
+| SwapRouter02 | `0xfE31F71C1b106EAc32F1A19239c9a9A72ddfb900` |
+
 ## Contracts on Monad testnet (chain 10143)
 
 Read from contracts/deployments/10143.json and confirmed with `cast code` against https://testnet-rpc.monad.xyz.
@@ -58,6 +70,8 @@ Earlier enforcer and PlanBook pairs (`0xc66cc7b7...` / `0x6a1fcb21...`, `0x9643f
 
 | Claim | Proof |
 |---|---|
+| Full lifecycle on Monad mainnet with real MON | holder `0xDc53288B21C4B6E9C3de5f862B9638b7AC0a00ad`, plan of two rows (0.3 MON at a line of 0.02479, 0.2 MON stop at 0.02187): plan armed `0xe496d6cd2534847503746ef0a9d7615452235a95048a3152e7ff3d252ca8708a` (block 113073215); keeper sale `0xb2989ce6fdef893c5fc63ee5fcf4b56666861a208d3e8845ba40c619c615007b` (status success, block 113073240) sold exactly 0.3 MON and paid 0.007267 USDC to the holder, above its 0.007101 floor; the 0.2 MON stop stayed unsold; revoke `0xd3980d11accb41bb5b3a395c3be3b0c3b31817090ef22e67e6174219d86d5866`. Evidence in demo/runs/mainnet-demo-2026-10-13T15-13-53-347Z.json |
+| A hostile keeper is refused on Monad mainnet | `Tripwire:above-line` `0x31de32af5dc239fe69b5890348364f831f0c75c4dc06f3c0f86e07f2c194d951`, `Tripwire:min-out` `0x95afd4e0977b977893ae941ce5b77a94ab61f2745f0d89e6e97d01da9de78fb6`, `Tripwire:recipient` `0x2acd2cd19571cf7c4a51cef6a660402038f583a9bc675daf852cef37875c860e` (all status failed, blocks 113073332 to 113073386). `curl -s https://tripwire-three.vercel.app/api/mainnet/recent` returns 3 forbidden sales sent, 3 reverted, 0 paid out |
 | The enforcer holds under a hostile keeper | `cd contracts && forge test --fork-url https://rpc1.monad.xyz --fork-block-number 109704919 --fork-retries 12 --fork-retry-backoff 2000`: 19 tests against a Monad mainnet fork with the real DelegationManager, SwapRouter02 and WMON/USDC pool, including 6 fuzz properties at 512 runs each (never other than the tranche amount, never below the floor, never to anyone else, a stop only at or below its line, a target only at or above its line, never more than the plan). Re-run on 2026-10-13: 19 passed, 0 failed. |
 | Each guard is load-bearing | Deleting any one guard turns its tests red: logs in contracts/results/ (`mutant-above-line.txt`, `mutant-amount.txt`, `mutant-min-out.txt`, `mutant-recipient.txt`, `mutant-spent.txt`, `mutant-target-as-stop.txt`, `mutant-target-check.txt`, `mutant-value.txt`) |
 | The keeper sells a crossed line | tx `0xc80cd805f0e1f88e743609d891a991ed9e68bdd1bd81a246ff4568049999aadf`, status success at block 67518777 |
@@ -66,7 +80,7 @@ Earlier enforcer and PlanBook pairs (`0xc66cc7b7...` / `0x6a1fcb21...`, `0x9643f
 | Full lifecycle on the current contracts | holder `0xd661b663c2E9fC4F7a07563dE9Fb97Ca345fB05d`: setup `0xdfc2783a3924c0b1c31598e0e1a1f158c42e074c881382632c43686c491cf026`, keeper fill `0x651e1ffa620c6c876483bd4768d4e2fdb4c24955b011c4f4dab83195ea67df6d` (sold exactly 0.005 WMON, status success at block 69245479), an uncrossed stop left unspent for 50.6 s, then revoke `0xc5814914c81965f0ac524798f9f0983e7d5ae80254a540d2af8a26b39c5fa2de`. Evidence in demo/runs/lifecycle-10143-2026-10-08T11-42-02-641Z.json |
 | Eighteen holder flows click-tested on the live site | passkey, plan from a link, presets, custom end date, keeper sale, three refused cheats, revoke, unwrap, returning sign-in, keeper heartbeat, at 1440 and 390 px. Listed in docs/feature-matrix.md, logged in demo/runs/ |
 | Any holder's plan reads back from chain | `bun run demo/verify-live.ts <holder> --attack` |
-| The live keeper is running | `curl -s https://tripwire-three.vercel.app/api/status` returns `loopError: null`, the pool's TWAP and mainnet spot. `curl -s https://tripwire-three.vercel.app/api/recent` returns the plans with their sales and refusals; on 2026-10-13 it listed 26 plans, 23 sales, 35 forbidden sales sent and 35 reverted, 0 paid out |
+| The live keeper is running | `curl -s https://tripwire-three.vercel.app/api/status` returns `loopError: null`, the pool's TWAP and mainnet spot. `curl -s https://tripwire-three.vercel.app/api/recent` returns the plans with their sales and refusals; on 2026-10-13 at 13:45 UTC it listed 40 plans, 37 sales, 61 forbidden sales sent and 61 reverted, 0 paid out. The mainnet keeper answers at `/api/mainnet/status` |
 
 ## Run it
 

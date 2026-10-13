@@ -202,8 +202,8 @@ export function ChainDetails({ s }: { s: Status | null | undefined }) {
           {row("Latest block", s ? Number(s.head).toLocaleString("en-US") : "reading")}
           {row("Pool", <>WMON/{net.stableSymbol}, Uniswap V3 0.3%, {link(net.pool)}</>)}
           {row("Keeper", link(net.keeper))}
-          {row("Plan enforcer", net.deployed ? link(net.enforcer) : "not deployed")}
-          {row("Plan book", net.deployed ? link(net.planBook) : "not deployed")}
+          {row("Plan enforcer", net.deployed ? link(net.enforcer) : "coming online")}
+          {row("Plan book", net.deployed ? link(net.planBook) : "coming online")}
           {row("Spot price", s ? `${fmtPrice(s.spotPrice)} ${net.stableSymbol}` : "reading")}
           {net.key === "testnet" && row("Mainnet MON price, for reference", s?.mainnet ? `${fmtPrice(s.mainnet.price)} USDC` : "reading")}
           {net.key === "testnet" && row("aUSD", "Agora's dollar on Monad")}
@@ -216,8 +216,8 @@ export function ChainDetails({ s }: { s: Status | null | undefined }) {
   );
 }
 
-/** Shown instead of the plan screens while a network has no enforcer and plan book of ours: nothing is read from a
- * keeper that is not there and nothing can be signed against an address that does not exist yet. */
+/** Shown instead of the plan screens while a network is coming online: reads and signing start once its enforcer and
+ * plan book addresses are in its deployment file. */
 export function ComingOnline({ net }: { net: Net }) {
   const link = (a: string) => (
     <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={`${net.explorer}/address/${a}`} target="_blank" rel="noreferrer">
