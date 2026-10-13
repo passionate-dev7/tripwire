@@ -25,8 +25,12 @@ import {
   toHex,
 } from "viem";
 import { encodeCalls } from "@metamask/smart-accounts-kit/utils";
+import mainnetDeployment from "./mainnet.json";
 
 export type Net = {
+  key: "testnet" | "mainnet";
+  /** False while the net has no plan enforcer and plan book of ours; enforcer and planBook are then the zero address. */
+  deployed: boolean;
   chainId: number;
   name: string;
   rpc: string;
@@ -56,6 +60,8 @@ const STATELESS_DELEGATOR: Address = "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B
 const TIMESTAMP_ENFORCER: Address = "0x1046bb45C8d673d4ea75321280DB34899413c069";
 
 export const TESTNET: Net = {
+  key: "testnet",
+  deployed: true,
   chainId: 10143,
   name: "Monad testnet",
   rpc: "https://testnet-rpc.monad.xyz",
@@ -83,7 +89,7 @@ export const TESTNET: Net = {
   ],
 };
 
-// Mainnet venue, read only until a mainnet enforcer and plan book are deployed.
+// Mainnet venue: Monad's own Uniswap V3 WMON/USDC 0.3% pool and SwapRouter02, which our contracts only read and call.
 export const MAINNET_VENUE = {
   chainId: 143,
   rpc: "https://rpc1.monad.xyz",
@@ -93,6 +99,43 @@ export const MAINNET_VENUE = {
   stable: "0x754704Bc059F8C67012fEd69BC8A327a5aafb603" as Address,
   stableDecimals: 6,
 };
+
+/** What contracts/deployments/143.json (deploy-mainnet.ts) records about our two mainnet contracts. */
+export type MainnetDeployment = { enforcer?: string; planBook?: string; planBookFromBlock?: number };
+
+const ZERO: Address = "0x0000000000000000000000000000000000000000";
+
+/** The mainnet Net for a deployment record. Without both contracts it is marked not deployed, never half filled. */
+export function mainnetNet(dep: MainnetDeployment | null | undefined): Net {
+  const ready = !!dep?.enforcer && !!dep.planBook && !!dep.planBookFromBlock;
+  return {
+    key: "mainnet",
+    deployed: ready,
+    chainId: MAINNET_VENUE.chainId,
+    name: "Monad mainnet",
+    rpc: MAINNET_VENUE.rpc,
+    explorer: "https://monadvision.com",
+    delegationManager: DELEGATION_MANAGER,
+    statelessDeleGator: STATELESS_DELEGATOR,
+    timestampEnforcer: TIMESTAMP_ENFORCER,
+    router: MAINNET_VENUE.router,
+    pool: MAINNET_VENUE.pool,
+    wmon: MAINNET_VENUE.wmon,
+    stable: MAINNET_VENUE.stable,
+    stableSymbol: "USDC",
+    stableDecimals: MAINNET_VENUE.stableDecimals,
+    fee: 3000,
+    twapSeconds: 60,
+    enforcer: ready ? getAddress(dep!.enforcer!) : ZERO,
+    planBook: ready ? getAddress(dep!.planBook!) : ZERO,
+    planBookFromBlock: ready ? BigInt(dep!.planBookFromBlock!) : 0n,
+    keeper: TESTNET.keeper,
+    legacy: [],
+  };
+}
+
+/** web/lib/mainnet.json is written by contracts/script/deploy-mainnet.ts beside deployments/143.json. */
+export const MAINNET: Net = mainnetNet(mainnetDeployment as MainnetDeployment);
 
 export const ROOT_AUTHORITY: Hex = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
@@ -255,13 +298,12 @@ export function requirePerplPosition(perpl: PerplPositionBind | null | undefined
 }
 
 function termsTupleForEnforcer(enforcer: Address) {
-  if (usesPerplTerms(enforcer)) return TERMS_TUPLE_V3;
-  if (TESTNET.legacy.some((l) => l.enforcer.toLowerCase() === enforcer.toLowerCase())) return TERMS_TUPLE_V1;
-  return TERMS_TUPLE_V2;
+  return usesPerplTerms(enforcer) ? TERMS_TUPLE_V3 : TERMS_TUPLE_V1;
 }
 
+/** Every enforcer except the retired testnet ones carries the Perpl bind: the testnet one in use and any mainnet one. */
 export function usesPerplTerms(enforcer: Address): boolean {
-  return enforcer.toLowerCase() === TESTNET.enforcer.toLowerCase();
+  return !TESTNET.legacy.some((l) => l.enforcer.toLowerCase() === enforcer.toLowerCase());
 }
 
 // ---------- price units ----------

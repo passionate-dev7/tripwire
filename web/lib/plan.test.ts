@@ -4,11 +4,14 @@ import { privateKeyToAccount } from "viem/accounts";
 import {
   TESTNET,
   abis,
+  mainnetNet,
+  usesPerplTerms,
   buildDelegation,
   decodeDelegation,
   decodePerplPosition,
   decodeTranches,
   delegationDigest,
+  delegationTypedData,
   encodeDelegation,
   floorToMinOutPerUnit,
   parseMon,
@@ -89,4 +92,33 @@ describe("delegation", () => {
     const onchain = keccak256(encodePacked(["bytes2", "bytes32", "bytes32"], ["0x1901", domain, hash]));
     expect(delegationDigest(TESTNET, d)).toBe(onchain);
   }, 30_000);
+});
+
+describe("terms layout by enforcer", () => {
+  const mainnet = mainnetNet({ enforcer: "0x4c594690108f808d9e5603df548740b22e82703e", planBook: "0xa3157a5a011404a70c033834a19826a9628e6928", planBookFromBlock: 1 });
+  test("only the retired testnet enforcers read the old layout", () => {
+    expect(usesPerplTerms(TESTNET.enforcer)).toBe(true);
+    for (const l of TESTNET.legacy) expect(usesPerplTerms(l.enforcer)).toBe(false);
+    expect(TESTNET.legacy.length).toBe(3);
+    expect(usesPerplTerms(mainnet.enforcer)).toBe(true);
+  });
+  test("a mainnet plan round trips with its Perpl bind and tranche directions", () => {
+    const tranches = toTranches([
+      { mon: "10", line: 0.03, floor: 0.028 },
+      { mon: "5", line: 0.05, floor: 0.048, up: true },
+    ]);
+    const d = buildDelegation(mainnet, holder.address, keeper, tranches, 1_800_000_000, 9n, TEST_PERPL);
+    expect(d.caveats[0].enforcer).toBe(mainnet.enforcer);
+    const back = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
+    expect(back.recipient).toBe(holder.address);
+    expect(back.tranches).toEqual(tranches);
+    expect(back.tranches.map((t) => t.atOrAbove)).toEqual([false, true]);
+    expect(decodePerplPosition(d.caveats[0].terms, d.caveats[0].enforcer)?.accountId).toBe(TEST_PERPL.accountId);
+  });
+  test("the delegation is signed for chain 143 and the same DelegationManager", () => {
+    const d = buildDelegation(mainnet, holder.address, keeper, toTranches([{ mon: "1", line: 0.03, floor: 0.02 }]), 1_800_000_000, 10n, TEST_PERPL);
+    const typed = delegationTypedData(mainnet, d);
+    expect(typed.domain.chainId).toBe(143);
+    expect(delegationDigest(mainnet, d)).not.toBe(delegationDigest({ ...mainnet, chainId: 10143 }, d));
+  });
 });
