@@ -155,7 +155,8 @@ export default function Page() {
           <ProofStrip t={t} onCheat={goCheat} />
         </div>
 
-        <aside className="min-w-0 lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:self-stretch">
+        {/* signed in on a phone, the chart with the distance to the next line comes before the plan table and the cheat buttons */}
+        <aside className={`min-w-0 lg:order-none lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:self-stretch ${tab === "watch" && t.account ? "order-last" : ""}`}>
           {tab === "plan" ? (
             <>
               {linkErrors.length > 0 && <p className="pb-3 text-[13px] text-ink">Link parts skipped: {linkErrors.join("; ")}</p>}
@@ -168,12 +169,10 @@ export default function Page() {
 
         <section className="min-w-0 lg:col-start-1" aria-label="Price and your lines">
           <div className="rounded-[10px] border border-hairline bg-surface">
-            <div className="flex flex-wrap items-end gap-x-10 gap-y-3 px-4 pt-4">
-              <div>
-                <div className="text-[12px] text-mute">MON in {net.stableSymbol}, 60 s average of the {net.name} pool</div>
-                <div className="num h-12 text-[44px] font-medium leading-[48px] tracking-[0.2px] text-ink lg:h-16 lg:text-[56px] lg:leading-[64px]">
-                  {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : <Digits value={fmtPrice(price)} />}
-                </div>
+            <div className="px-4 pt-4 text-[12px] text-mute">MON in {net.stableSymbol}, 60 s average of the {net.name} pool</div>
+            <div className="flex flex-wrap items-end gap-x-10 gap-y-2 px-4">
+              <div className="num h-12 text-[44px] font-medium leading-[48px] tracking-[0.2px] text-ink lg:h-16 lg:text-[56px] lg:leading-[64px]">
+                {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : <Digits value={fmtPrice(price)} />}
               </div>
               {(next || note) && (
                 <div className="min-w-0 pb-1.5" data-testid="next-line">
