@@ -26,8 +26,10 @@ import {
   wrapCall,
 } from "./plan";
 import { confirmed } from "./confirm";
+import { feeCap, liveFees } from "./fees";
 
-// Testnet base fee is 100 gwei. Monad charges the full gas limit, and the sender must hold limit x cap up front.
+// Fixed testnet cap for the demo scripts. The browser path reads the gas price before every send (liveFees). Monad charges
+// the full gas limit, and the sender must hold limit x cap up front.
 export const FEES = { maxFeePerGas: 110_000_000_000n, maxPriorityFeePerGas: 2_000_000_000n } as const;
 /** Monad keeps this much in an account that has delegated its code; below it, MON value cannot leave in a 7702 tx. */
 export const RESERVE = parseEther("10");
@@ -71,7 +73,15 @@ export function setupBlocker(h: Holdings, total: bigint, gasBudget: bigint): str
 
 const fmt = (wei: bigint) => (Number(wei) / 1e18).toFixed(4).replace(/\.?0+$/, "");
 
-export const SETUP_GAS_BUDGET = (60_000n + 420_000n) * FEES.maxFeePerGas;
+/** Gas limit of the two setup transactions together (wrap, then approve and post). */
+export const SETUP_GAS_LIMIT = 60_000n + 420_000n;
+/** What setup must hold in gas at the cap for Monad's 102 gwei price. A page that can read the chain uses setupBudget. */
+export const SETUP_GAS_BUDGET = SETUP_GAS_LIMIT * feeCap(102_000_000_000n);
+
+/** What setup must hold in gas right now: the limit at the fee cap derived from the chain's current gas price. */
+export async function setupBudget(net: Net): Promise<bigint> {
+  return SETUP_GAS_LIMIT * (await liveFees(clients(net).pub)).maxFeePerGas;
+}
 
 export type Progress = (step: string, hash?: Hex) => void;
 
@@ -89,7 +99,7 @@ export async function createPlan(
   const tranches = toTranches(plain, net.stableDecimals);
   const total = planTotal(tranches);
   const before = await holdings(net, account.address);
-  const blocker = setupBlocker(before, total, SETUP_GAS_BUDGET);
+  const blocker = setupBlocker(before, total, await setupBudget(net));
   if (blocker) throw new Error(blocker);
 
   onStep("Signing the plan");
@@ -105,7 +115,7 @@ export async function createPlan(
     onStep("Setting aside MON as WMON");
     const call = wrapCall(net, toWrap);
     const gas = ((await pub.estimateGas({ account: account.address, ...call })) * 13n) / 10n;
-    wrapHash = await wallet.sendTransaction({ ...call, gas, ...FEES });
+    wrapHash = await wallet.sendTransaction({ ...call, gas, ...(await liveFees(pub)) });
     const r = await pub.waitForTransactionReceipt({ hash: wrapHash, timeout: 60_000, pollingInterval: 800 });
     if (r.status !== "success") throw new Error(`Setting aside MON failed (${wrapHash}).`);
     onStep("MON set aside", wrapHash);
@@ -121,7 +131,7 @@ export async function createPlan(
   const data = setupCalldata(net, signed, before.allowance + total);
   const countBefore = await pub.readContract({ address: net.planBook, abi: abis.planBook, functionName: "count" });
   const gas = ((await pub.estimateGas({ account: account.address, to: account.address, data, authorizationList })) * 13n) / 10n;
-  const setupHash = await wallet.sendTransaction({ to: account.address, data, authorizationList, gas, ...FEES });
+  const setupHash = await wallet.sendTransaction({ to: account.address, data, authorizationList, gas, ...(await liveFees(pub)) });
   const r = await pub.waitForTransactionReceipt({ hash: setupHash, timeout: 60_000, pollingInterval: 800 });
   if (r.status !== "success") throw new Error(`Arming the plan failed (${setupHash}).`);
   const read = await confirmed(
@@ -143,7 +153,7 @@ export async function revokePlan(net: Net, account: LocalAccount, signed: Delega
   const wallet = createWalletClient({ account, chain, transport: http(net.rpc) });
   const data = encodeFunctionData({ abi: abis.delegationManager, functionName: "disableDelegation", args: [signed] });
   const gas = ((await pub.estimateGas({ account: account.address, to: net.delegationManager, data })) * 13n) / 10n;
-  const tx = await wallet.sendTransaction({ to: net.delegationManager, data, gas, ...FEES });
+  const tx = await wallet.sendTransaction({ to: net.delegationManager, data, gas, ...(await liveFees(pub)) });
   const r = await pub.waitForTransactionReceipt({ hash: tx, timeout: 60_000, pollingInterval: 800 });
   const { ok: off } = await confirmed(
     () => pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [hash] }),
@@ -159,7 +169,7 @@ export async function unwrap(net: Net, account: LocalAccount, amount: bigint): P
   const wallet = createWalletClient({ account, chain, transport: http(net.rpc) });
   const data = encodeFunctionData({ abi: abis.wmon, functionName: "withdraw", args: [amount] });
   const gas = ((await pub.estimateGas({ account: account.address, to: net.wmon, data })) * 13n) / 10n;
-  const tx = await wallet.sendTransaction({ to: net.wmon, data, gas, ...FEES });
+  const tx = await wallet.sendTransaction({ to: net.wmon, data, gas, ...(await liveFees(pub)) });
   const r = await pub.waitForTransactionReceipt({ hash: tx, timeout: 60_000, pollingInterval: 800 });
   if (r.status !== "success") throw new Error(`Unwrap failed (${tx}).`);
   return tx;

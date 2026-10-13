@@ -1,5 +1,9 @@
 // tripwire keeper: watches every posted plan and fills a tranche once the MON price is at or below its line.
 //   bun run keeper/keeper.ts            (launchd on the Mac mini: keeper/com.tripwire.keeper.plist)
+//   TRIPWIRE_NET=mainnet PORT=3512 bun run keeper/keeper.ts   Monad mainnet (chain 143), plist: com.tripwire.keeper-mainnet.plist
+// The mainnet keeper reads its enforcer and plan book from contracts/deployments/143.json (TRIPWIRE_DEPLOYMENT_FILE
+// overrides the path), keeps its own state-mainnet.json, serves its own port, has no faucet, and sends at most 3
+// hostile calls per plan. It exits with a message if that file is missing.
 // It holds no judgment the chain does not check. Every fill is a DelegationManager redemption that the plan's
 // enforcer re-checks on chain: line, floor, amount, recipient, once per tranche. The keeper key only pays gas.
 //
@@ -27,6 +31,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import {
   MAINNET_VENUE,
   TESTNET,
+  mainnetNet,
   abis,
   lineReached,
   decodeDelegation,
@@ -38,25 +43,50 @@ import {
   type Delegation,
 } from "../web/lib/plan";
 import { revertReason as chainRevertReason } from "../web/lib/chain";
+import { liveFees } from "../web/lib/fees";
 
 const here = path.dirname(new URL(import.meta.url).pathname);
-const net = { ...TESTNET, rpc: process.env.MONAD_TESTNET_RPC_URL ?? TESTNET.rpc };
+const mainnetMode = process.env.TRIPWIRE_NET === "mainnet";
+if (process.env.TRIPWIRE_NET && !["mainnet", "testnet"].includes(process.env.TRIPWIRE_NET)) {
+  console.error(`TRIPWIRE_NET is "${process.env.TRIPWIRE_NET}", expected mainnet or testnet`);
+  process.exit(1);
+}
+const deploymentFile = process.env.TRIPWIRE_DEPLOYMENT_FILE ?? path.join(here, "..", "contracts", "deployments", "143.json");
+function loadNet() {
+  if (!mainnetMode) return { ...TESTNET, rpc: process.env.MONAD_TESTNET_RPC_URL ?? TESTNET.rpc };
+  if (!fs.existsSync(deploymentFile)) {
+    console.error(`TRIPWIRE_NET=mainnet needs ${deploymentFile}, which does not exist. Deploy first: cd contracts && bun run script/deploy-mainnet.ts`);
+    process.exit(1);
+  }
+  const mainnet = mainnetNet(JSON.parse(fs.readFileSync(deploymentFile, "utf8")));
+  if (!mainnet.deployed) {
+    console.error(`${deploymentFile} has no enforcer, planBook and planBookFromBlock, so the mainnet contracts are not deployed`);
+    process.exit(1);
+  }
+  return { ...mainnet, rpc: process.env.MONAD_MAINNET_RPC_URL ?? mainnet.rpc };
+}
+const net = loadNet();
 const keyFile = process.env.TRIPWIRE_KEEPER_KEY_FILE ?? path.join(process.env.HOME ?? "", ".config/tripwire/keeper.json");
 const keyRing = JSON.parse(fs.readFileSync(keyFile, "utf8")) as { keeper: Hex; drip?: Hex };
 const keeper = privateKeyToAccount(keyRing.keeper);
 // A separate wallet that gives a brand-new passkey account enough testnet MON to arm a small plan. It never signs plans.
-const dripper = keyRing.drip ? privateKeyToAccount(keyRing.drip) : null;
+const dripper = keyRing.drip && !mainnetMode ? privateKeyToAccount(keyRing.drip) : null;
 if (keeper.address.toLowerCase() !== net.keeper.toLowerCase()) {
   throw new Error(`key file holds ${keeper.address}, plans name ${net.keeper} as their keeper`);
 }
 const chain = { id: net.chainId, name: net.name, nativeCurrency: { name: "MON", symbol: "MON", decimals: 18 }, rpcUrls: { default: { http: [net.rpc] } } } as const;
 const pub = createPublicClient({ chain, transport: http(net.rpc, { retryCount: 4 }) });
 const wallet = createWalletClient({ account: keeper, chain, transport: http(net.rpc) });
-const FEES = { maxFeePerGas: 110_000_000_000n, maxPriorityFeePerGas: 2_000_000_000n } as const;
+if ((await pub.getChainId()) !== net.chainId) throw new Error(`${net.rpc} is not chain ${net.chainId} (${net.name})`);
+// Fee cap from the chain's own gas price, read right before each send so a rising base fee never strands a fill
+// under a stale cap (web/lib/fees.ts).
+const fees = () => liveFees(pub);
 // Monad prices cold state access above Ethereum: a fill estimates ~407k gas on testnet against 289k on an anvil fork.
 // Fills are sized from Monad's own estimate; hostile calls revert inside the enforcer before the swap.
 const ATTACK_GAS = 250_000n;
-const PORT = Number(process.env.PORT ?? 8787);
+const MAINNET_ATTACKS_PER_PLAN = 3;
+const MAINNET_ATTACKS_PER_HOUR = 20;
+const PORT = Number(process.env.PORT ?? (mainnetMode ? 3512 : 8787));
 const WINDOW = 100n;
 const LOOP_MS = 2_000;
 
@@ -64,9 +94,9 @@ type Fill = { index: number; hash: Hex; block: string; amountIn: string; minOut:
 type Attack = { kind: string; hash: Hex; status: string; reason: string };
 type PlanRow = { id: number; holder: Address; delegationHash: Hex; postedTx: Hex; delegation: Hex; fills: Fill[]; attacks: Attack[]; lastError?: string };
 type Point = { t: number; twap: number; spot: number };
-type State = { cursor: string; plans: PlanRow[]; history?: Point[] };
+type State = { cursor: string; plans: PlanRow[]; history?: Point[]; attackAt?: number[] };
 
-const stateFile = path.join(here, "state.json");
+const stateFile = path.join(here, mainnetMode ? "state-mainnet.json" : "state.json");
 const state: State = fs.existsSync(stateFile)
   ? JSON.parse(fs.readFileSync(stateFile, "utf8"))
   : { cursor: String(net.planBookFromBlock), plans: [] };
@@ -183,7 +213,7 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
       plan.lastError = `tranche ${i} preflight: ${String((e as Error).message).split("\n")[0].slice(0, 160)}`;
       continue; // line crossed but the chain would refuse it (balance moved, floor not reachable): never send a doomed tx
     }
-    const hash = await wallet.sendTransaction({ to: net.delegationManager, data, gas, ...FEES });
+    const hash = await wallet.sendTransaction({ to: net.delegationManager, data, gas, ...(await fees()) });
     const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000, pollingInterval: 1_000 });
     log(`plan #${plan.id} tranche ${i}: ${hash} ${r.status}`);
     if (r.status !== "success") plan.lastError = `tranche ${i}: ${hash} reverted ${await revertReason(hash)}`;
@@ -199,7 +229,8 @@ const REVOKED_RECHECK = 30;
 let loopError: string | null = null;
 let loops = 0;
 /** What one fill costs the keeper up front: Monad charges the gas limit (the estimate plus 20%, about 470k) at the fee cap. */
-const FILL_COST = 470_000n * FEES.maxFeePerGas;
+const FILL_GAS = 470_000n;
+let fillCost = FILL_GAS * (await fees()).maxFeePerGas;
 // Snapshots the API serves: computed here, in the loop, so no request ever waits on (or fails with) the public RPC.
 let statusSnap: Record<string, unknown> | null = null;
 const viewSnap = new Map<number, Awaited<ReturnType<typeof planView>>>();
@@ -211,7 +242,7 @@ async function snapshot(head: bigint, twap: number) {
     pub.readContract({ address: net.stable, abi: erc20Abi, functionName: "balanceOf", args: [net.pool] }),
   ]);
   const spotTick = net.wmon.toLowerCase() < net.stable.toLowerCase() ? Number(slot0[1]) : -Number(slot0[1]);
-  statusSnap = { chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds, readAt: Date.now() };
+  statusSnap = { net: net.key, drip: !!dripper, chainId: net.chainId, keeper: keeper.address, keeperGas: String(gas), head: String(head), indexed: String(BigInt(state.cursor) - 1n), plans: state.plans.length, twapTick: twap, twapPrice: tickToPrice(twap), spotTick, spotPrice: tickToPrice(spotTick), poolStable: String(poolStable), twapSeconds: net.twapSeconds, readAt: Date.now() };
 }
 
 async function loop() {
@@ -222,7 +253,9 @@ async function loop() {
       await index(head);
       const tick = await priceTick();
       await sample(tick);
-      await readMainnet();
+      if (mainnetMode) mainnetRead = { price: tickToPrice(tick), tick, block: String(head), at: Date.now() };
+      else await readMainnet();
+      fillCost = FILL_GAS * (await fees()).maxFeePerGas;
       await snapshot(head, tick);
       // one plan's failed send (no gas, RPC error) must not stop the other plans, the views, or the heartbeat
       if (loops % REVOKED_RECHECK === 0) for (const [id, why] of closed) if (why === "revoked") closed.delete(id);
@@ -249,11 +282,26 @@ async function loop() {
 
 // ---------- hostile on purpose ----------
 
-async function attack(planId: number, kind: string): Promise<Attack> {
+// One hostile call at a time, so the per-plan and per-hour caps are checked against what is already on chain.
+let attackQueue: Promise<unknown> = Promise.resolve();
+function attack(planId: number, kind: string): Promise<Attack> {
+  const run = attackQueue.then(() => attackNow(planId, kind));
+  attackQueue = run.catch(() => undefined);
+  return run;
+}
+
+async function attackNow(planId: number, kind: string): Promise<Attack> {
   const plan = state.plans.find((p) => p.id === planId);
   if (!plan) throw new Error("no such plan");
   const prior = plan.attacks.find((a) => a.kind === kind);
   if (prior) return prior;
+  if (mainnetMode) {
+    // every hostile call spends the keeper's real MON: three per plan, twenty an hour across all plans
+    if (plan.attacks.length >= MAINNET_ATTACKS_PER_PLAN) throw new Error(`plan #${planId} already has ${MAINNET_ATTACKS_PER_PLAN} refused calls on chain`);
+    const hourAgo = Date.now() - 3_600_000;
+    state.attackAt = (state.attackAt ?? []).filter((t) => t > hourAgo);
+    if (state.attackAt.length >= MAINNET_ATTACKS_PER_HOUR) throw new Error("the keeper has sent its hostile calls for this hour, try again later");
+  }
   const d = decodeDelegation(plan.delegation);
   const { recipient, tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const tick = await priceTick();
@@ -278,8 +326,10 @@ async function attack(planId: number, kind: string): Promise<Attack> {
     const { i } = live[0];
     data = fillCalldata(net, d, i);
   } else throw new Error("kind is floor, line, recipient or expiry");
-  if ((await pub.getBalance({ address: keeper.address })) < ATTACK_GAS * FEES.maxFeePerGas + parseEther("0.002")) throw new Error("keeper is out of testnet gas");
-  const hash = await wallet.sendTransaction({ to: net.delegationManager, data, gas: ATTACK_GAS, ...FEES });
+  const fee = await fees();
+  if ((await pub.getBalance({ address: keeper.address })) < ATTACK_GAS * fee.maxFeePerGas + parseEther("0.002")) throw new Error(`keeper is out of ${mainnetMode ? "" : "testnet "}gas`);
+  const hash = await wallet.sendTransaction({ to: net.delegationManager, data, gas: ATTACK_GAS, ...fee });
+  if (mainnetMode) state.attackAt!.push(Date.now());
   const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000, pollingInterval: 1_000 });
   const a: Attack = { kind, hash, status: r.status, reason: r.status === "reverted" ? await revertReason(hash) : "DID NOT REVERT" };
   plan.attacks.push(a);
@@ -297,7 +347,7 @@ const dripped = new Set<string>();
 const dripLog: { at: number; ip: string }[] = [];
 
 async function drip(address: string, ip: string) {
-  if (!dripper) throw new Error("drip is off on this keeper");
+  if (!dripper) throw new Error(mainnetMode ? "There is no faucet on mainnet, so fund the account with MON first." : "drip is off on this keeper");
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error("address=0x... required");
   const day = Date.now() - 86_400_000;
   while (dripLog.length && dripLog[0].at < day) dripLog.shift();
@@ -309,7 +359,7 @@ async function drip(address: string, ip: string) {
   dripped.add(address.toLowerCase());
   dripLog.push({ at: Date.now(), ip });
   const w = createWalletClient({ account: dripper, chain, transport: http(net.rpc) });
-  const hash = await w.sendTransaction({ to: address as `0x${string}`, value: DRIP, ...FEES });
+  const hash = await w.sendTransaction({ to: address as `0x${string}`, value: DRIP, ...(await fees()) });
   const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000, pollingInterval: 1_000 });
   log(`drip ${address} ${hash} ${r.status}`);
   if (r.status !== "success") throw new Error(`drip reverted ${hash}`);
@@ -345,7 +395,7 @@ Bun.serve({
     try {
       if (url.pathname === "/api/status") {
         if (!statusSnap) return json({ error: "keeper is starting" }, 503);
-        return json({ ...statusSnap, lastLoop, loopError, fillCost: String(FILL_COST), mainnet: mainnetRead });
+        return json({ ...statusSnap, lastLoop, loopError, fillCost: String(fillCost), mainnet: mainnetRead });
       }
       if (url.pathname === "/api/recent") {
         // one row per plan, newest first: its sales (with what the holder actually received) and every refused call
