@@ -139,7 +139,7 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
             </div>
             <p className="mt-3 text-[13px] leading-5 text-mute">
               Every attempt is a mined transaction.
-              <span className="hidden sm:inline"> The keeper also made {tot.sales} real sales across {tot.plans} plans, each at or above its floor.</span>
+              <span className="hidden sm:inline"> The keeper also made {tot.sales} real {tot.sales === 1 ? "sale" : "sales"} across {tot.plans} {tot.plans === 1 ? "plan" : "plans"}, each at or above its floor.</span>
             </p>
           </div>
         ) : t.recentError ? (
