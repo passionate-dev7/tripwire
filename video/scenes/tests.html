@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>
+<style>
+.code{position:absolute;left:80px;top:150px;width:1040px;background:var(--card);border:1px solid var(--hair2);border-radius:10px;padding:18px 0}
+.code .f{padding:0 22px 12px;font:500 14px "PM";letter-spacing:.1em;color:var(--mute);border-bottom:1px solid var(--hair);margin-bottom:8px}
+.ln{display:flex;gap:18px;height:44px;align-items:center;padding:0 22px;font:400 16px "PM";color:var(--body);white-space:nowrap;position:relative}
+.ln b{color:var(--ash);font-weight:400;width:34px;text-align:right}
+.ln.hot{background:var(--redsoft)}
+.ln.gone span{text-decoration:line-through;color:var(--red)}
+.res{position:absolute;left:1160px;top:150px;width:400px}
+.big{font:500 64px/1 "PM";letter-spacing:-.02em}
+.sub{font:400 18px "PM";color:var(--mute);margin-top:12px;line-height:1.5}
+.fail{margin-top:26px;border-top:1px solid var(--hair)}
+.fail div{min-height:50px;padding:6px 0;display:flex;align-items:center;border-bottom:1px solid var(--hair);font:400 14px/1.35 "PM";color:var(--red);word-break:break-all}
+.hl{position:absolute;left:80px;top:62px;font:500 15px "PM";letter-spacing:.14em;color:var(--mute)}
+.cap2{position:absolute;left:100px;top:660px;width:800px;font:400 18px/1.5 "PM";color:var(--mute)}
+</style>
+<div class="hl" id="hl">THE GUARDS, AND THE TESTS THAT WATCH THEM</div>
+<div class="code"><div class="f">contracts/src/TripwirePlanEnforcer.sol</div>
+<div class="ln" data-l="87"><b>87</b><span>require(!spent[_delegationHash][index], "Tripwire:spent");</span></div>
+<div class="ln" data-l="93"><b>93</b><span>if (tr.atOrAbove) require(priceTick &gt;= tr.lineTick, "Tripwire:below-line");</span></div>
+<div class="ln hot" id="ln94" data-l="94"><b>94</b><span>else require(priceTick &lt;= tr.lineTick, "Tripwire:above-line");</span></div>
+<div class="ln" data-l="120"><b>120</b><span>require(recipient == t.recipient, "Tripwire:recipient");</span></div>
+<div class="ln" data-l="121"><b>121</b><span>require(amountIn == tr.amountIn, "Tripwire:amount");</span></div>
+<div class="ln" data-l="122"><b>122</b><span>require(amountOutMin * 1 ether &gt;= amountIn * tr.minOutPerUnit, "Tripwire:min-out");</span></div></div>
+<div class="cap2" id="cap2"></div>
+<div class="res"><div class="big" id="big"></div><div class="sub" id="sub"></div><div class="fail" id="fail"></div></div>
+<script src="engine.js"></script>
+<script>
+// cues: del (guard deleted), res (restored), pass (first result)
+const del = cue("del", 5), res = cue("res", 10), pass = cue("pass", 1.2);
+const fails = ["testFuzz_only_at_or_below_the_line", "test_hostile_keeper_reverts", "test_staged_plan_fills_as_price_crosses_each_line"];
+window.render = (t) => {
+  $("#hl").style.opacity = eo(seg(t, 0.1, 0.5));
+  document.querySelectorAll(".ln").forEach((l, i) => (l.style.opacity = eo(seg(t, 0.2 + i * 0.12, 0.5 + i * 0.12))));
+  const phase = t < pass ? 0 : t < del ? 1 : t < res ? 2 : 3;
+  const l94 = $("#ln94"); l94.classList.toggle("gone", phase === 2);
+  const big = $("#big"), sub = $("#sub"), fail = $("#fail");
+  if (phase === 0) { big.textContent = ""; sub.textContent = ""; fail.innerHTML = ""; $("#cap2").textContent = ""; }
+  if (phase === 1 || phase === 3) { big.textContent = "19 passed"; big.style.color = "var(--ink)"; sub.innerHTML = "0 failed. forge test, Monad mainnet fork,<br>6 fuzz properties at 512 runs each"; fail.innerHTML = ""; $("#cap2").textContent = phase === 3 ? "line 94 restored: green again" : "the real enforcer, the real DelegationManager, router and pool"; }
+  if (phase === 2) { big.textContent = "3 failed"; big.style.color = "var(--red)"; sub.innerHTML = "guard on line 94 deleted"; fail.innerHTML = fails.map((f) => `<div>FAIL  ${f}</div>`).join(""); $("#cap2").textContent = "delete a guard and the tests that watch it turn red"; }
+  const o = phase === 0 ? 0 : 1; big.style.opacity = o * eo(seg(t, pass, pass + 0.4)); sub.style.opacity = big.style.opacity; fail.style.opacity = 1; $("#cap2").style.opacity = o;
+};
+</script>

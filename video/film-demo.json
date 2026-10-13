@@ -1,0 +1,314 @@
+{
+ "name": "demo",
+ "timings": "vo/out-demo/timings.json",
+ "audio": "vo/out-demo/narration.wav",
+ "out": "tripwire-demo.mp4",
+ "caps": "work/caps-demo",
+ "beats": [
+  {
+   "lines": [
+    "d01"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 0,
+     "se": 4.07,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d02"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 4.07,
+     "se": 7.67,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d03"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 7.67,
+     "se": 13.53,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d04"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 13.53,
+     "se": 19.39,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d05"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 19.39,
+     "se": 23.55,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d06"
+   ],
+   "pieces": [
+    {
+     "src": "work/B.mp4",
+     "ss": 0.3,
+     "se": 6.9,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d07"
+   ],
+   "pieces": [
+    {
+     "src": "work/B.mp4",
+     "ss": 6.9,
+     "se": 15.6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d08"
+   ],
+   "pieces": [
+    {
+     "src": "work/C.mp4",
+     "ss": 0.8,
+     "se": 12.7,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d09"
+   ],
+   "pieces": [
+    {
+     "src": "work/C.mp4",
+     "ss": 12.7,
+     "se": 15.7
+    },
+    {
+     "src": "work/C.mp4",
+     "ss": 27.5,
+     "se": 34,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d10"
+   ],
+   "pieces": [
+    {
+     "src": "work/C.mp4",
+     "ss": 34,
+     "se": 38.4,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d11"
+   ],
+   "pieces": [
+    {
+     "src": "work/X1.mp4",
+     "ss": 0.8,
+     "se": 5.4
+    },
+    {
+     "src": "work/s-chain.mp4",
+     "ss": 0.2,
+     "se": 5.6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d12"
+   ],
+   "pieces": [
+    {
+     "src": "work/C.mp4",
+     "ss": 38.5,
+     "se": 42,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d12b"
+   ],
+   "pieces": [
+    {
+     "src": "work/C.mp4",
+     "ss": 40,
+     "se": 42.1,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d13"
+   ],
+   "pieces": [
+    {
+     "src": "work/F.mp4",
+     "ss": 0,
+     "se": 3.3,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d14"
+   ],
+   "pieces": [
+    {
+     "src": "work/F.mp4",
+     "ss": 3.3,
+     "se": 8.6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d15"
+   ],
+   "pieces": [
+    {
+     "src": "work/F.mp4",
+     "ss": 10.4,
+     "se": 15.2,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d16"
+   ],
+   "pieces": [
+    {
+     "src": "work/X3.mp4",
+     "ss": 0.7,
+     "se": 6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d17"
+   ],
+   "pieces": [
+    {
+     "src": "work/X2.mp4",
+     "ss": 0.7,
+     "se": 5.2
+    },
+    {
+     "src": "work/X2b.mp4",
+     "ss": 0.7,
+     "se": 5,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d18",
+    "d19",
+    "d20",
+    "d20b"
+   ],
+   "pieces": [
+    {
+     "src": "work/s-split.mp4",
+     "ss": 0,
+     "se": 26.71,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d21"
+   ],
+   "pieces": [
+    {
+     "src": "work/G.mp4",
+     "ss": 3.4,
+     "se": 7.6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d21b"
+   ],
+   "pieces": [
+    {
+     "src": "work/s-chain2.mp4",
+     "ss": 0,
+     "se": 5.12,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "d22",
+    "d23"
+   ],
+   "pieces": [
+    {
+     "src": "work/s-end.mp4",
+     "ss": 0,
+     "se": 8.23,
+     "fit": true
+    }
+   ]
+  }
+ ]
+}

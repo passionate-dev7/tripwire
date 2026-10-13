@@ -1,0 +1,89 @@
+<style>
+.road{position:absolute;left:110px;right:110px;top:392px;height:2px;background:var(--hair)}
+.end{position:absolute;top:330px;width:260px}
+.end .k{margin-bottom:10px}
+.end b{display:block;font:500 17px "PM";color:var(--ink);word-break:break-all;font-weight:500}
+#kp{left:110px;top:556px;width:300px}#hd{right:110px;text-align:right;top:556px}
+.parcel{position:absolute;left:0;top:0;width:330px;background:var(--card);border:1px solid var(--hair2);border-radius:10px;opacity:0;will-change:transform}
+.parcel .h{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hair);font:500 13px "PM";letter-spacing:.12em;color:var(--mute)}
+.parcel .r{white-space:nowrap;display:flex;justify-content:space-between;padding:8px 16px;font:400 15px "PM";border-bottom:1px solid var(--hair);color:var(--body)}
+.parcel .r:last-child{border-bottom:0}.parcel .r span:first-child{color:var(--mute)}
+.parcel .bad{background:var(--redsoft);color:var(--ink)}.parcel .bad span:first-child{color:var(--red)}
+#wire{position:absolute;inset:0;pointer-events:none}
+.post{position:absolute;left:795px;width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.lbl{position:absolute;left:834px;font:500 14px "PM";letter-spacing:.12em;color:var(--mute);opacity:0}
+.stamp{position:absolute;left:0;top:0;font:500 22px "PM";color:var(--red);border:2px solid var(--red);border-radius:6px;padding:7px 12px;background:rgba(7,8,10,.92);opacity:0;white-space:nowrap}
+.log{position:absolute;left:230px;right:230px;top:660px}
+.log .row{display:grid;grid-template-columns:460px 1fr 160px;gap:18px;height:38px;align-items:center;border-top:1px solid var(--hair);font:400 16px "PM";opacity:0}
+.log .row .a{color:var(--red)}.log .row .b{color:var(--body)}.log .row .c{color:var(--mute);text-align:right}
+.log .row.ok .a{color:var(--ink)}
+.ttl{position:absolute;left:110px;top:84px;font:500 15px "PM";letter-spacing:.14em;color:var(--mute);opacity:0}
+.hl{position:absolute;left:110px;top:116px;width:1100px;font:500 38px/1.15 "PS";letter-spacing:-.01em;opacity:0}
+.land{position:absolute;right:110px;top:440px;text-align:right;font:500 20px "PM";color:var(--ink);opacity:0;line-height:1.5}
+</style>
+<div class="ttl" id="ttl">ONE SALE, CHECKED ON EVERY REDEMPTION</div>
+<div class="hl" id="hl"></div>
+<div class="road"></div>
+<div class="end" id="kp"><div class="k">keeper</div><b id="kpa"></b></div>
+<div class="end" id="hd"><div class="k">holder</div><b>the passkey address that signed the plan</b></div>
+<svg id="wire" viewBox="0 0 1600 900"><path id="w1" fill="none" stroke="#ff6161" stroke-width="5" stroke-linecap="round"/><path id="w2" fill="none" stroke="#ff6161" stroke-width="5" stroke-linecap="round"/></svg>
+<div class="post" style="top:240px"></div><div class="post" style="top:540px"></div>
+<div class="lbl" id="lb1" style="top:232px">LINE</div><div class="lbl" id="lb2" style="top:283px">FLOOR</div><div class="lbl" id="lb3" style="top:466px">AMOUNT</div><div class="lbl" id="lb4" style="top:532px">RECIPIENT</div>
+<div class="parcel" id="p0"></div><div class="parcel" id="p1"></div><div class="parcel" id="p2"></div><div class="parcel" id="p3"></div><div class="parcel" id="p4"></div>
+<div class="stamp" id="s0"></div><div class="stamp" id="s1"></div><div class="stamp" id="s2"></div><div class="stamp" id="s3"></div>
+<div class="land" id="land"></div>
+<div class="log" id="log"></div>
+<script src="engine.js"></script>
+<script>
+const A = cue("attempts", []), OK = cue("ok", null);
+$("#kpa").textContent = cue("keeper", "");
+$("#hl").textContent = cue("headline", "");
+const W = 800, TOP = 250, BOT = 535, Y = 393, PW = 330, LEFT = 150;
+const mk = (el, rows) => { el.innerHTML = '<div class="h"><span>SALE REQUEST</span><span>from the keeper</span></div>' + rows.map(([k, v, bad]) => `<div class="r ${bad ? "bad" : ""}"><span>${k}</span><span>${v}</span></div>`).join(""); };
+A.forEach((a, i) => mk($("#p" + i), a.rows));
+if (OK) mk($("#p4"), OK.rows);
+const log = $("#log");
+const ORDER = [...A.map((a, i) => ({ a, k: i })), ...(OK ? [{ a: OK, k: A.length }] : [])].sort((x, y) => x.a.at - y.a.at);
+ORDER.forEach(({ a, k: i }) => { const d = document.createElement("div"); d.className = "row" + (a.reason ? "" : " ok"); d.id = "lg" + i; d.style.order = 0; d.innerHTML = `<span class="a">${a.reason ?? "filled, status success"}</span><span class="b">${a.what}</span><span class="c">${a.tx}</span>`; log.append(d); });
+A.forEach((a, i) => { $("#s" + i).textContent = a.reason; });
+const wirePath = (disp, open) => {
+  const mid = Y;
+  if (open > 0) {
+    const g = 26 + open * 130;
+    $("#w1").setAttribute("d", `M ${W} ${TOP} L ${W} ${mid - g}`); $("#w2").setAttribute("d", `M ${W} ${mid + g} L ${W} ${BOT}`);
+  } else {
+    $("#w1").setAttribute("d", `M ${W} ${TOP} Q ${W - disp * 1.5} ${mid - 110} ${W - disp} ${mid}`); $("#w2").setAttribute("d", `M ${W - disp} ${mid} Q ${W - disp * 1.5} ${mid + 110} ${W} ${BOT}`);
+  }
+};
+const pulse = (t, s, a, b) => eo(seg(t, s, s + a)) * (1 - eo(seg(t, s + a, s + a + b)));
+window.render = (t) => {
+  const t0 = cue("t0", 0.2);
+  $("#ttl").style.opacity = eo(seg(t, t0, t0 + 0.4));
+  $("#hl").style.opacity = eo(seg(t, t0 + 0.1, t0 + 0.6));
+  [1, 2, 3, 4].forEach((n) => ($("#lb" + n).style.opacity = eo(seg(t, t0 + 0.5 + n * 0.25, t0 + 0.9 + n * 0.25))));
+  $("#kp").style.opacity = $("#hd").style.opacity = eo(seg(t, t0, t0 + 0.5));
+  let disp = 0, open = 0;
+  A.forEach((a, i) => {
+    const p = $("#p" + i), st = $("#s" + i), row = $("#lg" + i), s = a.at;
+    const go = eo(seg(t, s, s + 0.95)), back = eo(seg(t, s + 1.3, s + 2.0));
+    p.style.transform = `translate(${LEFT + (W - PW - 6 - LEFT) * go - back * 150}px, ${Y - 74}px)`;
+    p.style.opacity = eo(seg(t, s, s + 0.2)) * (1 - seg(t, s + 1.8, s + 2.25));
+    disp = Math.max(disp, pulse(t, s + 0.9, 0.12, 0.7) * 34);
+    const sv = eo(seg(t, s + 1.0, s + 1.25));
+    st.style.opacity = sv * (1 - seg(t, s + 2.2, s + 2.6));
+    st.style.transform = `translate(${W + 36}px, ${Y - 26}px) scale(${0.9 + 0.1 * sv})`;
+    row.style.opacity = eo(seg(t, s + 1.3, s + 1.7));
+  });
+  if (OK) {
+    const s = OK.at, p = $("#p4");
+    const go = eo(seg(t, s, s + 0.9)), thru = eo(seg(t, s + 0.9, s + 2.0));
+    open = pulse(t, s + 0.7, 0.35, 1.2);
+    p.style.transform = `translate(${LEFT + (W - PW - 6 - LEFT) * go + (1600 - 110 - 260 - W - 40) * thru}px, ${Y - 74}px)`;
+    p.style.opacity = eo(seg(t, s, s + 0.2)) * (1 - seg(t, s + 2.4, s + 2.8));
+    $("#land").innerHTML = OK.land;
+    $("#land").style.opacity = eo(seg(t, s + 1.9, s + 2.4)) * (1 - seg(t, s + 4.6, s + 5.1));
+    $("#lg" + A.length).style.opacity = eo(seg(t, s + 2.0, s + 2.4));
+  }
+  wirePath(disp, open);
+};
+</script>

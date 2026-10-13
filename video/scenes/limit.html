@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>
+<style>
+.road{position:absolute;left:110px;right:110px;top:392px;height:2px;background:var(--hair)}
+.gate{position:absolute;left:760px;top:300px;width:80px;height:190px;border:2px dashed var(--ash);border-radius:10px;opacity:0}
+.gl{position:absolute;left:640px;top:238px;width:320px;text-align:center;font:500 15px "PM";letter-spacing:.12em;color:var(--mute);opacity:0}
+.parcel{position:absolute;left:0;top:0;width:330px;background:var(--card);border:1px solid var(--hair2);border-radius:10px;opacity:0;will-change:transform}
+.parcel .h{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hair);font:500 13px "PM";letter-spacing:.12em;color:var(--mute)}
+.parcel .r{white-space:nowrap;display:flex;justify-content:space-between;padding:8px 16px;font:400 15px "PM";border-bottom:1px solid var(--hair);color:var(--body)}
+.parcel .r:last-child{border-bottom:0}.parcel .r span:first-child{color:var(--mute)}
+.parcel .bad{background:var(--redsoft);color:var(--ink)}.parcel .bad span:first-child{color:var(--red)}
+.ttl{position:absolute;left:110px;top:84px;font:500 15px "PM";letter-spacing:.14em;color:var(--mute);opacity:0}
+.hl{position:absolute;left:110px;top:116px;width:1200px;font:500 38px/1.15 "PS";letter-spacing:-.01em;opacity:0}
+.end{position:absolute;top:556px;width:300px;font:500 17px "PM"}.end .k{margin-bottom:10px}
+#kp{left:110px}#hd{right:110px;text-align:right}
+.res{position:absolute;right:110px;top:700px;font:500 24px "PM";color:var(--ink);opacity:0;text-align:right}
+</style>
+<div class="ttl" id="ttl">A SPENDING LIMIT</div><div class="hl" id="hl"></div>
+<div class="road"></div><div class="gl" id="gl">LIMIT: 0.1 MON A DAY</div><div class="gate" id="gate"></div>
+<div class="end" id="kp"><div class="k">keeper</div>0x8a91..4468</div><div class="end" id="hd"><div class="k">goes to</div>whoever the keeper names</div>
+<div class="parcel" id="p0"></div><div class="parcel" id="p1"></div>
+<div class="res" id="res"></div>
+<script src="engine.js"></script>
+<script>
+$("#hl").textContent = cue("headline", "");
+const P = [[["sell", "0.05 MON"], ["price", "any price", 1], ["floor", "none", 1], ["pays", "the keeper", 1]], [["sell", "0.05 MON"], ["price", "any price", 1], ["floor", "none", 1], ["pays", "the keeper", 1]]];
+P.forEach((rows, i) => { $("#p" + i).innerHTML = '<div class="h"><span>SALE REQUEST</span><span>from the keeper</span></div>' + rows.map(([k, v, b]) => `<div class="r ${b ? "bad" : ""}"><span>${k}</span><span>${v}</span></div>`).join(""); });
+const Y = 393;
+window.render = (t) => {
+  const t0 = cue("t0", 0.2);
+  $("#ttl").style.opacity = eo(seg(t, t0, t0 + 0.4)); $("#hl").style.opacity = eo(seg(t, t0 + 0.1, t0 + 0.6));
+  $("#gate").style.opacity = $("#gl").style.opacity = eo(seg(t, t0 + 0.6, t0 + 1.0));
+  [cue("a", 2.0), cue("b", 5.0)].forEach((s, i) => {
+    const go = eo(seg(t, s, s + 3.2));
+    const p = $("#p" + i);
+    p.style.transform = `translate(${150 + (1600 - 110 - 260 - 330 - 40 - 150) * go}px, ${Y - 74}px)`;
+    p.style.opacity = eo(seg(t, s, s + 0.25)) * (1 - seg(t, s + 3.1, s + 3.5));
+  });
+  $("#res").innerHTML = cue("res", "");
+  $("#res").style.opacity = eo(seg(t, cue("resAt", 6.0), cue("resAt", 6.0) + 0.5));
+};
+</script>

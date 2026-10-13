@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>
+<style>
+.panel{position:absolute;left:120px;top:60px;width:1360px;height:765px;overflow:hidden;border:1px solid var(--hair2);border-radius:10px;background:#000}
+.stage{}#stage{position:absolute;left:0;top:0;width:1360px;transform-origin:0 0;will-change:transform}
+.panel img{position:absolute;left:0;top:0;width:1360px;height:765px;transform-origin:0 0;will-change:transform}
+.spot{position:absolute;border:3px solid var(--ink);border-radius:8px;box-shadow:0 0 0 2000px rgba(7,8,10,.66);opacity:0}
+.src{position:absolute;left:120px;top:842px;font:400 16px "PM";color:var(--mute);white-space:nowrap}
+.src b{color:var(--ink);font-weight:500}
+</style>
+<div class="panel" id="panel"><div id="stage"><img id="img"><div class="spot" id="spot"></div></div></div>
+<div class="src" id="src"></div>
+<script src="engine.js"></script>
+<script>
+// cues: img, hl:[l,t,w,h] fractions of the image, zoom, src (label), t0, hlAt, dur
+const img = $("#img"); img.src = cue("img", "");
+const ASP = cue("aspect", 1.78), PHH = Math.round(1360 / ASP); $("#panel").style.height = PHH + "px"; $("#panel").style.top = Math.round((800 - PHH) / 2) + "px"; img.style.height = PHH + "px"; $("#src").style.top = Math.round((800 - PHH) / 2) + PHH + 22 + "px";
+$("#src").innerHTML = cue("src", "");
+const hl = cue("hl", [0.1, 0.1, 0.5, 0.2]), Z = cue("zoom", 1.5), PW = 1360, PH = Math.round(1360 / ASP);
+window.render = (t) => {
+  const a = cue("t0", 0.1), h = cue("hlAt", 1.2), z = Z > 1 ? eio(seg(t, h, h + 1.4)) : 0;
+  $("#panel").style.opacity = eo(seg(t, a, a + 0.35));
+  $("#src").style.opacity = eo(seg(t, a + 0.3, a + 0.7));
+  const cx = (hl[0] + hl[2] / 2) * PW, cy = (hl[1] + hl[3] / 2) * PH;
+  const s = 1 + (Z - 1) * z, drift = 1 + 0.012 * seg(t, 0, cue("dur", 8)), k = s * drift;
+  const tx = Math.min(0, Math.max(PW - PW * k, (PW / 2 - cx * s) * z)), ty = Math.min(0, Math.max(PH - PH * k, (PH / 2 - cy * s) * z));
+  $("#stage").style.transform = `translate(${tx}px,${ty}px) scale(${k})`;
+  const sp = $("#spot");
+  sp.style.left = hl[0] * PW + "px"; sp.style.top = hl[1] * PH + "px"; sp.style.width = hl[2] * PW + "px"; sp.style.height = hl[3] * PH + "px";
+  sp.style.borderWidth = 3 / k + "px";
+  sp.style.opacity = eo(seg(t, h - 0.2, h + 0.5));
+};
+</script>

@@ -1,0 +1,128 @@
+[
+ {
+  "id": "p01",
+  "text": "Was able to sell twenty-five percent at zero point zero three three. Stop losses entered for now.",
+  "cap": "\"Was able to sell 25% at 0.033 stop losses entered for now\"",
+  "gap": 0.65
+ },
+ {
+  "id": "p02",
+  "text": "That is a real Monad holder, planning the November unlock by hand.",
+  "cap": "A Monad holder's exit plan for the November unlock, written as a comment.",
+  "gap": 0.65
+ },
+ {
+  "id": "p03",
+  "text": "Ten point seven billion team tokens unlock, around ninety percent of the circulating supply.",
+  "cap": "10.7 billion MON unlock: around 90 percent of the circulating supply.",
+  "gap": 0.65
+ },
+ {
+  "id": "p03b",
+  "text": "On r slash Monad's November thread alone, nineteen comments, and one unlock date for every holder.",
+  "cap": "r/Monad, November strategies thread: 19 comments, one unlock date for every holder.",
+  "gap": 0.65
+ },
+ {
+  "id": "p04",
+  "text": "Anything that carries it out has to hold his key.",
+  "cap": "Anything that carries it out has to hold his key.",
+  "gap": 0.65
+ },
+ {
+  "id": "p05",
+  "text": "As one trader put it: the Telegram bot is where your wallet gets drained.",
+  "cap": "\"The Telegram bot is where your wallet gets drained.\"",
+  "gap": 0.65
+ },
+ {
+  "id": "p06",
+  "text": "Another holder wants a real spot stop loss, with the Mon staying in his own wallet.",
+  "cap": "\"Looking for a DEX on Monad with a real spot stop-loss\"",
+  "gap": 0.65
+ },
+ {
+  "id": "p07",
+  "text": "A spending limit caps how much a keeper sells. Not at what price, and not to whom.",
+  "cap": "A spending limit caps how much. Not at what price, and not to whom.",
+  "gap": 0.65
+ },
+ {
+  "id": "p08",
+  "text": "So, let a bot sell for you. The chain makes sure it can only make the sale you signed.",
+  "cap": "Let a bot sell for you. The chain makes sure it can only make the sale you signed.",
+  "gap": 0.65
+ },
+ {
+  "id": "p09",
+  "text": "You sign your exit plan once, with a pass key. No extension, no seed phrase.",
+  "cap": "You sign once with a passkey. No extension, no seed phrase.",
+  "gap": 0.65
+ },
+ {
+  "id": "p10",
+  "text": "The keeper may sell only at your line, never below your floor, only the amount you signed, only to you.",
+  "cap": "Only at your line. Never below your floor. Only the amount you signed. Only to you.",
+  "gap": 0.65
+ },
+ {
+  "id": "p11",
+  "text": "Monad checks all of it on every sale. A hacked keeper can try, and the contract refuses.",
+  "cap": "Monad checks every sale. A hacked keeper can try, and the contract refuses.",
+  "gap": 0.65
+ },
+ {
+  "id": "p12",
+  "text": "So we let the keeper cheat on purpose. Forty-one forbidden sales sent, forty-one reverted, none paid out, each a real transaction on Monad.",
+  "cap": "41 forbidden sales sent, 41 reverted, 0 paid out. Each a real transaction.",
+  "gap": 0.65
+ },
+ {
+  "id": "p13",
+  "text": "Each one is a real transaction on Monad, and its reason is read from the receipt.",
+  "cap": "Each is a real transaction on Monad. The reason is read from the receipt.",
+  "gap": 0.65
+ },
+ {
+  "id": "p14",
+  "text": "The contract suite runs on a Monad mainnet fork, and deleting any one guard turns its tests red.",
+  "cap": "Mainnet-fork test suite. Delete any one guard and its tests turn red.",
+  "gap": 0.65
+ },
+ {
+  "id": "p15",
+  "text": "A fill costs about four hundred seventy-five thousand gas, and Monad charges the whole limit.",
+  "cap": "A fill costs about 475,000 gas, and Monad charges the whole gas limit.",
+  "gap": 0.65
+ },
+ {
+  "id": "p16",
+  "text": "We found its reserve rule by losing a transaction to it.",
+  "cap": "We found Monad's reserve rule by losing a transaction to it.",
+  "gap": 0.65
+ },
+ {
+  "id": "p17",
+  "text": "MetaMask's delegation contracts already live on Monad, and E I P seven seven oh two keeps your Mon at your own address.",
+  "cap": "MetaMask delegations on Monad, EIP-7702: your MON stays at your address until a sale.",
+  "gap": 0.65
+ },
+ {
+  "id": "p19",
+  "text": "The enforcer is a standard MetaMask caveat, so any Monad wallet or agent can give a keeper the same blast radius.",
+  "cap": "A standard MetaMask caveat: any Monad wallet or agent can give a keeper the same blast radius.",
+  "gap": 0.65
+ },
+ {
+  "id": "p20",
+  "text": "MetaMask's head of developer relations put the rule in one line: make sure the compromised agent still can't hurt you.",
+  "cap": "\"Make sure the compromised agent still can't hurt you.\"",
+  "gap": 0.65
+ },
+ {
+  "id": "p21",
+  "text": "That is trip wire. Open the live site, sign a plan, and try to make the keeper cheat.",
+  "cap": "tripwire-three.vercel.app",
+  "gap": 0.65
+ }
+]

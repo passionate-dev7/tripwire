@@ -1,0 +1,20 @@
+<style>
+#mark{position:absolute;left:600px;top:120px;width:400px;height:400px}
+.wm{position:absolute;left:0;right:0;top:540px;text-align:center;font:600 92px "PS";letter-spacing:-.03em;opacity:0}
+.tag{position:absolute;left:0;right:0;top:664px;text-align:center;font:400 28px "PS";color:var(--body);opacity:0}
+.url{position:absolute;left:0;right:0;top:730px;text-align:center;font:500 26px "PM";color:var(--ink);opacity:0}
+</style>
+<svg id="mark" viewBox="0 0 1024 1024"><g transform="translate(0 -10)"><line id="ln" x1="110" y1="430" x2="914" y2="430" stroke="#ff6161" stroke-width="52" stroke-linecap="round" stroke-dasharray="804" stroke-dashoffset="804"/><path id="pc" d="M140 260 L300 180 L400 260 L730 710" fill="none" stroke="#f4f4f6" stroke-width="68" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1200" stroke-dashoffset="1200"/><circle id="dt" cx="524" cy="430" r="0" fill="#ff6161" stroke="#07080a" stroke-width="30"/></g></svg>
+<div class="wm" id="wm">tripwire</div><div class="tag" id="tag"></div><div class="url" id="url"></div>
+<script src="engine.js"></script>
+<script>
+$("#tag").textContent = cue("tag", ""); $("#url").textContent = cue("url", "");
+window.render = (t) => {
+  $("#ln").style.strokeDashoffset = 804 * (1 - eio(seg(t, 0.2, 1.0)));
+  $("#pc").style.strokeDashoffset = 1200 * (1 - eio(seg(t, 0.8, 2.0)));
+  const d = eo(seg(t, 1.5, 1.9)); $("#dt").setAttribute("r", 78 * d);
+  $("#wm").style.opacity = eo(seg(t, cue("word", 2.0), cue("word", 2.0) + 0.5));
+  $("#tag").style.opacity = eo(seg(t, cue("tagAt", 2.8), cue("tagAt", 2.8) + 0.5));
+  $("#url").style.opacity = eo(seg(t, cue("urlAt", 3.6), cue("urlAt", 3.6) + 0.5));
+};
+</script>

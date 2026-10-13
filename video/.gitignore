@@ -1,0 +1,6 @@
+work/
+asm-*/
+vo/out-*/
+vo/old-default-voice/
+*.log
+*.mp4

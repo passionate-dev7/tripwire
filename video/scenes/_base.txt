@@ -1,0 +1,10 @@
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>

@@ -1,0 +1,158 @@
+[
+ {
+  "id": "d01",
+  "text": "What can the bot that sells your Mon do, if somebody takes it over?",
+  "cap": "What can the bot that sells your MON do, if somebody takes it over?",
+  "gap": 0.7
+ },
+ {
+  "id": "d02",
+  "text": "On this plan, nothing I did not sign. So first, I write the plan.",
+  "cap": "On this plan, nothing I did not sign. So first, I write the plan.",
+  "gap": 0.65
+ },
+ {
+  "id": "d03",
+  "text": "Three lines. Two stops, which sell if Mon falls to the line. One target, which sells if it rises to it.",
+  "cap": "Three lines. Two stops sell if MON falls to the line. One target sells if it rises to it.",
+  "gap": 0.65
+ },
+ {
+  "id": "d04",
+  "text": "The target is still above today's price, so I pull it just under, and the keeper should sell it right away.",
+  "cap": "I pull the target just under today's price, so the keeper should sell it right away.",
+  "gap": 0.65
+ },
+ {
+  "id": "d05",
+  "text": "Every line carries a floor, the lowest price the keeper may ever accept.",
+  "cap": "Every line carries a floor: the lowest price the keeper may accept.",
+  "gap": 0.65
+ },
+ {
+  "id": "d06",
+  "text": "I need a wallet. A pass key is the wallet, so there is no extension and no seed phrase.",
+  "cap": "A passkey is the wallet. No extension, no seed phrase.",
+  "gap": 0.65
+ },
+ {
+  "id": "d07",
+  "text": "The page sends me a little testnet Mon, and one pass key prompt signs the whole plan.",
+  "cap": "A little testnet MON, then one passkey prompt signs the whole plan.",
+  "gap": 0.65
+ },
+ {
+  "id": "d08",
+  "text": "That single signature sets the Mon aside, upgrades my address, and arms the plan on Monad.",
+  "cap": "One signature: MON set aside, address upgraded, plan armed on Monad.",
+  "gap": 0.65
+ },
+ {
+  "id": "d09",
+  "text": "Now I watch. The keeper reads the price, and my target line is already reached.",
+  "cap": "The keeper watches the price. My target line is already reached.",
+  "gap": 0.65
+ },
+ {
+  "id": "d10",
+  "text": "It sells exactly the amount I signed, once.",
+  "cap": "It sells exactly the amount I signed, once.",
+  "gap": 0.65
+ },
+ {
+  "id": "d11",
+  "text": "I do not trust the page, so I read the sale back from the chain. Status success, and the proceeds landed at my own address.",
+  "cap": "Read back from the chain: status success, proceeds at my own address.",
+  "gap": 0.65
+ },
+ {
+  "id": "d12",
+  "text": "The two stops sit far below the price. Nothing else sold.",
+  "cap": "The two stops sit far below the price. Nothing else sold.",
+  "gap": 0.65
+ },
+ {
+  "id": "d12b",
+  "text": "That is the whole loop: write the plan, sign once, watch the keeper, and try to break it.",
+  "cap": "The whole loop: write the plan, sign once, watch the keeper, try to break it.",
+  "gap": 0.7
+ },
+ {
+  "id": "d13",
+  "text": "Now the bad day. Assume the keeper is hacked, and it tries to cheat.",
+  "cap": "The bad day: the keeper is hacked and tries to cheat.",
+  "gap": 0.65
+ },
+ {
+  "id": "d14",
+  "text": "First, a sale before the price has reached my line.",
+  "cap": "1. Sell before the price reaches my line.",
+  "gap": 0.65
+ },
+ {
+  "id": "d15",
+  "text": "Second, send the proceeds to the keeper itself.",
+  "cap": "2. Send the proceeds to the keeper.",
+  "gap": 0.65
+ },
+ {
+  "id": "d16",
+  "text": "Third, a fill after the end date. The timestamp caveat refuses that too.",
+  "cap": "3. Fill after the end date: refused by the timestamp caveat.",
+  "gap": 0.65
+ },
+ {
+  "id": "d17",
+  "text": "Each one is a real transaction on Monad testnet, mined with status zero, and the reason is read from the receipt, not from the page.",
+  "cap": "Each is a real transaction, mined with status 0. The reason comes from the receipt.",
+  "gap": 0.65
+ },
+ {
+  "id": "d18",
+  "text": "Here is why nobody can cheat. The plan is a MetaMask delegation with two caveats: trip wire's own enforcer, and a timestamp.",
+  "cap": "The plan is a MetaMask delegation with two caveats: tripwire's enforcer and a timestamp.",
+  "gap": 0.65
+ },
+ {
+  "id": "d19",
+  "text": "The enforcer runs inside every redemption, on Monad. It checks the line, the floor, the amount, and the recipient.",
+  "cap": "The enforcer runs inside every redemption, on Monad: line, floor, amount, recipient.",
+  "gap": 0.65
+ },
+ {
+  "id": "d20",
+  "text": "Off chain, the keeper only watches the price, and asks Monad's own gas estimate before it sends anything.",
+  "cap": "Off chain, the keeper only watches the price and asks Monad's gas estimate first.",
+  "gap": 0.65
+ },
+ {
+  "id": "d20b",
+  "text": "The site itself is a static export with no server functions, so the only live process off chain is the keeper.",
+  "cap": "The site is a static export with no server functions. Only the keeper runs off chain.",
+  "gap": 0.7
+ },
+ {
+  "id": "d21",
+  "text": "When I am done, one transaction revokes the plan.",
+  "cap": "When I am done, one transaction revokes the plan.",
+  "gap": 0.65
+ },
+ {
+  "id": "d21b",
+  "text": "And the chain confirms it: the plan is disabled, so nothing can fill it again.",
+  "cap": "The chain confirms it: the plan is disabled and cannot be filled again.",
+  "gap": 0.7
+ },
+ {
+  "id": "d22",
+  "text": "Let a bot sell for you. The chain makes sure it only makes the sale you signed.",
+  "cap": "Let a bot sell for you. The chain makes sure it only makes the sale you signed.",
+  "gap": 0.45
+ },
+ {
+  "id": "d23",
+  "text": "Open the live site, sign a plan, and press make it try.",
+  "cap": "tripwire-three.vercel.app",
+  "gap": 0.65
+ }
+]

@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>
+<style>
+html,body{background:transparent}
+.c{position:absolute;left:0;right:0;bottom:46px;display:flex;justify-content:center}
+.c div{max-width:1280px;background:rgba(7,8,10,.86);border:1px solid var(--hair2);border-radius:10px;padding:13px 26px 15px;font:500 32px/1.25 "PS";letter-spacing:-.005em;text-align:center;color:var(--ink)}
+</style>
+<div class="c"><div id="t"></div></div>
+<script src="engine.js"></script>
+<script>$("#t").textContent = CUES.text || ""; window.render = () => {};</script>

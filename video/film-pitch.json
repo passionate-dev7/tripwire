@@ -1,0 +1,237 @@
+{
+ "name": "pitch",
+ "timings": "vo/out-pitch/timings.json",
+ "audio": "vo/out-pitch/narration.wav",
+ "out": "tripwire-pitch.mp4",
+ "caps": "work/caps-pitch",
+ "beats": [
+  {
+   "lines": [
+    "p01",
+    "p02"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-reddit1.mp4",
+     "ss": 0.15,
+     "se": 10.39
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p03"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-unlock.mp4",
+     "ss": 0.15,
+     "se": 5.54
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p03b"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-reddit2.mp4",
+     "ss": 0.15,
+     "se": 6.01
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p04",
+    "p05"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-xdrain.mp4",
+     "ss": 0.15,
+     "se": 7.33
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p06"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-xstop.mp4",
+     "ss": 0.15,
+     "se": 5.01
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p07"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-limit.mp4",
+     "ss": 0.15,
+     "se": 4.86
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p08"
+   ],
+   "pieces": [
+    {
+     "src": "work/A2.mp4",
+     "ss": 0.3,
+     "se": 5.3,
+     "fit": true,
+     "vf": "crop=1440:810:235:270"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p09"
+   ],
+   "pieces": [
+    {
+     "src": "work/B.mp4",
+     "ss": 0.3,
+     "se": 7,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p10",
+    "p11"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-wire.mp4",
+     "ss": 0.15,
+     "se": 11.23
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p12"
+   ],
+   "pieces": [
+    {
+     "src": "work/P.mp4",
+     "ss": 0.9,
+     "se": 9.4,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p13"
+   ],
+   "pieces": [
+    {
+     "src": "work/X2.mp4",
+     "ss": 0.7,
+     "se": 5.6,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p14"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-tests.mp4",
+     "ss": 0.15,
+     "se": 5.94
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p15"
+   ],
+   "pieces": [
+    {
+     "src": "work/Xg.mp4",
+     "ss": 0.9,
+     "se": 7.3,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p16"
+   ],
+   "pieces": [
+    {
+     "src": "work/Xr.mp4",
+     "ss": 0.9,
+     "se": 6.2,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p17"
+   ],
+   "pieces": [
+    {
+     "src": "work/s-split.mp4",
+     "ss": 0.3,
+     "se": 9.5,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p19"
+   ],
+   "pieces": [
+    {
+     "src": "work/s-split.mp4",
+     "ss": 12,
+     "se": 20,
+     "fit": true
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p20"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-xjudge.mp4",
+     "ss": 0.15,
+     "se": 6.81
+    }
+   ]
+  },
+  {
+   "lines": [
+    "p21"
+   ],
+   "pieces": [
+    {
+     "src": "work/p-end.mp4",
+     "ss": 0.15,
+     "se": 5.06
+    }
+   ]
+  }
+ ]
+}

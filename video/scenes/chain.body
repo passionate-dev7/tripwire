@@ -1,0 +1,24 @@
+<style>
+.wrap{position:absolute;left:260px;right:260px;top:150px}
+.ttl{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);margin-bottom:10px;opacity:0}
+.big{font:500 44px/1.1 "PS";letter-spacing:-.01em;margin-bottom:30px;opacity:0}
+.row{display:grid;grid-template-columns:48px 360px 1fr;align-items:center;min-height:62px;border-top:1px solid var(--hair);opacity:0;font:400 20px "PM"}
+.row .m{width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:15px}
+.row .l{color:var(--mute)}.row .v{color:var(--ink);word-break:break-all}
+.row .v i{font-style:normal;color:var(--mute)}
+.foot{margin-top:26px;font:400 16px "PM";color:var(--mute);opacity:0;line-height:1.6}
+</style>
+<div class="wrap"><div class="ttl" id="ttl"></div><div class="big" id="big"></div><div id="rows"></div><div class="foot" id="foot"></div></div>
+<script src="engine.js"></script>
+<script>
+// cues: title, big, rows [[label, value]], step, t0, foot
+const R = cue("rows", []), step = cue("step", 1.0), t0 = cue("t0", 0.3);
+$("#ttl").textContent = cue("title", ""); $("#big").textContent = cue("big", ""); $("#foot").innerHTML = cue("foot", "");
+R.forEach(([l, v], i) => { const d = document.createElement("div"); d.className = "row"; d.id = "r" + i; d.innerHTML = `<span class="m">&#10003;</span><span class="l">${l}</span><span class="v">${v}</span>`; $("#rows").append(d); });
+window.render = (t) => {
+  $("#ttl").style.opacity = eo(seg(t, t0, t0 + 0.4));
+  $("#big").style.opacity = eo(seg(t, t0 + 0.2, t0 + 0.7));
+  R.forEach((_, i) => { const s = t0 + 0.8 + i * step, r = $("#r" + i); r.style.opacity = eo(seg(t, s, s + 0.4)); r.style.transform = `translateY(${10 * (1 - eo(seg(t, s, s + 0.4)))}px)`; });
+  $("#foot").style.opacity = eo(seg(t, t0 + 1.0 + R.length * step, t0 + 1.5 + R.length * step));
+};
+</script>
