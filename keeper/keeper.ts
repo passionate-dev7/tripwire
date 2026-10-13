@@ -169,8 +169,8 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
   plan.lastError = undefined;
   const { tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const expiry = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
-  if (expiry * 1000 < Date.now()) return;
-  if (await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [plan.delegationHash] })) return;
+  if (expiry * 1000 < Date.now()) return void closed.set(plan.id, "done");
+  if (await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [plan.delegationHash] })) return void closed.set(plan.id, "revoked");
   for (let i = 0; i < tranches.length; i++) {
     const t = tranches[i];
     if (!lineReached(t, tick)) continue;
@@ -192,6 +192,10 @@ async function tryFill(plan: PlanRow, d: Delegation, tick: number) {
 }
 
 let lastLoop = 0;
+// Plans that can never fill again are skipped by the loop: every tranche spent or past expiry is final; a revoke can be
+// undone on the DelegationManager, so revoked plans are re-read every REVOKED_RECHECK loops.
+const closed = new Map<number, "done" | "revoked">();
+const REVOKED_RECHECK = 30;
 let loopError: string | null = null;
 let loops = 0;
 /** What one fill costs the keeper up front: Monad charges the gas limit (the estimate plus 20%, about 470k) at the fee cap. */
@@ -221,7 +225,9 @@ async function loop() {
       await readMainnet();
       await snapshot(head, tick);
       // one plan's failed send (no gas, RPC error) must not stop the other plans, the views, or the heartbeat
+      if (loops % REVOKED_RECHECK === 0) for (const [id, why] of closed) if (why === "revoked") closed.delete(id);
       for (const plan of state.plans) {
+        if (closed.has(plan.id)) continue;
         try {
           await tryFill(plan, decodeDelegation(plan.delegation), tick);
         } catch (e) {
@@ -229,7 +235,7 @@ async function loop() {
           log(`plan #${plan.id}: ${plan.lastError}`);
         }
       }
-      if (loops++ % 3 === 0) for (const plan of state.plans) viewSnap.set(plan.id, await planView(plan));
+      if (loops++ % 3 === 0) for (const plan of state.plans) if (!closed.has(plan.id) || !viewSnap.has(plan.id)) viewSnap.set(plan.id, await planView(plan));
       persist();
       lastLoop = Date.now();
       loopError = null;
@@ -317,6 +323,9 @@ async function planView(p: PlanRow) {
   const { tranches } = decodeTranches(d.caveats[0].terms, d.caveats[0].enforcer);
   const spent = await Promise.all(tranches.map((_, i) => pub.readContract({ address: d.caveats[0].enforcer, abi: abis.enforcer, functionName: "spent", args: [p.delegationHash, BigInt(i)] })));
   const revoked = await pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [p.delegationHash] });
+  const expiresAt = Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`));
+  if (spent.every(Boolean) || expiresAt * 1000 < Date.now()) closed.set(p.id, "done");
+  else if (revoked) closed.set(p.id, "revoked");
   return {
     id: p.id, holder: p.holder, delegationHash: p.delegationHash, postedTx: p.postedTx, delegation: p.delegation, revoked,
     expiresAt: Number(BigInt(`0x${d.caveats[1].terms.slice(-32)}`)),
