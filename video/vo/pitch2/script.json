@@ -1,0 +1,68 @@
+[
+ {
+  "id": "q01",
+  "text": "Dan holds Mon, a coin on the Monad network. A trading bot usually holds his key, so one hack can empty his wallet.",
+  "cap": "Dan holds MON, a coin on the Monad network. A trading bot usually holds his key, so one hack can empty his wallet.",
+  "gap": 0.35
+ },
+ {
+  "id": "q02",
+  "text": "tripwire: a bot, called the keeper, sells Dan's Mon if the price drops, an automatic stop-loss. The blockchain, the public network that runs the money, blocks any sale he did not sign.",
+  "cap": "tripwire: a bot, called the keeper, sells Dan's MON if the price drops, an automatic stop-loss. The blockchain, the public network that runs the money, blocks any sale he did not sign.",
+  "gap": 0.4
+ },
+ {
+  "id": "q03",
+  "text": "Dan signs one plan, once: what the bot may sell, the price that triggers it, the lowest price it may sell at, and where the money goes.",
+  "cap": "Dan signs one plan, once: what the bot may sell, the price that triggers it, the lowest price it may sell at, and where the money goes.",
+  "gap": 0.4
+ },
+ {
+  "id": "q04",
+  "text": "He signs with a passkey, his fingerprint: nothing to install, no secret words to keep. It builds on MetaMask's contracts, already live on Monad.",
+  "cap": "He signs with a passkey, his fingerprint: nothing to install, no secret words to keep. It builds on MetaMask's contracts, already live on Monad.",
+  "gap": 0.4
+ },
+ {
+  "id": "q05",
+  "text": "Here it is, live on Monad. The price line is crossed, the bot sells, and zero point three Mon becomes a dollar coin, USDC, in Dan's wallet.",
+  "cap": "Here it is, live on Monad. The price line is crossed, the bot sells, and 0.3 MON becomes a dollar coin, 0.007267 USDC, in Dan's wallet.",
+  "gap": 0.4
+ },
+ {
+  "id": "q06",
+  "text": "Then we hacked our own bot. Three cheats on the live network: sell too early, sell too cheap, pay itself. Three refused, nothing paid out.",
+  "cap": "Then we hacked our own bot. Three cheats on the live network: sell too early, sell too cheap, pay itself. Three refused, nothing paid out.",
+  "gap": 0.4
+ },
+ {
+  "id": "q07",
+  "text": "On the Monad test network, a practice copy, the same bot has faced sixty-one cheats. Sixty-one refused.",
+  "cap": "On the Monad test network, a practice copy, the same bot has faced 61 cheats. 61 refused.",
+  "gap": 0.4
+ },
+ {
+  "id": "q08",
+  "text": "Dan is not alone. On X and Reddit, holders keep asking for a real stop-loss, with their Mon staying in their own wallet.",
+  "cap": "Dan is not alone. On X and Reddit, holders keep asking for a real stop-loss, with their MON staying in their own wallet.",
+  "gap": 0.4
+ },
+ {
+  "id": "q09",
+  "text": "Other stop-loss bots can sell however they like once you grant them access. Here the chain checks every sale against the plan.",
+  "cap": "Other stop-loss bots can sell however they like once you grant them access. Here the chain checks every sale against the plan.",
+  "gap": 0.4
+ },
+ {
+  "id": "q10",
+  "text": "Next, any bot can carry out a signed plan, and we bring tripwire to the holders who asked.",
+  "cap": "Next, any bot can carry out a signed plan, and we bring tripwire to the holders who asked.",
+  "gap": 0.4
+ },
+ {
+  "id": "q11",
+  "text": "tripwire: a bot sells for you, and the blockchain blocks any sale you didn't sign.",
+  "cap": "tripwire: a bot sells for you, and the blockchain blocks any sale you didn't sign.",
+  "gap": 0.4
+ }
+]

@@ -26,6 +26,7 @@ html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);ov
 // cues: title, big, rows [[label, value]], step, t0, foot
 const R = cue("rows", []), step = cue("step", 1.0), t0 = cue("t0", 0.3), r0 = cue("r0", t0 + 0.8);
 $("#ttl").textContent = cue("title", ""); $("#big").textContent = cue("big", ""); $("#foot").innerHTML = cue("foot", "");
+$(".wrap").style.top = cue("top", 150) + "px"; $("#big").style.fontSize = cue("bigPx", 44) + "px";
 R.forEach(([l, v], i) => { const d = document.createElement("div"); d.className = "row"; d.id = "r" + i; d.innerHTML = `<span class="m">&#10003;</span><span class="l">${l}</span><span class="v">${v}</span>`; $("#rows").append(d); });
 window.render = (t) => {
   $("#ttl").style.opacity = eo(seg(t, t0, t0 + 0.4));
