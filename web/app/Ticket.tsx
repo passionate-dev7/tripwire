@@ -218,7 +218,15 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
           <Fact label="Keeper fee">0</Fact>
           <Fact label="Gas per sale">paid by keeper</Fact>
           <Fact label="Expires">
-            <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num h-6 bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
+            {/* the date is shown as YYYY-MM-DD whatever the browser's locale, so 10/11 is never read as two different days */}
+            <label className="relative inline-flex h-6 cursor-pointer items-center gap-2 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink">
+              <span>{expiry || "pick a date"}</span>
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-mute" aria-hidden>
+                <rect x="2" y="3" width="12" height="11" rx="1.5" />
+                <path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" />
+              </svg>
+              <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} onClick={(e) => e.currentTarget.showPicker?.()} aria-label="Plan stops on" className="absolute inset-0 h-full w-full cursor-pointer opacity-0 [color-scheme:dark]" />
+            </label>
           </Fact>
         </div>
         <p className="border-t border-hairline px-4 py-2.5 text-[12px] leading-5 text-mute">Sells at the 60 s pool average. If MON gaps through your floor, that row does not sell.</p>

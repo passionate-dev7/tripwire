@@ -157,6 +157,7 @@ export function PlanCard({ p, price, action, title, note }: { p: PlanView; price
 export function armedNote(t: T): string {
   const live = t.plans.filter((p) => !p.revoked && p.expiresAt * 1000 > Date.now());
   const target = live.find((p) => p.tranches.some((x) => !x.spent)) ?? null;
+  if (t.plans.length === 0 && t.steps.at(-1)?.label === "Plan armed") return "Plan armed on chain. Waiting for the keeper to read it.";
   if (t.plans.length === 0) return t.plansLoaded ? "No plan yet. Set your lines on the Plan tab." : "Reading your plans.";
   if (!target) return "Every sale in your plans has happened, or the plans are revoked.";
   const w = live.reduce((n, p) => n + p.tranches.filter((x) => !x.spent).length, 0);
@@ -174,7 +175,9 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
         {t.publicPlan ? (
           <PlanCard p={t.publicPlan} price={price} title={`Latest plan on chain, plan ${t.publicPlan.id}`} action={<span className="text-[12px] text-mute">read only</span>} note="Each refusal is a mined transaction the keeper sent and the enforcer reverted. Set your own plan on the Plan tab to try it yourself." />
         ) : t.recent && t.recent.plans.every((p) => p.refused.length === 0) ? (
-          <p className="text-[13px] leading-5 text-body">Sign a plan on the Plan tab, then make the keeper try to break it and read the chain's answer here.</p>
+          <Card title="Your plan on chain">
+            <p className="px-4 py-3 text-[13px] leading-5 text-body">Sign a plan on the Plan tab. Its lines, how far MON is from each, and the chain's answer to every cheat the keeper tries appear here.</p>
+          </Card>
         ) : (
           <p className="text-[13px] text-mute">Reading the latest plan on chain.</p>
         )}
