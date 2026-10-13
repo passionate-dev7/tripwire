@@ -3,11 +3,12 @@
 // every forbidden sale the contract refused, each linked to its transaction. From the keeper's index (/api/recent).
 import type { RecentPlan } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
-import { Check, TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl } from "./parts";
+import { Check, TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl, useNet } from "./parts";
 
 const CHIP: Record<string, string> = { line: "before the line", floor: "below the floor", recipient: "to the keeper", expiry: "after the end date" };
 
 export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: string | null }) {
+  const sym = useNet().stableSymbol;
   return (
     <section className="rounded-[10px] border border-hairline bg-surface-card" aria-label="On chain record">
       <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 border-b border-hairline px-4 py-2">
@@ -28,7 +29,7 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
                     <Check className="mt-[3px] shrink-0" />
                     <span>
                       <span className="num text-mute">Plan {p.plan}</span> sold <span className="num">{fmtMon(s.amountIn)}</span> MON at <span className="num">{fmtPrice(tickToPrice(s.priceTick))}</span>.{" "}
-                      {short(p.holder)} received <span className="num">{s.amountOut ? fmtUsd(s.amountOut) : "at least " + fmtUsd(s.minOut)}</span> aUSD, floor <span className="num">{fmtUsd(s.minOut)}</span>.
+                      {short(p.holder)} received <span className="num">{s.amountOut ? fmtUsd(s.amountOut) : "at least " + fmtUsd(s.minOut)}</span> {sym}, floor <span className="num">{fmtUsd(s.minOut)}</span>.
                     </span>
                   </span>
                   <span className="pl-6 sm:-mt-2 sm:pl-0"><TxLink hash={s.hash} /></span>

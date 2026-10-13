@@ -4,7 +4,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { Hex } from "viem";
 import { MAINNET, TESTNET, type Net } from "../lib/plan";
-import { currentNet } from "../lib/net";
+import { currentNet, netFrom } from "../lib/net";
 
 // Explorer links follow the network the address names (?net=), read when the link is built.
 export const txUrl = (hash: Hex) => `${currentNet().explorer}/tx/${hash}`;
@@ -12,7 +12,7 @@ export const addrUrl = (a: string) => `${currentNet().explorer}/address/${a}`;
 
 /** The network this page is on. Server render and first paint use the build default; the address wins after mount. */
 export function useNet(): Net {
-  const [net, setNet] = useState<Net>(TESTNET);
+  const [net, setNet] = useState<Net>(() => netFrom("", process.env.NEXT_PUBLIC_TRIPWIRE_NET));
   useEffect(() => setNet(currentNet()), []);
   return net;
 }

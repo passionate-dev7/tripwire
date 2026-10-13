@@ -6,7 +6,7 @@ import type { Attack, PlanView } from "../lib/api";
 import { salesLeft } from "../lib/keeper-gas";
 import { tickToPrice } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
-import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short } from "./parts";
+import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short, useNet } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 
@@ -63,13 +63,13 @@ export function Heartbeat({ lastLoop, keeperGas, fillCost, loopError }: { lastLo
   );
 }
 
-function activity(p: PlanView, holder: string) {
+function activity(p: PlanView, holder: string, sym: string) {
   const rows: { at: number; text: string; hash: `0x${string}`; refused: boolean }[] = [];
   for (const f of p.fills) {
     const tr = p.tranches[f.index];
     rows.push({
       at: Number(f.block),
-      text: `Sold ${fmtMon(f.amountIn)} MON at a 60 s average of ${fmtPrice(tickToPrice(f.priceTick))}. ${short(holder)} received ${f.amountOut ? fmtUsd(f.amountOut) : "at least " + fmtUsd(f.minOut)} aUSD (floor ${fmtUsd(f.minOut)}; sale ${f.index + 1}, line ${fmtPrice(tr?.line ?? 0)})`,
+      text: `Sold ${fmtMon(f.amountIn)} MON at a 60 s average of ${fmtPrice(tickToPrice(f.priceTick))}. ${short(holder)} received ${f.amountOut ? fmtUsd(f.amountOut) : "at least " + fmtUsd(f.minOut)} ${sym} (floor ${fmtUsd(f.minOut)}; sale ${f.index + 1}, line ${fmtPrice(tr?.line ?? 0)})`,
       hash: f.hash,
       refused: false,
     });
@@ -80,7 +80,7 @@ function activity(p: PlanView, holder: string) {
   return rows;
 }
 
-const TRIED_SHORT: Record<string, string> = { line: "Sell before MON reached the line", floor: "Sell for half the floor", recipient: "Pay the aUSD to the keeper" };
+const TRIED_SHORT: Record<string, string> = { line: "Sell before MON reached the line", floor: "Sell for half the floor", recipient: "Pay the proceeds to the keeper" };
 
 /** Signed out: every forbidden sale the keeper has sent, what the contract said, and the totals. */
 function Proof({ t }: { t: T }) {
@@ -112,6 +112,7 @@ function Proof({ t }: { t: T }) {
 }
 
 export function PlanCard({ p, price, action, title }: { p: PlanView; price: number | null; action?: ReactNode; title?: string }) {
+  const sym = useNet().stableSymbol;
   return (
     <Card title={title ?? `Plan ${p.id}`} aside={action}>
       <div className="grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
@@ -131,7 +132,7 @@ export function PlanCard({ p, price, action, title }: { p: PlanView; price: numb
           <span className="text-mute">Plan posted by {short(p.holder)}</span>
           <TxLink hash={p.postedTx} />
         </li>
-        {activity(p, p.holder).map((r) => (
+        {activity(p, p.holder, sym).map((r) => (
           <li key={r.hash} className="flex min-h-8 items-start justify-between gap-3 border-t border-hairline px-4 py-[7px] text-[13px] leading-[18px]">
             <span className={r.refused ? "text-body" : "text-ink"}>{r.text}</span>
             <TxLink hash={r.hash} />

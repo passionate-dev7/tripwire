@@ -10,7 +10,7 @@ import { Ticket } from "./Ticket";
 import { Heartbeat, Watch } from "./Watch";
 import { useTripwire } from "./useTripwire";
 import { Record } from "./Record";
-import { ChainDetails, Hero, ProofStrip } from "./Front";
+import { ChainDetails, ComingOnline, Hero, ProofStrip } from "./Front";
 import { NetSwitch, fmtPrice, useNet } from "./parts";
 
 // Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
@@ -21,7 +21,7 @@ const r5 = (n: number) => Number(n.toFixed(5));
 const starterPlan = (price: number): PlainTranche[] => [
   { mon: "0.02", line: r5(price * 0.92), floor: r5(price * 0.88) },
   { mon: "0.01", line: r5(price * 0.85), floor: r5(price * 0.8) },
-  { mon: "0.005", line: r5(price * 1.05), floor: r5(price * 0.98), up: true },
+  { mon: "0.005", line: r5(price * 0.97), floor: r5(price * 0.92), up: true },
 ];
 
 function Legend({ hasTarget, hasDone }: { hasTarget: boolean; hasDone: boolean }) {
@@ -85,24 +85,41 @@ export default function Page() {
     setTimeout(() => document.getElementById(t.account && t.plans.length > 0 ? "cheat" : "refusals")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 60);
   };
 
-  return (
-    <div className="min-h-[100dvh]">
+  const header = (
       <header className="flex h-14 items-center justify-between border-b border-hairline px-4 lg:px-6">
         <div className="flex items-center gap-4 sm:gap-6">
           <a href="/" className="flex items-center gap-2" aria-label="tripwire">
             <img src="/mark.svg" alt="" width={22} height={22} />
             <span className="text-[15px] font-semibold tracking-[0.2px] text-ink">tripwire</span>
           </a>
-          <nav className="flex gap-1" aria-label="Screens">
-            {(["plan", "watch"] as const).map((k) => (
-              <button key={k} type="button" onClick={() => setTab(k)} aria-current={tab === k ? "page" : undefined} className={`h-9 rounded-lg px-3 text-[13px] font-medium capitalize transition-colors duration-150 ease-out ${tab === k ? "bg-surface-elevated text-ink" : "text-mute hover:text-ink"}`}>
-                {k}
-              </button>
-            ))}
-          </nav>
+          {net.deployed && (
+            <nav className="flex gap-1" aria-label="Screens">
+              {(["plan", "watch"] as const).map((k) => (
+                <button key={k} type="button" onClick={() => setTab(k)} aria-current={tab === k ? "page" : undefined} className={`h-9 rounded-lg px-3 text-[13px] font-medium capitalize transition-colors duration-150 ease-out ${tab === k ? "bg-surface-elevated text-ink" : "text-mute hover:text-ink"}`}>
+                  {k}
+                </button>
+              ))}
+            </nav>
+          )}
         </div>
         <NetSwitch />
       </header>
+  );
+
+  if (!net.deployed) {
+    return (
+      <div className="min-h-[100dvh]">
+        {header}
+        <main className="mx-auto max-w-[1240px] px-4 lg:px-6">
+          <ComingOnline net={net} />
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[100dvh]">
+      {header}
 
       <main className="mx-auto grid max-w-[1240px] gap-x-8 gap-y-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:px-6 lg:py-8">
         {tab === "plan" && (
@@ -114,7 +131,7 @@ export default function Page() {
           <ProofStrip t={t} onCheat={goCheat} />
         </div>
 
-        <aside className="min-w-0 lg:col-start-2 lg:row-span-4 lg:row-start-1">
+        <aside className="min-w-0 lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:self-stretch">
           {tab === "plan" ? (
             <>
               {linkErrors.length > 0 && <p className="pb-3 text-[13px] text-ink">Link parts skipped: {linkErrors.join("; ")}</p>}
@@ -129,13 +146,13 @@ export default function Page() {
           <div className="rounded-[10px] border border-hairline bg-surface">
             <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 px-4 pt-4">
               <div>
-                <div className="text-[12px] text-mute">MON in aUSD, 60 s average of the {net.name} pool</div>
+                <div className="text-[12px] text-mute">MON in {net.stableSymbol}, 60 s average of the {net.name} pool</div>
                 <div className="num h-12 text-[44px] font-medium leading-[48px] tracking-[0.2px] text-ink lg:h-16 lg:text-[56px] lg:leading-[64px]">
                   {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : fmtPrice(price)}
                 </div>
               </div>
               <p className="num pb-2 text-[12px] text-mute">
-                {s?.mainnet ? <>MON on mainnet <span className="text-body">{fmtPrice(s.mainnet.price)}</span></> : "Reading mainnet"}
+                {net.key === "testnet" && (s?.mainnet ? <>Mainnet MON price, for reference <span className="text-body">{fmtPrice(s.mainnet.price)}</span></> : "Reading the mainnet price")}
               </p>
             </div>
             <div className="px-4 pb-2 pt-3">

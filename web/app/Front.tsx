@@ -3,9 +3,10 @@
 // the chain details a holder can open but never has to read. Every number here is read from the keeper's index
 // (/api/recent) or the chain; nothing is typed in.
 import type { Status } from "../lib/api";
+import type { Net } from "../lib/plan";
 import { PERPL_ANCHOR } from "../lib/perplAnchor";
 import type { useTripwire } from "./useTripwire";
-import { Check, TxLink, fmtPrice, short, useNet } from "./parts";
+import { Card, Check, Fact, TxLink, fmtPrice, short, useNet } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 
@@ -130,14 +131,49 @@ export function ChainDetails({ s }: { s: Status | null | undefined }) {
           {row("Keeper", link(net.keeper))}
           {row("Plan enforcer", net.deployed ? link(net.enforcer) : "not deployed")}
           {row("Plan book", net.deployed ? link(net.planBook) : "not deployed")}
-          {row("Spot price", s ? `${fmtPrice(s.spotPrice)} aUSD` : "reading")}
-          {row("Mainnet MON", s?.mainnet ? `${fmtPrice(s.mainnet.price)} aUSD` : "reading")}
-          {row("aUSD", "Agora's dollar on Monad")}
+          {row("Spot price", s ? `${fmtPrice(s.spotPrice)} ${net.stableSymbol}` : "reading")}
+          {net.key === "testnet" && row("Mainnet MON price, for reference", s?.mainnet ? `${fmtPrice(s.mainnet.price)} USDC` : "reading")}
+          {net.key === "testnet" && row("aUSD", "Agora's dollar on Monad")}
           <div data-perpl-account-id={PERPL_ANCHOR.accountId}>
             {row("Perpl hedge", `account ${PERPL_ANCHOR.accountId}, ${PERPL_ANCHOR.side} ${PERPL_ANCHOR.size} ${PERPL_ANCHOR.symbol} lots on Monad mainnet`)}
           </div>
         </dl>
       </details>
     </footer>
+  );
+}
+
+/** Shown instead of the plan screens while a network has no enforcer and plan book of ours: nothing is read from a
+ * keeper that is not there and nothing can be signed against an address that does not exist yet. */
+export function ComingOnline({ net }: { net: Net }) {
+  const link = (a: string) => (
+    <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={`${net.explorer}/address/${a}`} target="_blank" rel="noreferrer">
+      {short(a)}
+    </a>
+  );
+  return (
+    <section aria-labelledby="coming" className="mx-auto flex max-w-[560px] flex-col gap-6 py-6 lg:py-12" data-testid="coming-online">
+      <div>
+        <h1 id="coming" className="text-[28px] font-medium leading-[1.15] tracking-[0.1px] text-ink sm:text-[36px]">
+          {net.name} is coming online.
+        </h1>
+        <p className="mt-3 text-[16px] leading-7 text-body">
+          The plan enforcer and plan book are going live on chain {net.chainId}. Plans open here the moment both are on chain, so a signature only ever points at contracts that exist.
+        </p>
+      </div>
+      <Card title="Where plans will sell">
+        <Fact label="Network">{net.name}, chain {net.chainId}</Fact>
+        <Fact label="Pool">WMON/{net.stableSymbol}, Uniswap V3 0.3%, {link(net.pool)}</Fact>
+        <Fact label="Router">{link(net.router)}</Fact>
+        <Fact label="Plan enforcer">going live</Fact>
+        <Fact label="Plan book">going live</Fact>
+      </Card>
+      <div className="flex flex-col gap-2">
+        <a href="?net=testnet" className="inline-flex h-[54px] w-full items-center justify-center rounded-full bg-ink text-[15px] font-medium text-canvas transition-opacity duration-150 ease-out hover:opacity-90">
+          Try the full flow on Monad testnet
+        </a>
+        <p className="text-[12px] leading-5 text-mute">Same plan, same enforcer, same refusals, with free testnet MON.</p>
+      </div>
+    </section>
   );
 }

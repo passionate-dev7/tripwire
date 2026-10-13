@@ -7,15 +7,16 @@ import type { Hex, LocalAccount } from "viem";
 import { type Attack, type PlanView, type Point, type Status, keeperApi } from "../lib/api";
 import { type Holdings, createPlan, holdings, revokePlan, unwrap } from "../lib/holder";
 import { createPasskeyAccount, signInWithPasskey } from "../lib/passkey";
-import { TESTNET, type PlainTranche, decodeDelegation } from "../lib/plan";
+import { type PlainTranche, decodeDelegation } from "../lib/plan";
 import { revertReason } from "../lib/chain";
+import { useNet } from "./parts";
 
 export type Step = { label: string; hash?: Hex };
-const net = TESTNET;
 
-function usePoll<T>(fn: () => Promise<T>, ms: number, deps: unknown[]): { data: T | null; error: string | null; at: number } {
+function usePoll<T>(fn: () => Promise<T>, ms: number, deps: unknown[], enabled = true): { data: T | null; error: string | null; at: number } {
   const [state, set] = useState<{ data: T | null; error: string | null; at: number }>({ data: null, error: null, at: 0 });
   useEffect(() => {
+    if (!enabled) return;
     let live = true;
     const tick = async () => {
       try {
@@ -32,11 +33,17 @@ function usePoll<T>(fn: () => Promise<T>, ms: number, deps: unknown[]): { data: 
       clearInterval(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [enabled, ...deps]);
   return state;
 }
 
 export function useTripwire() {
+  // The address names the network, and a static export only knows it after mount: nothing is fetched or signed before
+  // that, and nothing on a network whose contracts are not deployed (their addresses are the zero address).
+  const net = useNet();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const live = mounted && net.deployed;
   const [account, setAccount] = useState<LocalAccount | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
@@ -45,20 +52,21 @@ export function useTripwire() {
   const nonce = useRef(0);
   const [refresh, setRefresh] = useState(0);
 
-  const status = usePoll<Status>(keeperApi.status, 4000, []);
-  const history = usePoll<{ points: Point[] }>(keeperApi.history, 15000, []);
-  const mine = usePoll<{ plans: PlanView[] } | null>(async () => (account ? keeperApi.plans(account.address) : null), 4000, [account?.address, refresh]);
-  const recent = usePoll(keeperApi.recent, 8000, []);
+  const status = usePoll<Status>(keeperApi.status, 4000, [net.key], live);
+  const history = usePoll<{ points: Point[] }>(keeperApi.history, 15000, [net.key], live);
+  const mine = usePoll<{ plans: PlanView[] } | null>(async () => (account ? keeperApi.plans(account.address) : null), 4000, [account?.address, refresh, net.key], live);
+  const recent = usePoll(keeperApi.recent, 8000, [net.key], live);
   // the newest plan on chain, shown read-only to anyone not signed in
   // the newest plan that carries refused calls, so the proof never disappears when someone arms a fresh plan
   const latestHolder = recent.data?.plans.find((p) => p.refused.length > 0)?.holder ?? null;
-  const publicPlans = usePoll<{ plans: PlanView[] } | null>(async () => (latestHolder && !account ? keeperApi.plans(latestHolder) : null), 8000, [latestHolder, account?.address]);
-  const held = usePoll<Holdings | null>(async () => (account ? holdings(net, account.address) : null), 5000, [account?.address, refresh]);
+  const publicPlans = usePoll<{ plans: PlanView[] } | null>(async () => (latestHolder && !account ? keeperApi.plans(latestHolder) : null), 8000, [latestHolder, account?.address, net.key], live);
+  const held = usePoll<Holdings | null>(async () => (account ? holdings(net, account.address) : null), 5000, [account?.address, refresh, net.key], live);
 
   const run = useCallback(async (label: string, fn: () => Promise<void>) => {
     setBusy(label);
     setError(null);
     try {
+      if (!net.deployed) throw new Error(`${net.name} contracts are coming online. Nothing can be signed there yet.`);
       await fn();
     } catch (e) {
       const cause = (e as { cause?: { name?: string; message?: string } }).cause;
@@ -67,7 +75,7 @@ export function useTripwire() {
       setBusy(null);
       setRefresh((r) => r + 1);
     }
-  }, []);
+  }, [net]);
 
   const signIn = () => run("Signing in", async () => setAccount((await signInWithPasskey()).account));
   const create = (name: string) => run("Creating your passkey", async () => setAccount((await createPasskeyAccount(name)).account));
