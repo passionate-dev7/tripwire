@@ -7,15 +7,15 @@
   <array>
     <string>/Users/tesla/.bun/bin/bun</string>
     <string>run</string>
-    <string>/Users/tesla/tripwire/keeper/keeper.ts</string>
+    <string>/Users/tesla/tripwire-mainnet/keeper/keeper.ts</string>
   </array>
-  <key>WorkingDirectory</key><string>/Users/tesla/tripwire/keeper</string>
+  <key>WorkingDirectory</key><string>/Users/tesla/tripwire-mainnet/keeper</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>TRIPWIRE_NET</key><string>mainnet</string>
     <key>PORT</key><string>3512</string>
     <key>TRIPWIRE_KEEPER_KEY_FILE</key><string>/Users/tesla/.config/tripwire/keeper.json</string>
-    <key>TRIPWIRE_DEPLOYMENT_FILE</key><string>/Users/tesla/tripwire/contracts/deployments/143.json</string>
+    <key>TRIPWIRE_DEPLOYMENT_FILE</key><string>/Users/tesla/tripwire-mainnet/contracts/deployments/143.json</string>
   </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>

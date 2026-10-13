@@ -1,0 +1,16 @@
+{
+  "enforcer": "0x4c594690108f808d9e5603df548740b22e82703e",
+  "enforcerTx": "0x4cd0069d11b5932aba49902ed34ac2f0305a1595d1cae1b9f8173fb4a0a571b4",
+  "enforcerBlock": 113042447,
+  "planBook": "0xa3157a5a011404a70c033834a19826a9628e6928",
+  "planBookTx": "0x4383696d693f402379be2770eaf3a6f8e51025f2946b51d3ebcfdc8def0805f9",
+  "planBookBlock": 113042454,
+  "chainId": 143,
+  "delegationManager": "0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3",
+  "router": "0xfE31F71C1b106EAc32F1A19239c9a9A72ddfb900",
+  "pool": "0x659bD0BC4167BA25c62E05656F78043E7eD4a9da",
+  "wmon": "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+  "usdc": "0x754704Bc059F8C67012fEd69BC8A327a5aafb603",
+  "deployer": "0xfE4C86C4641F3D39266F1CcE8cc24E7a85227f63",
+  "planBookFromBlock": 113042447
+}
