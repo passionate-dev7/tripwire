@@ -23,7 +23,7 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
           {plans.map((p) => (
             <li key={p.plan} className="border-b border-hairline px-4 py-3 text-[13px] leading-[20px] last:border-b-0">
               {p.sales.map((s) => (
-                <div key={s.hash} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                <div key={s.hash} className="grid items-start gap-x-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <span className="flex items-start gap-2 text-ink">
                     <Check className="mt-[3px] shrink-0" />
                     <span>
@@ -31,7 +31,7 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
                       {short(p.holder)} received <span className="num">{s.amountOut ? fmtUsd(s.amountOut) : "at least " + fmtUsd(s.minOut)}</span> aUSD, floor <span className="num">{fmtUsd(s.minOut)}</span>.
                     </span>
                   </span>
-                  <span className="-mt-2"><TxLink hash={s.hash} /></span>
+                  <span className="pl-6 sm:-mt-2 sm:pl-0"><TxLink hash={s.hash} /></span>
                 </div>
               ))}
               {p.sales.length === 0 && (

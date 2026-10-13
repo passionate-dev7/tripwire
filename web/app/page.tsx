@@ -11,7 +11,7 @@ import { Heartbeat, Watch } from "./Watch";
 import { useTripwire } from "./useTripwire";
 import { Record } from "./Record";
 import { ChainDetails, Hero, ProofStrip } from "./Front";
-import { NetBadge, fmtPrice } from "./parts";
+import { NetSwitch, fmtPrice, useNet } from "./parts";
 
 // Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
 const DEFAULT_PLAN: PlainTranche[] = [{ mon: "0.02", line: 0.033, floor: 0.03 }];
@@ -24,13 +24,14 @@ const starterPlan = (price: number): PlainTranche[] => [
   { mon: "0.005", line: r5(price * 1.05), floor: r5(price * 0.98), up: true },
 ];
 
-function Legend({ hasTarget }: { hasTarget: boolean }) {
+function Legend({ hasTarget, hasDone }: { hasTarget: boolean; hasDone: boolean }) {
   const swatch = "inline-block h-0 w-5 shrink-0 border-t-2 align-middle";
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-mute" aria-label="Chart key">
       <li className="flex items-center gap-2"><span className={`${swatch} border-ink`} />60 s average, what the contract reads</li>
       <li className="flex items-center gap-2"><span className={`${swatch} border-line`} />Stop-loss line</li>
       {hasTarget && <li className="flex items-center gap-2"><span className={`${swatch} border-dashed border-body`} />Take-profit line</li>}
+      {hasDone && <li className="flex items-center gap-2"><span className={`${swatch} border-mute`} />Sold or switched off</li>}
       <li className="flex items-center gap-2"><span className={`${swatch} border-dotted border-mute`} />Floor, the lowest price it may sell at</li>
     </ul>
   );
@@ -38,6 +39,7 @@ function Legend({ hasTarget }: { hasTarget: boolean }) {
 
 export default function Page() {
   const t = useTripwire();
+  const net = useNet();
   const [tab, setTab] = useState<"plan" | "watch">("plan");
   const [plan, setPlanRaw] = useState<PlainTranche[]>(DEFAULT_PLAN);
   const [touched, setTouched] = useState(false);
@@ -99,7 +101,7 @@ export default function Page() {
             ))}
           </nav>
         </div>
-        <NetBadge />
+        <NetSwitch />
       </header>
 
       <main className="mx-auto grid max-w-[1240px] gap-x-8 gap-y-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:px-6 lg:py-8">
@@ -127,7 +129,7 @@ export default function Page() {
           <div className="rounded-[10px] border border-hairline bg-surface">
             <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 px-4 pt-4">
               <div>
-                <div className="text-[12px] text-mute">MON in aUSD, 60 s average of the {t.net.name} pool</div>
+                <div className="text-[12px] text-mute">MON in aUSD, 60 s average of the {net.name} pool</div>
                 <div className="num h-12 text-[44px] font-medium leading-[48px] tracking-[0.2px] text-ink lg:h-16 lg:text-[56px] lg:leading-[64px]">
                   {price === null ? <span className="font-sans text-[14px] font-normal tracking-normal text-mute">Reading the pool</span> : fmtPrice(price)}
                 </div>
@@ -137,7 +139,7 @@ export default function Page() {
               </p>
             </div>
             <div className="px-4 pb-2 pt-3">
-              <Legend hasTarget={lines.some((l) => l.up)} />
+              <Legend hasTarget={lines.some((l) => l.up && l.state !== "sold" && l.state !== "off")} hasDone={lines.some((l) => l.state === "sold" || l.state === "off")} />
             </div>
             <div className="px-2">
               <StopChart points={t.history.data?.points ?? []} lines={lines} height={wide ? 360 : 260} />

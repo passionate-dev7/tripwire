@@ -1,12 +1,21 @@
 "use client";
 // Small pieces both screens share. Row pitches follow design-research/LAYOUT.md: 40 px editable rows, 31 px fact
 // rows, 32 px activity sentences, 25 px numeric rows.
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Hex } from "viem";
-import { TESTNET } from "../lib/plan";
+import { MAINNET, TESTNET, type Net } from "../lib/plan";
+import { currentNet } from "../lib/net";
 
-export const txUrl = (hash: Hex) => `${TESTNET.explorer}/tx/${hash}`;
-export const addrUrl = (a: string) => `${TESTNET.explorer}/address/${a}`;
+// Explorer links follow the network the address names (?net=), read when the link is built.
+export const txUrl = (hash: Hex) => `${currentNet().explorer}/tx/${hash}`;
+export const addrUrl = (a: string) => `${currentNet().explorer}/address/${a}`;
+
+/** The network this page is on. Server render and first paint use the build default; the address wins after mount. */
+export function useNet(): Net {
+  const [net, setNet] = useState<Net>(TESTNET);
+  useEffect(() => setNet(currentNet()), []);
+  return net;
+}
 export const short = (h: string, n = 6) => `${h.slice(0, n)}..${h.slice(-4)}`;
 export const fmtPrice = (p: number) => p.toFixed(5);
 export const fmtMon = (wei: bigint | string) => {
@@ -94,12 +103,30 @@ export function Check({ className = "" }: { className?: string }) {
   );
 }
 
-/** Which network the page reads. One slot in the header, so a network switch can replace it in one place. */
-export function NetBadge() {
+/** Which network the page reads. The switch appears once mainnet has contracts of ours, so it never offers a dead end. */
+export function NetSwitch() {
+  const net = useNet();
+  const [search, setSearch] = useState("");
+  useEffect(() => setSearch(window.location.search), []);
+  if (!MAINNET.deployed) {
+    return (
+      <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-hairline px-3 text-[12px] text-body" title={`Chain ${net.chainId}`}>
+        {net.name}
+      </span>
+    );
+  }
+  const href = (key: Net["key"]) => {
+    const q = new URLSearchParams(search);
+    q.set("net", key);
+    return `?${q.toString()}`;
+  };
   return (
-    <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-hairline px-3 text-[12px] text-body" title={`Chain ${TESTNET.chainId}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden />
-      {TESTNET.name}
-    </span>
+    <div role="group" aria-label="Network" className="inline-flex h-8 overflow-hidden rounded-full border border-hairline text-[12px]">
+      {[TESTNET, MAINNET].map((n) => (
+        <a key={n.key} href={href(n.key)} aria-current={net.key === n.key ? "true" : undefined} className={`inline-flex items-center px-3 transition-colors duration-150 ease-out ${net.key === n.key ? "bg-hairline-strong font-medium text-ink" : "text-mute hover:text-ink"}`}>
+          {n.key === "mainnet" ? "Mainnet" : "Testnet"}
+        </a>
+      ))}
+    </div>
   );
 }

@@ -37,7 +37,7 @@ export function Heartbeat({ lastLoop, keeperGas, fillCost, loopError }: { lastLo
     const id = setInterval(() => {
       const t = Date.now();
       setNow(t);
-      if (n++ % 4 === 0) setBeats((b) => [...b.slice(-59), lastLoop !== undefined && t - lastLoop < 15_000]);
+      if (lastLoop !== undefined && n++ % 4 === 0) setBeats((b) => [...b.slice(-59), t - lastLoop < 15_000]);
     }, 1000);
     return () => clearInterval(id);
   }, [lastLoop]);
@@ -93,7 +93,7 @@ function Proof({ t }: { t: T }) {
       <header className="border-b border-hairline px-4 py-3">
         <h2 className="text-[15px] font-medium text-ink">Every cheat the keeper tried, and what the chain said</h2>
         <p className="mt-0.5 text-[13px] text-mute">
-          {tot ? `${tot.forbiddenSent} attempts, ${tot.forbiddenReverted} reverted, ${tot.forbiddenPaidOut} paid out. ` : ""}Each row is a mined {t.net.name} transaction with status 0. Newest plans first.
+          {tot ? `${tot.forbiddenSent} attempts, ${tot.forbiddenReverted} reverted, ${tot.forbiddenPaidOut} paid out. ` : ""}Each row is a mined transaction with status 0. Newest plans first.
         </p>
       </header>
       <div className="grid min-h-8 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">

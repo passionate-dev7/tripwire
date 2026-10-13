@@ -4,9 +4,8 @@
 // (/api/recent) or the chain; nothing is typed in.
 import type { Status } from "../lib/api";
 import { PERPL_ANCHOR } from "../lib/perplAnchor";
-import { TESTNET } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
-import { Check, TxLink, addrUrl, fmtPrice, short } from "./parts";
+import { Check, TxLink, fmtPrice, short, useNet } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 
@@ -31,6 +30,7 @@ const TRIED: Record<string, string> = {
 };
 
 export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
+  const net = useNet();
   const tot = t.recent?.totals;
   const plans = t.recent?.plans ?? [];
   const holder = plans.find((p) => p.refused.length > 0);
@@ -56,7 +56,7 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
             <p className="mt-1 flex items-start gap-2 text-[13px] leading-5 text-mute">
               <Check className="mt-[3px] shrink-0 text-ink" />
               <span>
-                Every attempt is a transaction on {TESTNET.name}. Meanwhile the keeper made {tot.sales} real sales across {tot.plans} plans, each to its holder at or above the floor.
+                Every attempt is a transaction on {net.name}. Meanwhile the keeper made {tot.sales} real sales across {tot.plans} plans, each to its holder at or above the floor.
               </span>
             </p>
           </>
@@ -96,6 +96,7 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
 }
 
 export function ChainDetails({ s }: { s: Status | null | undefined }) {
+  const net = useNet();
   const row = (k: string, v: React.ReactNode) => (
     <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 border-t border-hairline py-2 first:border-t-0">
       <dt className="text-mute">{k}</dt>
@@ -103,7 +104,7 @@ export function ChainDetails({ s }: { s: Status | null | undefined }) {
     </div>
   );
   const link = (a: string) => (
-    <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={addrUrl(a)} target="_blank" rel="noreferrer">
+    <a className="underline decoration-hairline-strong underline-offset-4 hover:text-ink" href={`${net.explorer}/address/${a}`} target="_blank" rel="noreferrer">
       {short(a)}
     </a>
   );
@@ -115,12 +116,12 @@ export function ChainDetails({ s }: { s: Status | null | undefined }) {
           <span className="text-mute transition-transform duration-150 group-open:rotate-90" aria-hidden>&rsaquo;</span>
         </summary>
         <dl className="px-4 pb-2 text-[13px]">
-          {row("Network", `${TESTNET.name}, chain ${TESTNET.chainId}`)}
+          {row("Network", `${net.name}, chain ${net.chainId}`)}
           {row("Latest block", s ? Number(s.head).toLocaleString("en-US") : "reading")}
-          {row("Pool", <>WMON/aUSD, Uniswap V3 0.3%, {link(TESTNET.pool)}</>)}
-          {row("Keeper", link(TESTNET.keeper))}
-          {row("Plan enforcer", link(TESTNET.enforcer))}
-          {row("Plan book", link(TESTNET.planBook))}
+          {row("Pool", <>WMON/{net.stableSymbol}, Uniswap V3 0.3%, {link(net.pool)}</>)}
+          {row("Keeper", link(net.keeper))}
+          {row("Plan enforcer", net.deployed ? link(net.enforcer) : "not deployed")}
+          {row("Plan book", net.deployed ? link(net.planBook) : "not deployed")}
           {row("Spot price", s ? `${fmtPrice(s.spotPrice)} aUSD` : "reading")}
           {row("Mainnet MON", s?.mainnet ? `${fmtPrice(s.mainnet.price)} aUSD` : "reading")}
           {row("aUSD", "Agora's dollar on Monad")}

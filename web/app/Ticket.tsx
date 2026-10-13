@@ -15,7 +15,7 @@ const DEFAULT_END = "2026-10-20";
 const fmtAusd = (n: number) => n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
 
 const FIELD =
-  "num h-9 rounded-md border border-hairline bg-surface px-2 text-[14px] text-ink outline-none transition-colors duration-150 ease-out hover:border-hairline-strong focus:border-ink";
+  "num h-10 rounded-md lg:h-9 border border-hairline bg-surface px-2 text-[14px] text-ink outline-none transition-colors duration-150 ease-out hover:border-hairline-strong focus:border-ink";
 
 /** A number box that keeps what the holder is typing ("0." stays "0.") until the plan value it parses to changes. */
 function NumField({ label, value, onChange, tone = "text-ink", tight = false }: { label: string; value: string | number; onChange: (v: string) => void; tone?: string; tight?: boolean }) {
@@ -38,7 +38,7 @@ function NumField({ label, value, onChange, tone = "text-ink", tight = false }: 
 
 function Direction({ n, up, onPick }: { n: number; up: boolean; onPick: () => void }) {
   return (
-    <span role="group" aria-label={`Tranche ${n} direction`} className="mx-1 inline-flex h-9 overflow-hidden rounded-md border border-hairline align-middle">
+    <span role="group" aria-label={`Tranche ${n} direction`} className="mx-1 inline-flex h-10 overflow-hidden lg:h-9 rounded-md border border-hairline align-middle">
       {([false, true] as const).map((u) => (
         <button
           key={String(u)}
@@ -90,13 +90,15 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
   return (
     <div className="flex flex-col gap-4">
       <Card title="Your plan" aside={<span className="text-[12px] text-mute">prices in aUSD per MON</span>}>
-        <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
-          <span className="mr-1 text-[12px] text-mute">Set row 1 to</span>
-          {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
-            <button key={l} type="button" onClick={() => preset(v as number)} className="h-9 min-w-[48px] rounded-md border border-hairline px-3 text-[13px] text-body transition-colors duration-150 ease-out hover:border-hairline-strong hover:text-ink active:scale-[0.97]">
-              {l}
-            </button>
-          ))}
+        <div className="px-4 pb-3 pt-2.5">
+          <p className="mb-1.5 text-[12px] text-mute">Set row 1 to</p>
+          <div className="grid grid-cols-4 gap-2">
+            {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
+              <button key={l} type="button" onClick={() => preset(v as number)} className="h-10 rounded-md border border-hairline px-1 text-[13px] lg:h-9 text-body transition-colors duration-150 ease-out hover:border-hairline-strong hover:text-ink active:scale-[0.97]">
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
         <ol>
           {plan.map((p, i) => {
@@ -121,12 +123,12 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
                   <p className="num text-[12px] leading-5 text-mute">
                     <span className="font-sans text-body">{p.up ? "Take-profit" : "Stop-loss"}</span>
                     {price === null || !(p.line > 0) ? (
-                      ". Reading the price."
+                      ": reading the price."
                     ) : reached(p) ? (
-                      <span className="text-body">. MON is already {p.up ? "at or above" : "at or below"} this line ({fmtPrice(price)}). The keeper sells it within about a minute of arming.</span>
+                      <span className="text-body">: MON is already {p.up ? "at or above" : "at or below"} this line ({fmtPrice(price)}). The keeper sells it within about a minute of arming.</span>
                     ) : (
                       <>
-                        . <span className="text-ink">{dist!.toFixed(1)}% {p.up ? "above" : "below"}</span> MON now ({fmtPrice(price)})
+                        : <span className="text-ink">{dist!.toFixed(1)}% {p.up ? "above" : "below"}</span> MON now ({fmtPrice(price)})
                         {Number.isFinite(back) && back > 0 ? `, pays at least ${fmtAusd(back)} aUSD` : ""}
                       </>
                     )}
