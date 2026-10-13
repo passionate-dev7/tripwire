@@ -46,3 +46,39 @@
     }
   }
 }
+
+/* The ticket stays in view beside the page only when it fits the window: a taller ticket than the window would hide its
+   sign step until the end of the page. An opened "what the contract checks" list also lets it scroll with the page. */
+@utility ticket-stick {
+  @media (min-width: 1024px) and (min-height: 820px) {
+    position: sticky;
+    top: 1.5rem;
+    &:has(details[open]) {
+      position: static;
+    }
+  }
+}
+
+/* A digit that changed since the last read settles from mute to ink; a new refusal row slides up 4 px as it fades in. */
+@theme {
+  --animate-digit: digit 400ms var(--ease-out-quick) both;
+  --animate-row-in: row-in 180ms var(--ease-out-quick) both;
+  @keyframes digit {
+    from {
+      color: var(--color-mute);
+    }
+    to {
+      color: var(--color-ink);
+    }
+  }
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

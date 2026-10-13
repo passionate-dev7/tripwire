@@ -1,7 +1,7 @@
 "use client";
 // Small pieces both screens share. Row pitches follow design-research/LAYOUT.md: 40 px editable rows, 31 px fact
 // rows, 32 px activity sentences, 25 px numeric rows.
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Hex } from "viem";
 import { MAINNET, TESTNET, type Net } from "../lib/plan";
 import { currentNet, netFrom } from "../lib/net";
@@ -22,7 +22,41 @@ export const fmtMon = (wei: bigint | string) => {
   const n = Number(BigInt(wei)) / 1e18;
   return n >= 1 ? n.toLocaleString("en-US", { maximumFractionDigits: 4 }) : n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
 };
-export const fmtUsd = (raw: bigint | string, decimals = 6) => (Number(BigInt(raw)) / 10 ** decimals).toLocaleString("en-US", { maximumSignificantDigits: 4 });
+/** One precision per kind of figure: prices to 5 decimals (fmtPrice), stablecoin amounts to 6 (fmtAusd, fmtUsd). */
+export const fmtAusd = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 6, maximumFractionDigits: 6 });
+export const fmtUsd = (raw: bigint | string, decimals = 6) => fmtAusd(Number(BigInt(raw)) / 10 ** decimals);
+
+/** The keys that arrived after the first read of a list, so only new rows animate in and a page load never does. */
+export function useFresh(keys: string[], ready: boolean): Set<string> {
+  const seen = useRef<Set<string> | null>(null);
+  const fresh = new Set<string>();
+  if (ready && seen.current !== null) for (const k of keys) if (!seen.current.has(k)) fresh.add(k);
+  useEffect(() => {
+    if (!ready) return;
+    if (seen.current === null) seen.current = new Set();
+    for (const k of keys) seen.current.add(k);
+  });
+  // the first ready render has nothing seen yet: show every row at rest
+  return seen.current === null ? new Set() : fresh;
+}
+
+/** A price whose changed digits settle from mute to ink. A digit that is unchanged is never touched, so nothing flickers. */
+export function Digits({ value }: { value: string }) {
+  const st = useRef<{ v: string; gen: number[] }>({ v: value, gen: Array.from(value, () => 0) });
+  if (st.current.v !== value) {
+    const { v, gen } = st.current;
+    st.current = { v: value, gen: Array.from(value, (c, i) => (v[i] === c ? gen[i] ?? 0 : (gen[i] ?? 0) + 1)) };
+  }
+  return (
+    <>
+      {Array.from(value, (c, i) => (
+        <span key={`${i}-${st.current.gen[i]}`} className={st.current.gen[i] > 0 ? "animate-digit" : undefined}>
+          {c}
+        </span>
+      ))}
+    </>
+  );
+}
 
 export function Card({ title, aside, children, className = "", id }: { title?: string; aside?: ReactNode; children: ReactNode; className?: string; id?: string }) {
   return (
@@ -90,7 +124,7 @@ export function Pill({ children, onClick, disabled, type = "button" }: { childre
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="h-[54px] w-full rounded-full bg-ink text-[15px] font-medium text-canvas transition-opacity duration-150 ease-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+      className="h-11 w-full rounded-lg bg-ink text-[15px] font-medium text-canvas transition-opacity duration-150 ease-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {children}
     </button>
@@ -125,7 +159,7 @@ export function NetSwitch() {
   useEffect(() => setSearch(window.location.search), []);
   if (!MAINNET.deployed) {
     return (
-      <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-hairline px-3 text-[12px] text-body" title={`Chain ${net.chainId}`}>
+      <span className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-hairline px-3 text-[12px] text-body" title={`Chain ${net.chainId}`}>
         {net.name}
       </span>
     );
@@ -136,7 +170,7 @@ export function NetSwitch() {
     return `?${q.toString()}`;
   };
   return (
-    <div role="group" aria-label="Network" className="inline-flex h-8 overflow-hidden rounded-full border border-hairline text-[12px]">
+    <div role="group" aria-label="Network" className="inline-flex h-8 overflow-hidden rounded-lg border border-hairline text-[12px]">
       {[TESTNET, MAINNET].map((n) => (
         <a key={n.key} href={href(n.key)} aria-current={net.key === n.key ? "true" : undefined} className={`inline-flex items-center px-3 transition-colors duration-150 ease-out ${net.key === n.key ? "bg-hairline-strong font-medium text-ink" : "text-mute hover:text-ink"}`}>
           {n.key === "mainnet" ? "Mainnet" : "Testnet"}

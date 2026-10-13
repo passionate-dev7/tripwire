@@ -2,8 +2,10 @@
 // The first screen: what tripwire is in one breath, the keeper's live record of refused cheats right under it, and
 // the chain details a holder can open but never has to read. Every number here is read from the keeper's index
 // (/api/recent) or the chain; nothing is typed in.
+import { useEffect, useState } from "react";
 import type { Status } from "../lib/api";
-import type { Net } from "../lib/plan";
+import { apiBase } from "../lib/net";
+import { TESTNET, type Net } from "../lib/plan";
 import { PERPL_ANCHOR } from "../lib/perplAnchor";
 import type { useTripwire } from "./useTripwire";
 import { Card, Check, Fact, TxLink, fmtPrice, short, useNet } from "./parts";
@@ -16,10 +18,10 @@ export function Hero() {
       <h1 id="claim" className="max-w-[640px] text-[28px] font-medium leading-[1.15] tracking-[0.1px] text-ink sm:text-[36px]">
         A stop-loss on your MON that the bot can&apos;t break.
       </h1>
-      <p className="mt-3 max-w-[600px] text-[16px] leading-7 text-body">
+      <p className="mt-2 max-w-[600px] text-[14px] leading-6 text-body sm:mt-3 sm:text-[16px] sm:leading-7">
         Your MON stays in your wallet. A bot sells it only on your terms. Anything else, the chain refuses.
       </p>
-      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[14px] leading-5 text-ink">
+      <ul className="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-[14px] leading-5 text-ink sm:flex">
         {["Only at your line", "Never under your floor", "Only to your address", "Only until your end date"].map((rule) => (
           <li key={rule} className="flex items-center gap-1.5">
             <Check className="shrink-0 text-body" />
@@ -38,47 +40,108 @@ const TRIED: Record<string, string> = {
   expiry: "sell after the plan expired",
 };
 
+/** The mainnet deployment as a status row: what is live, at which address, from which block, each linked to the explorer. */
+function LiveRow({ net }: { net: Net }) {
+  const addr = (a: string) => a.toLowerCase();
+  const link = (path: string, text: string) => (
+    <a className="num underline decoration-hairline-strong underline-offset-4 hover:text-ink hover:decoration-ink" href={`${net.explorer}/${path}`} target="_blank" rel="noreferrer">
+      {text}
+    </a>
+  );
+  const item = (k: string, v: React.ReactNode) => (
+    <div className="flex items-baseline gap-2">
+      <dt className="text-mute">{k}</dt>
+      <dd className="text-ink">{v}</dd>
+    </div>
+  );
+  return (
+    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] leading-5" aria-label={`Live on ${net.name}`}>
+      {item("Plan enforcer", link(`address/${net.enforcer}`, short(addr(net.enforcer))))}
+      {item("Plan book", link(`address/${net.planBook}`, short(addr(net.planBook))))}
+      {item("From block", link(`block/${net.planBookFromBlock}`, net.planBookFromBlock.toString()))}
+    </dl>
+  );
+}
+
+/** The testnet keeper's record, read from its own API while the page is on mainnet. */
+function useTestnetRecord(enabled: boolean) {
+  const [state, setState] = useState<{ sent: number; reverted: number; paid: number } | { error: string } | null>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    let live = true;
+    fetch(`${apiBase(TESTNET)}/recent`, { cache: "no-store" })
+      .then(async (r) => {
+        const b = await r.json();
+        if (!r.ok || !b.totals) throw new Error(b.error ?? `keeper ${r.status}`);
+        if (live) setState({ sent: b.totals.forbiddenSent, reverted: b.totals.forbiddenReverted, paid: b.totals.forbiddenPaidOut });
+      })
+      .catch((e: Error) => live && setState({ error: e.message }));
+    return () => {
+      live = false;
+    };
+  }, [enabled]);
+  return state;
+}
+
+function Figure({ n, label, tone = "text-ink", onGo }: { n: number; label: string; tone?: string; onGo: (e: React.MouseEvent) => void }) {
+  return (
+    <a href="#refusals" onClick={onGo} className="group -mx-1 min-w-0 rounded-md px-1 transition-colors duration-150 hover:bg-surface-elevated">
+      <div className={`num text-[48px] font-medium leading-[52px] ${tone}`}>{n}</div>
+      <div className="text-[11px] uppercase tracking-[0.06em] text-mute group-hover:text-body">{label}</div>
+    </a>
+  );
+}
+
 export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
   const net = useNet();
   const tot = t.recent?.totals;
   const plans = t.recent?.plans ?? [];
   const holder = plans.find((p) => p.refused.length > 0);
   const latest = holder?.refused.at(-1);
+  const first = !!tot && tot.plans === 0;
+  const testnet = useTestnetRecord(first && net.key === "mainnet");
   const go = (e: React.MouseEvent) => {
     e.preventDefault();
     onCheat();
   };
-  const num = "num rounded-sm px-1 text-[28px] font-medium leading-9 text-ink underline decoration-hairline-strong decoration-1 underline-offset-[6px] hover:bg-surface-elevated hover:decoration-ink";
   return (
     <section aria-label="Live proof" className="min-w-0 rounded-[10px] border border-hairline bg-surface-card">
       <div className="px-4 pb-4 pt-4 sm:px-5">
-        {tot && tot.plans === 0 ? (
-          <>
-            <p className="text-[17px] leading-7 text-ink sm:text-[18px]" data-testid="proof-first">
-              No plan on {net.name} yet. Yours can be the first.
+        {first ? (
+          <div data-testid="proof-first">
+            <p className="flex items-center gap-2 text-[17px] leading-7 text-ink sm:text-[18px]">
+              <Check className="shrink-0" />
+              Live on {net.name}
             </p>
-            <p className="mt-1 flex items-start gap-2 text-[13px] leading-5 text-mute">
-              <Check className="mt-[3px] shrink-0 text-ink" />
-              <span>Sign one line and a floor, then press Try to cheat: the keeper sends the sales your plan forbids and the chain refuses each one, in the open.</span>
-            </p>
-          </>
+            {net.deployed && <LiveRow net={net} />}
+            {net.key === "mainnet" && (
+              <p className="num mt-3 border-t border-hairline pt-3 text-[13px] leading-5 text-body">
+                {testnet === null ? (
+                  "Reading the testnet record"
+                ) : "error" in testnet ? (
+                  `The testnet record is not reachable right now: ${testnet.error}`
+                ) : (
+                  <>
+                    Testnet record: <span className="text-ink">{testnet.reverted}/{testnet.sent}</span> forbidden sales refused, <span className="text-ink">{testnet.paid}</span> paid out.{" "}
+                    <a className="font-sans text-ink underline decoration-hairline-strong underline-offset-4 hover:decoration-ink" href="?net=testnet&view=watch">See it on Watch</a>
+                  </>
+                )}
+              </p>
+            )}
+          </div>
         ) : tot ? (
-          <>
-            <p className="text-[17px] leading-[44px] text-ink sm:text-[18px]" data-testid="proof-totals">
-              Our own keeper tried to cheat{" "}
-              <a className={num} href="#refusals" onClick={go}>{tot.forbiddenSent}</a>{" "}
-              times. The chain refused{" "}
-              <a className={num} href="#refusals" onClick={go}>{tot.forbiddenReverted}</a>
-              . It paid out{" "}
-              <a className={num} href="#refusals" onClick={go}>{tot.forbiddenPaidOut}</a>.
+          <div data-testid="proof-totals">
+            <p className="text-[13px] leading-5 text-body">Our own keeper tried to cheat on {net.name}</p>
+            <div className="mt-2 flex gap-x-8 sm:gap-x-12">
+              <Figure n={tot.forbiddenSent} label="tried" onGo={go} />
+              <Figure n={tot.forbiddenReverted} label="refused" onGo={go} />
+              <Figure n={tot.forbiddenPaidOut} label="paid out" tone="text-line" onGo={go} />
+            </div>
+            <p className="mt-3 text-[13px] leading-5 text-mute">
+              Every attempt is a mined transaction.
+              <span className="hidden sm:inline"> The keeper also made {tot.sales} real sales across {tot.plans} plans, each at or above its floor.</span>
             </p>
-            <p className="mt-1 flex items-start gap-2 text-[13px] leading-5 text-mute">
-              <Check className="mt-[3px] shrink-0 text-ink" />
-              <span>
-                Every attempt is a transaction on {net.name}. Meanwhile the keeper made {tot.sales} real sales across {tot.plans} plans, each to its holder at or above the floor.
-              </span>
-            </p>
-          </>
+          </div>
         ) : t.recentError ? (
           <p className="text-[14px] leading-6 text-body">The keeper&apos;s record is not reachable right now: {t.recentError}. It reloads every few seconds.</p>
         ) : (
@@ -86,7 +149,7 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
         )}
       </div>
       <div className="flex flex-col gap-3 border-t border-hairline px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div className="min-w-0 text-[13px] leading-5 text-body">
+        <div className="hidden min-w-0 text-[13px] leading-5 text-body sm:block">
           {holder && latest ? (
             <>
               <p>
@@ -98,15 +161,15 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
               </p>
             </>
           ) : (
-            <p className="text-mute">Refusals appear here as the keeper tries them.</p>
+            <p className="text-mute">{first ? "Sign one line and a floor, then press Try to cheat and read the chain's refusal." : "Refusals appear here as the keeper tries them."}</p>
           )}
         </div>
         <button
           type="button"
           onClick={onCheat}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-ink px-5 text-[14px] font-medium text-ink transition-colors duration-150 ease-out hover:bg-ink hover:text-canvas active:scale-[0.97]"
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-ink px-5 text-[14px] font-medium text-ink transition-colors duration-150 ease-out hover:bg-ink hover:text-canvas active:scale-[0.97]"
         >
-          {tot && tot.plans === 0 ? "Set the first plan" : "Try to cheat"}
+          {first ? "Set your plan" : "Try to cheat"}
           <span aria-hidden>&rarr;</span>
         </button>
       </div>
@@ -179,7 +242,7 @@ export function ComingOnline({ net }: { net: Net }) {
         <Fact label="Plan book">going live</Fact>
       </Card>
       <div className="flex flex-col gap-2">
-        <a href="?net=testnet" className="inline-flex h-[54px] w-full items-center justify-center rounded-full bg-ink text-[15px] font-medium text-canvas transition-opacity duration-150 ease-out hover:opacity-90">
+        <a href="?net=testnet" className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-ink text-[15px] font-medium text-canvas transition-opacity duration-150 ease-out hover:opacity-90">
           Try the full flow on Monad testnet
         </a>
         <p className="text-[12px] leading-5 text-mute">Same plan, same enforcer, same refusals, with free testnet MON.</p>
