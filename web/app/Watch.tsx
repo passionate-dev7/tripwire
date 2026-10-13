@@ -11,7 +11,7 @@ import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short } from "./parts";
 type T = ReturnType<typeof useTripwire>;
 
 const ATTACKS: { kind: Attack["kind"]; label: string; tried: string }[] = [
-  { kind: "line", label: "Sell above your Perpl hedge line", tried: "to sell before the line was reached" },
+  { kind: "line", label: "Sell before MON reaches your line", tried: "to sell before the line was reached" },
   { kind: "recipient", label: "Send proceeds to the keeper", tried: "to send proceeds to someone other than you" },
   { kind: "expiry", label: "Fire after the plan expired", tried: "to sell after the signed end date" },
 ];
@@ -44,7 +44,7 @@ export function Heartbeat({ lastLoop, keeperGas, fillCost, loopError }: { lastLo
   const age = lastLoop ? Math.max(0, Math.round((now - lastLoop) / 1000)) : null;
   const left = salesLeft(keeperGas, fillCost);
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-hairline px-1 py-2" data-testid="heartbeat">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-hairline px-4 py-3" data-testid="heartbeat">
       <div className="flex h-6 items-end gap-[2px]" aria-hidden>
         {beats.map((ok, i) => (
           <span key={i} className={`w-[3px] ${ok ? "h-6 bg-ink/70" : "h-6 bg-line"}`} />
@@ -89,14 +89,12 @@ function Proof({ t }: { t: T }) {
   const tot = t.recent?.totals;
   if (rows.length === 0) return null;
   return (
-    <section className="mt-6 rounded-[10px] border border-hairline bg-surface-card" aria-label="Forbidden sales">
+    <section id="refusals" className="mt-6 scroll-mt-4 rounded-[10px] border border-hairline bg-surface-card" aria-label="Forbidden sales">
       <header className="border-b border-hairline px-4 py-3">
-        {tot && (
-          <p className="num text-[22px] font-medium leading-8 text-ink">
-            {tot.forbiddenSent} forbidden sales sent, {tot.forbiddenReverted} reverted, {tot.forbiddenPaidOut} paid out
-          </p>
-        )}
-        <p className="text-[13px] text-mute">The keeper broke the rules on purpose. Each attempt is a mined Monad testnet transaction with status 0.</p>
+        <h2 className="text-[15px] font-medium text-ink">Every cheat the keeper tried, and what the chain said</h2>
+        <p className="mt-0.5 text-[13px] text-mute">
+          {tot ? `${tot.forbiddenSent} attempts, ${tot.forbiddenReverted} reverted, ${tot.forbiddenPaidOut} paid out. ` : ""}Each row is a mined {t.net.name} transaction with status 0. Newest plans first.
+        </p>
       </header>
       <div className="grid min-h-8 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
         <span>Plan</span><span>Keeper tried to</span><span>Contract said</span><span>Tx</span>
@@ -105,7 +103,7 @@ function Proof({ t }: { t: T }) {
         <div key={r.hash} className="num grid min-h-9 grid-cols-[48px_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline px-4 text-[13px]">
           <span className="text-mute">{r.plan}</span>
           <span className="font-sans text-body">{TRIED_SHORT[r.attack]}</span>
-          <span className="text-line">{r.reason}</span>
+          <span className="text-ink">{r.reason}</span>
           <TxLink hash={r.hash} />
         </div>
       ))}
@@ -123,7 +121,7 @@ export function PlanCard({ p, price, action, title }: { p: PlanView; price: numb
         <div key={x.index} className="num grid min-h-[25px] grid-cols-[32px_1fr_1fr_1fr_84px] items-center gap-2 border-t border-hairline px-4 text-[13px]">
           <span className="text-mute">{x.index + 1}</span>
           <span className="text-right text-ink">{fmtMon(x.mon)}</span>
-          <span className="text-right text-line">{fmtPrice(x.line)}</span>
+          <span className={`text-right ${x.atOrAbove ? "text-ink" : "text-line"}`}>{fmtPrice(x.line)}</span>
           <span className="text-right text-ink">{fmtPrice(x.floorPerMon)}</span>
           <span className="text-right text-body">{x.spent ? "sold" : p.revoked ? "off" : price !== null && (x.atOrAbove ? price >= x.line : price <= x.line) ? "selling" : `${((Math.abs((price ?? 0) - x.line) / (price || 1)) * 100).toFixed(1)}% to ${x.atOrAbove ? "target" : "stop"}`}</span>
         </div>
@@ -162,7 +160,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
         {t.publicPlan && t.publicPlan.attacks.length > 0 && (
           <p className="text-[13px] leading-5 text-body">Each refusal above is a real transaction: the keeper sent a sale the plan forbids and Monad reverted it with the enforcer's reason.</p>
         )}
-        <p className="text-[13px] leading-5 text-body">Sign in with a passkey on the Plan tab to arm your own plan and make the keeper try it.</p>
+        <p className="text-[13px] leading-5 text-body">Set your own plan on the Plan tab. Once it is signed, this screen lets you make the keeper try to break it.</p>
       </div>
     );
   }
@@ -197,9 +195,9 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
       ))}
 
       {target && (
-        <Card title="Try to cheat">
+        <Card title="Try to cheat" id="cheat">
           <p className="px-4 pt-3 text-[13px] leading-5 text-body">
-            Make the keeper break plan {target.id} on purpose. These are real testnet transactions: sell above your hedge line, pay the keeper, or fill after expiry.
+            Make the keeper break plan {target.id} on purpose: sell before your line, pay itself, or fill after the plan ends. Each try is a real transaction, and the chain refuses it.
           </p>
           <div className="mt-2">
             {ATTACKS.map((a) => {

@@ -121,6 +121,7 @@ export function useTripwire() {
     plansLoaded: mine.at > 0,
     holdings: held.data,
     recent: recent.data,
+    recentError: recent.error,
     publicPlan: [...(publicPlans.data?.plans ?? [])].reverse().find((p) => p.attacks.length > 0) ?? null,
     busy,
     steps,

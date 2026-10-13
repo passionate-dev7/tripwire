@@ -15,9 +15,9 @@ export const fmtMon = (wei: bigint | string) => {
 };
 export const fmtUsd = (raw: bigint | string, decimals = 6) => (Number(BigInt(raw)) / 10 ** decimals).toLocaleString("en-US", { maximumSignificantDigits: 4 });
 
-export function Card({ title, aside, children, className = "" }: { title?: string; aside?: ReactNode; children: ReactNode; className?: string }) {
+export function Card({ title, aside, children, className = "", id }: { title?: string; aside?: ReactNode; children: ReactNode; className?: string; id?: string }) {
   return (
-    <section className={`rounded-[10px] border border-hairline bg-surface-card ${className}`}>
+    <section id={id} className={`scroll-mt-4 rounded-[10px] border border-hairline bg-surface-card ${className}`}>
       {title && (
         <header className="flex h-10 items-center justify-between border-b border-hairline px-4">
           <h2 className="text-[13px] font-medium tracking-[0.2px] text-ink">{title}</h2>
@@ -83,5 +83,23 @@ export function Ghost({ children, onClick, disabled }: { children: ReactNode; on
     >
       {children}
     </button>
+  );
+}
+
+export function Check({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
+      <path d="M3 8.5l3.2 3L13 4.5" />
+    </svg>
+  );
+}
+
+/** Which network the page reads. One slot in the header, so a network switch can replace it in one place. */
+export function NetBadge() {
+  return (
+    <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-hairline px-3 text-[12px] text-body" title={`Chain ${TESTNET.chainId}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden />
+      {TESTNET.name}
+    </span>
   );
 }

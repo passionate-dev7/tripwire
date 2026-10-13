@@ -1,17 +1,22 @@
 "use client";
 // The noun: MON's price running across the chart and the holder's red lines it must cross before anything sells.
 // The 60 s TWAP (what the contract reads) is the ink line; spot is a faint line beside it, so the gap the enforcer
-// waits out is visible. Each tranche is a red line at its price; its floor is a faint dashed red line under it.
+// waits out is visible. A stop is the one red line, a target is a light dashed line, and a floor is a quiet grey dotted
+// line under its row. The price scale's own tick numbers are hidden: every line carries its own labelled value, so
+// no tick can sit under a label.
 import { useEffect, useRef } from "react";
 import { ColorType, LineSeries, LineStyle, createChart, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import type { Point } from "../lib/api";
 import { tickToPrice } from "../lib/plan";
 
-export type ChartLine = { price: number; floor: number; label: string; state: "draft" | "armed" | "sold" | "off" };
+export type ChartLine = { price: number; floor: number; label: string; up?: boolean; state: "draft" | "armed" | "sold" | "off" };
 
 const INK = "#f4f4f6";
 const MUTE = "#9c9c9d";
 const RED = "#ff6161";
+const BODY = "#cdcdcd";
+const QUIET = "rgba(156,156,157,0.55)";
+const PLATE = "#1a1b1c";
 const HAIR = "#242728";
 
 export function StopChart({ points, lines, height = 280 }: { points: Point[]; lines: ChartLine[]; height?: number }) {
@@ -26,7 +31,7 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
       height,
       layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: MUTE, fontFamily: "IBM Plex Mono, ui-monospace, monospace", fontSize: 11, attributionLogo: false },
       grid: { vertLines: { visible: false }, horzLines: { color: HAIR } },
-      rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.12 } },
+      rightPriceScale: { borderVisible: false, textColor: "rgba(0,0,0,0)", scaleMargins: { top: 0.14, bottom: 0.14 } },
       timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },
       crosshair: { vertLine: { color: HAIR, labelBackgroundColor: "#121212" }, horzLine: { color: HAIR, labelBackgroundColor: "#121212" } },
       handleScale: false,
@@ -61,17 +66,23 @@ export function StopChart({ points, lines, height = 280 }: { points: Point[]; li
   useEffect(() => {
     const s = twap.current;
     if (!s) return;
-    const made = lines.flatMap((l) => [
-      s.createPriceLine({
-        price: l.price,
-        color: l.state === "sold" || l.state === "off" ? MUTE : RED,
-        lineWidth: l.state === "armed" ? 2 : 1,
-        lineStyle: l.state === "draft" ? LineStyle.LargeDashed : LineStyle.Solid,
-        axisLabelVisible: true,
-        title: l.label,
-      }),
-      s.createPriceLine({ price: l.floor, color: l.state === "sold" || l.state === "off" ? "rgba(156,156,157,0.45)" : "rgba(255,97,97,0.55)", lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, title: "floor" }),
-    ]);
+    const made = lines.flatMap((l) => {
+      const done = l.state === "sold" || l.state === "off";
+      const color = done ? QUIET : l.up ? BODY : RED;
+      return [
+        s.createPriceLine({
+          price: l.price,
+          color,
+          lineWidth: l.state === "armed" ? 2 : 1,
+          lineStyle: l.state === "draft" ? LineStyle.LargeDashed : l.up ? LineStyle.Dashed : LineStyle.Solid,
+          axisLabelVisible: true,
+          axisLabelColor: color,
+          axisLabelTextColor: "#07080a",
+          title: l.label,
+        }),
+        s.createPriceLine({ price: l.floor, color: QUIET, lineWidth: 1, lineStyle: LineStyle.Dotted, axisLabelVisible: true, axisLabelColor: PLATE, axisLabelTextColor: MUTE, title: "floor" }),
+      ];
+    });
     // keep every line in view, not just the price
     s.applyOptions({
       autoscaleInfoProvider: (base: () => { priceRange: { minValue: number; maxValue: number } } | null) => {

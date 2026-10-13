@@ -1,7 +1,7 @@
 "use client";
-// The Plan ticket (LAYOUT.md, Plan screen, ticket column): one sentence for the first line, up to three tranche rows,
-// the facts the chain will enforce, then Sign. Every fact below is read from the same tranche values that are
-// encoded into the signed terms, so what the holder reads is what the enforcer checks.
+// The plan ticket. Each row reads as the sentence the chain will enforce: "Sell 0.02 MON if MON falls to 0.02981,
+// never below 0.02851", with how far MON is from that line right now. Every figure below is read from the same
+// tranche values that are encoded into the signed terms, so what the holder reads is what the enforcer checks.
 import { useMemo, useState } from "react";
 import type { Hex } from "viem";
 import { type PlainTranche, priceToTick, toTranches } from "../lib/plan";
@@ -13,6 +13,46 @@ import { Card, Copy, Fact, Ghost, Pill, TxLink, addrUrl, fmtMon, fmtPrice, short
 type T = ReturnType<typeof useTripwire>;
 const DEFAULT_END = "2026-10-20";
 const fmtAusd = (n: number) => n.toLocaleString("en-US", { maximumSignificantDigits: 4 });
+
+const FIELD =
+  "num h-9 rounded-md border border-hairline bg-surface px-2 text-[14px] text-ink outline-none transition-colors duration-150 ease-out hover:border-hairline-strong focus:border-ink";
+
+/** A number box that keeps what the holder is typing ("0." stays "0.") until the plan value it parses to changes. */
+function NumField({ label, value, onChange, tone = "text-ink", tight = false }: { label: string; value: string | number; onChange: (v: string) => void; tone?: string; tight?: boolean }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft !== null && Number(draft) === Number(value) ? draft : String(value);
+  return (
+    <input
+      aria-label={label}
+      inputMode="decimal"
+      value={shown}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        onChange(e.target.value);
+      }}
+      style={{ width: `${Math.max(shown.length, 5) + 3}ch` }}
+      className={`${FIELD} ${tight ? "ml-1" : "mx-1"} max-w-full text-right ${tone}`}
+    />
+  );
+}
+
+function Direction({ n, up, onPick }: { n: number; up: boolean; onPick: () => void }) {
+  return (
+    <span role="group" aria-label={`Tranche ${n} direction`} className="mx-1 inline-flex h-9 overflow-hidden rounded-md border border-hairline align-middle">
+      {([false, true] as const).map((u) => (
+        <button
+          key={String(u)}
+          type="button"
+          aria-pressed={up === u}
+          onClick={() => up !== u && onPick()}
+          className={`px-3 text-[13px] transition-colors duration-150 ease-out ${up === u ? "bg-hairline-strong font-medium text-ink" : "text-mute hover:text-ink"}`}
+        >
+          {u ? "rises to" : "falls to"}
+        </button>
+      ))}
+    </span>
+  );
+}
 
 export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]; setPlan: (p: PlainTranche[]) => void; price: number | null }) {
   const [expiry, setExpiry] = useState(DEFAULT_END);
@@ -45,102 +85,114 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
   const h = t.holdings;
   const toWrap = h && total > h.wmon ? total - h.wmon : total;
   const short_ = h ? h.mon < toWrap + SETUP_GAS_BUDGET : false;
+  const atLeast = plan.reduce((n, p) => n + Number(p.mon) * p.floor, 0);
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <div className="px-4 pb-4 pt-5">
-          <p className="text-[14px] leading-6 text-body">
-            Line 1 hedges your Perpl book: sell <span className="num text-ink">{plan[0]?.mon || "0"}</span> MON once the 60 s average{" "}
-            <button type="button" onClick={() => flip(0)} className="rounded-md border border-hairline px-1.5 text-ink hover:border-hairline-strong" aria-label="Switch sale 1 between falls to and rises to">
-              {up0 ? "rises to" : "falls to"}
+    <div className="flex flex-col gap-4">
+      <Card title="Your plan" aside={<span className="text-[12px] text-mute">prices in aUSD per MON</span>}>
+        <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+          <span className="mr-1 text-[12px] text-mute">Set row 1 to</span>
+          {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
+            <button key={l} type="button" onClick={() => preset(v as number)} className="h-9 min-w-[48px] rounded-md border border-hairline px-3 text-[13px] text-body transition-colors duration-150 ease-out hover:border-hairline-strong hover:text-ink active:scale-[0.97]">
+              {l}
             </button>
-          </p>
-          <label className="mt-1 flex items-baseline gap-2">
-            <span className="sr-only">Line, in aUSD per MON</span>
-            <input
-              inputMode="decimal"
-              value={String(plan[0]?.line ?? "")}
-              onChange={(e) => set(0, "line", e.target.value)}
-              className="num w-full bg-transparent text-[36px] font-medium leading-[54px] text-ink outline-none"
-            />
-            <span className="text-[14px] text-mute">aUSD</span>
-          </label>
-          <p className="num mt-1 text-[12px] text-mute">
-            {price === null || !(plan[0]?.line > 0)
-              ? "Reading the price."
-              : reached(plan[0])
-                ? `MON is already ${up0 ? "at or above" : "at or below"} it (${fmtPrice(price)}): the keeper sells this within about a minute of arming.`
-                : `${((Math.abs(price - plan[0].line) / price) * 100).toFixed(1)}% ${up0 ? "above" : "below"} today's 60 s average of ${fmtPrice(price)}.`}
-          </p>
-          <div className="mt-2 flex gap-2 overflow-x-auto">
-            {(up0 ? [["Market", 0], ["+5%", 5], ["+10%", 10], ["+20%", 20]] : [["Market", 0], ["-5%", -5], ["-10%", -10], ["-20%", -20]]).map(([l, v]) => (
-              <button key={l} type="button" onClick={() => preset(v as number)} className="h-10 shrink-0 rounded-lg border border-hairline px-3 text-[13px] text-body hover:border-hairline-strong hover:text-ink">
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="border-t border-hairline">
-          <div className="grid h-8 grid-cols-[1fr_60px_1fr_1fr_36px] items-center gap-2 px-4 text-[11px] uppercase tracking-[0.4px] text-mute">
-            <span>Sell MON</span><span>When MON</span><span className="text-right">Line</span><span className="text-right" title="The sale never pays less than this per MON">Floor</span><span />
-          </div>
-          {plan.map((p, i) => (
-            <div key={i} className="grid h-10 grid-cols-[1fr_60px_1fr_1fr_36px] items-center gap-2 border-t border-hairline px-4">
-              <input aria-label={`Tranche ${i + 1} MON`} inputMode="decimal" value={p.mon} onChange={(e) => set(i, "mon", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-[13px] text-ink outline-none" />
-              <button type="button" aria-label={`Tranche ${i + 1} direction`} onClick={() => flip(i)} className="h-8 rounded-lg border border-hairline text-[12px] text-body hover:border-hairline-strong hover:text-ink">
-                {p.up ? "rises" : "falls"}
-              </button>
-              <input aria-label={`Tranche ${i + 1} line`} inputMode="decimal" value={String(p.line)} onChange={(e) => set(i, "line", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-line outline-none" />
-              <input aria-label={`Tranche ${i + 1} floor`} inputMode="decimal" value={String(p.floor)} onChange={(e) => set(i, "floor", e.target.value)} className="num h-8 w-full min-w-0 rounded-lg bg-surface px-2 text-right text-[13px] text-ink outline-none" />
-              <button type="button" aria-label={`Remove tranche ${i + 1}`} disabled={plan.length === 1} onClick={() => setPlan(plan.filter((_, j) => j !== i))} className="h-9 w-9 text-[16px] text-mute hover:text-ink disabled:opacity-20">
-                ×
-              </button>
-            </div>
           ))}
-          {plan.length < 3 && (
-            <button type="button" onClick={() => { const last = plan[plan.length - 1]; const k = last.up ? 1.15 : 0.85; setPlan([...plan, { mon: last.mon, line: Number((last.line * k).toFixed(5)), floor: Number((last.floor * k).toFixed(5)), ...(last.up ? { up: true } : {}) }]); }} className="h-10 w-full border-t border-hairline px-4 text-left text-[13px] text-mute hover:text-ink">
-              Add a staged sell
-            </button>
-          )}
         </div>
+        <ol>
+          {plan.map((p, i) => {
+            const dist = price !== null && p.line > 0 ? (Math.abs(price - p.line) / price) * 100 : null;
+            const back = Number(p.mon) * p.floor;
+            return (
+              <li key={i} className="border-t border-hairline px-4 pb-2 pt-3">
+                <p className="text-[15px] leading-[44px] text-ink">
+                  Sell
+                  <NumField label={`Tranche ${i + 1} MON`} value={p.mon} onChange={(v) => set(i, "mon", v)} />
+                  MON if MON
+                  <Direction n={i + 1} up={p.up === true} onPick={() => flip(i)} />
+                  <span className="whitespace-nowrap">
+                    <NumField label={`Tranche ${i + 1} line`} value={p.line} onChange={(v) => set(i, "line", v)} tone={p.up ? "text-ink" : "text-line"} tight />,
+                  </span>
+                  <span className="whitespace-nowrap">
+                    {" "}never below
+                    <NumField label={`Tranche ${i + 1} floor`} value={p.floor} onChange={(v) => set(i, "floor", v)} tone="text-body" />
+                  </span>
+                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="num text-[12px] leading-5 text-mute">
+                    <span className="font-sans text-body">{p.up ? "Take-profit" : "Stop-loss"}</span>
+                    {price === null || !(p.line > 0) ? (
+                      ". Reading the price."
+                    ) : reached(p) ? (
+                      <span className="text-body">. MON is already {p.up ? "at or above" : "at or below"} this line ({fmtPrice(price)}). The keeper sells it within about a minute of arming.</span>
+                    ) : (
+                      <>
+                        . <span className="text-ink">{dist!.toFixed(1)}% {p.up ? "above" : "below"}</span> MON now ({fmtPrice(price)})
+                        {Number.isFinite(back) && back > 0 ? `, pays at least ${fmtAusd(back)} aUSD` : ""}
+                      </>
+                    )}
+                  </p>
+                  <button type="button" aria-label={`Remove tranche ${i + 1}`} disabled={plan.length === 1} onClick={() => setPlan(plan.filter((_, j) => j !== i))} className="-mr-2 -mt-1.5 h-9 w-9 shrink-0 text-[18px] leading-none text-mute transition-colors duration-150 hover:text-ink disabled:opacity-20">
+                    &times;
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+        {plan.length < 3 && (
+          <button
+            type="button"
+            onClick={() => {
+              const last = plan[plan.length - 1];
+              const k = last.up ? 1.15 : 0.85;
+              setPlan([...plan, { mon: last.mon, line: Number((last.line * k).toFixed(5)), floor: Number((last.floor * k).toFixed(5)), ...(last.up ? { up: true } : {}) }]);
+            }}
+            className="h-11 w-full border-t border-hairline px-4 text-left text-[13px] text-mute transition-colors duration-150 hover:text-ink"
+          >
+            Add another sale
+          </button>
+        )}
+        <div className="border-t border-hairline">
+          <Fact label="Pays only to">
+            {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
+          </Fact>
+          <Fact label="At most it sells">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>
+          <Fact label="You get at least">{checked.tranches ? `${fmtAusd(atLeast)} aUSD` : "check the rows"}</Fact>
+          <Fact label="Plan ends">
+            <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num h-6 bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
+          </Fact>
+        </div>
+        <details className="group border-t border-hairline">
+          <summary className="flex h-11 cursor-pointer list-none items-center justify-between px-4 text-[13px] text-body hover:text-ink [&::-webkit-details-marker]:hidden">
+            <span>What the contract checks on every sale</span>
+            <span className="text-mute transition-transform duration-150 group-open:rotate-90" aria-hidden>&rsaquo;</span>
+          </summary>
+          <div className="pb-1">
+            <Fact label="Line">the 60 s average has to be at or past it, in the direction you chose</Fact>
+            <Fact label="Floor">the sale pays at least this per MON, or it reverts</Fact>
+            <Fact label="Size">{checked.tranches ? `exactly the row's MON, largest ${fmtMon(largest)} MON` : "exactly the row's MON"}</Fact>
+            <Fact label="Gap below a floor">that row does not sell and you keep the MON</Fact>
+            <Fact label="Route">WMON for aUSD, Uniswap V3, 0.3% fee</Fact>
+            <Fact label="Perpl hedge">this plan also records account {PERPL_ANCHOR.accountId}, {PERPL_ANCHOR.side} {PERPL_ANCHOR.size} {PERPL_ANCHOR.symbol} lots</Fact>
+          </div>
+        </details>
       </Card>
 
-      <Card title="What the keeper can do">
-        <Fact label="Perpl position">account {PERPL_ANCHOR.accountId}, market {PERPL_ANCHOR.marketId}, {PERPL_ANCHOR.side} {PERPL_ANCHOR.size} {PERPL_ANCHOR.symbol} lots (mainnet read {PERPL_ANCHOR.fetchedAt.slice(0, 10)})</Fact>
-        <Fact label="Lines">1 spot stop at your line hedges that book, then staged sells, then vault target</Fact>
-        <Fact label="Sells">WMON for aUSD on Monad testnet, one fill per row</Fact>
-        {plan.some((p) => !p.up) && <Fact label="Stops: once MON falls to">{plan.filter((p) => !p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
-        {plan.some((p) => p.up) && <Fact label="Targets: once MON rises to">{plan.filter((p) => p.up).map((p) => fmtPrice(p.line)).join(", ")}</Fact>}
-        <Fact label="Never for less than">{plan.map((p) => `${fmtPrice(p.floor)}`).join(", ")} aUSD per MON</Fact>
-        <Fact label="Pays only to">
-          {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
-        </Fact>
-        <Fact label="If MON gaps below a floor">that sale does not fire; you keep the MON</Fact>
-        <Fact label="Pool fee">0.3%, Uniswap V3 WMON/aUSD</Fact>
-        <Fact label="You receive at least">
-          {checked.tranches ? `${fmtAusd(plan.reduce((n, p) => n + Number(p.mon) * p.floor, 0))} aUSD` : "check the rows"}
-        </Fact>
-        <Fact label="Largest single sale">{checked.tranches ? `${fmtMon(largest)} MON` : "check the rows"}</Fact>
-        <Fact label="In total, at most">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>
-        <Fact label="Stops on">
-          <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num min-h-9 bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
-        </Fact>
-      </Card>
-
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" id="sign">
         {checked.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{checked.error}</p>}
         {firesNow && !checked.error && <p className="text-[13px] text-body">MON is already past a line in this plan, so the keeper sells that row within about a minute of arming.</p>}
 
         {!t.account ? (
-          <div className="flex flex-col gap-2">
-            <Pill onClick={t.signIn} disabled={t.busy !== null}>{t.busy === "Signing in" ? "Waiting for your passkey" : "Sign in with passkey"}</Pill>
-            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average reaches your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
-            <div className="flex gap-2">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name a new passkey" aria-label="Name for a new passkey" className="h-[31px] min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-3 text-[13px] text-ink outline-none placeholder:text-mute" />
-              <Ghost onClick={() => t.create(name || "tripwire")} disabled={t.busy !== null}>Create</Ghost>
+          <div className="flex flex-col gap-3">
+            <Pill onClick={() => t.create(name || "tripwire")} disabled={t.busy !== null}>{t.busy === "Creating your passkey" ? "Waiting for your passkey" : "Create a passkey wallet"}</Pill>
+            <p className="text-[12px] leading-5 text-mute">
+              The passkey is your wallet: no extension, no seed phrase. The next step signs this plan with one prompt.
+            </p>
+            <div className="flex items-center gap-2">
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name it (optional)" aria-label="Name for a new passkey" className="h-10 min-w-0 flex-1 rounded-md border border-hairline bg-surface px-3 text-[13px] text-ink outline-none placeholder:text-mute focus:border-ink" />
+              <Ghost onClick={t.signIn} disabled={t.busy !== null}>{t.busy === "Signing in" ? "Waiting for your passkey" : "Sign in with passkey"}</Ghost>
             </div>
-            <p className="text-[12px] leading-5 text-mute">The passkey is your wallet: no extension, no seed phrase. It signs the plan and the account upgrade with one prompt.</p>
+            <p className="text-[12px] leading-5 text-mute">Already have one? Sign in with it instead.</p>
           </div>
         ) : short_ && h && h.mon === 0n ? (
           <div className="flex flex-col gap-2">
@@ -173,10 +225,9 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             <Pill onClick={() => t.arm(plan, expiresAt)} disabled={t.busy !== null || !!checked.error}>
               {t.busy === "Arming" ? t.steps.at(-1)?.label ?? "Signing" : `Sign plan (${plan.length} ${plan.length === 1 ? "sale" : "sales"})`}
             </Pill>
-            <p className="text-[12px] leading-5 text-mute">A line is not a guaranteed price: the keeper sells at the pool price once the 60 s average reaches your line, never below your floor. In a fast drop past the floor, that row does not sell.</p>
+            <p className="text-[12px] leading-5 text-mute">One passkey prompt wraps the planned MON, upgrades your account and posts the signed plan. Revoke any time.</p>
           </>
         )}
-
 
         {t.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{t.error}</p>}
         {t.steps.length > 0 && (
