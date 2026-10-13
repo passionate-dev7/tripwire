@@ -70,7 +70,6 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
   const largest = checked.tranches?.reduce((m, x) => (x.amountIn > m ? x.amountIn : m), 0n) ?? 0n;
   const expiresAt = Math.floor(new Date(`${expiry}T00:00:00Z`).getTime() / 1000);
   const reached = (p: PlainTranche) => price !== null && p.line > 0 && (p.up ? priceToTick(price) >= priceToTick(p.line) : priceToTick(price) <= priceToTick(p.line));
-  const firesNow = plan.some(reached);
   const flip = (i: number) => setPlan(plan.map((p, j) => (j === i ? { ...p, up: !p.up } : p)));
   const up0 = plan[0]?.up === true;
 
@@ -162,7 +161,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
             {t.account ? <span className="font-mono text-[12px]">{short(t.account.address, 8)}<Copy text={t.account.address} /></span> : <span className="text-mute">your passkey address</span>}
           </Fact>
           <Fact label="At most it sells">{checked.tranches ? `${fmtMon(total)} MON` : "check the rows"}</Fact>
-          <Fact label="You get at least">{checked.tranches ? `${fmtAusd(atLeast)} {sym}` : "check the rows"}</Fact>
+          <Fact label="You get at least">{checked.tranches ? `${fmtAusd(atLeast)} ${sym}` : "check the rows"}</Fact>
           <Fact label="Plan ends">
             <input type="date" value={expiry} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setExpiry(e.target.value)} aria-label="Plan stops on" className="num h-6 bg-transparent text-right text-ink outline-none [color-scheme:dark]" />
           </Fact>
@@ -186,7 +185,6 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
 
       <div className="flex shrink-0 flex-col gap-3" id="sign">
         {checked.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{checked.error}</p>}
-        {firesNow && !checked.error && <p className="text-[13px] text-body">MON is already past a line in this plan, so the keeper sells that row within about a minute of arming.</p>}
 
         {!t.account ? (
           <div className="flex flex-col gap-3">

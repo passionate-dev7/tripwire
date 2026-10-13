@@ -97,24 +97,24 @@ export default function Page() {
   };
 
   const header = (
-      <header className="flex h-14 items-center justify-between border-b border-hairline px-4 lg:px-6">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <a href="/" className="flex items-center gap-2" aria-label="tripwire">
-            <img src="/mark.svg" alt="" width={22} height={22} />
-            <span className="text-[15px] font-semibold tracking-[0.2px] text-ink">tripwire</span>
-          </a>
-          {net.deployed && (
-            <nav className="flex gap-1" aria-label="Screens">
-              {(["plan", "watch"] as const).map((k) => (
-                <button key={k} type="button" onClick={() => setTab(k)} aria-current={tab === k ? "page" : undefined} className={`h-9 rounded-lg px-3 text-[13px] font-medium capitalize transition-colors duration-150 ease-out ${tab === k ? "bg-surface-elevated text-ink" : "text-mute hover:text-ink"}`}>
-                  {k}
-                </button>
-              ))}
-            </nav>
-          )}
-        </div>
-        <NetSwitch />
-      </header>
+    <header className="flex h-14 items-center justify-between border-b border-hairline px-4 lg:px-6">
+      <div className="flex items-center gap-4 sm:gap-6">
+        <a href="/" className="flex items-center gap-2" aria-label="tripwire">
+          <img src="/mark.svg" alt="" width={22} height={22} />
+          <span className="text-[15px] font-semibold tracking-[0.2px] text-ink">tripwire</span>
+        </a>
+        {net.deployed && (
+          <nav className="flex gap-1" aria-label="Screens">
+            {(["plan", "watch"] as const).map((k) => (
+              <button key={k} type="button" onClick={() => setTab(k)} aria-current={tab === k ? "page" : undefined} className={`h-9 rounded-lg px-3 text-[13px] font-medium capitalize transition-colors duration-150 ease-out ${tab === k ? "bg-surface-elevated text-ink" : "text-mute hover:text-ink"}`}>
+                {k}
+              </button>
+            ))}
+          </nav>
+        )}
+      </div>
+      <NetSwitch />
+    </header>
   );
 
   if (!net.deployed) {
