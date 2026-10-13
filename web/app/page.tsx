@@ -4,7 +4,7 @@
 // right column beside all of it.
 import { useEffect, useMemo, useState } from "react";
 import { parsePlanLink } from "../lib/link";
-import type { PlainTranche } from "../lib/plan";
+import type { Net, PlainTranche } from "../lib/plan";
 import { StopChart, type ChartLine } from "./StopChart";
 import { Ticket } from "./Ticket";
 import { Heartbeat, Watch } from "./Watch";
@@ -16,13 +16,21 @@ import { NetSwitch, fmtPrice, useNet } from "./parts";
 // Until the live price arrives: r/Monad's most common written plan ("sell 25% at 0.033"), testnet sized.
 const DEFAULT_PLAN: PlainTranche[] = [{ mon: "0.02", line: 0.033, floor: 0.03 }];
 const r5 = (n: number) => Number(n.toFixed(5));
-/** A first plan that fits the 0.1 MON drip and shows both outcomes: a target just under the market (MON is already
- * above it, so it sells within a minute) and a stop far below (the one that must not sell). */
-const starterPlan = (price: number): PlainTranche[] => [
-  { mon: "0.02", line: r5(price * 0.92), floor: r5(price * 0.88) },
-  { mon: "0.01", line: r5(price * 0.85), floor: r5(price * 0.8) },
-  { mon: "0.005", line: r5(price * 0.97), floor: r5(price * 0.92), up: true },
-];
+/** The first plan a holder sees. On testnet it fits the 0.1 MON drip with the gas the setup reserves (SETUP_GAS_BUDGET) and
+ * shows both outcomes: a target just under the market (MON is already above it, so it sells within a minute) and stops far
+ * below (the ones that must not sell). On mainnet nothing is crossed, so signing the first plan never sells by surprise. */
+const starterPlan = (price: number, net: Net["key"]): PlainTranche[] =>
+  net === "testnet"
+    ? [
+        { mon: "0.012", line: r5(price * 0.92), floor: r5(price * 0.88) },
+        { mon: "0.006", line: r5(price * 0.85), floor: r5(price * 0.8) },
+        { mon: "0.004", line: r5(price * 0.97), floor: r5(price * 0.95), up: true },
+      ]
+    : [
+        { mon: "1", line: r5(price * 0.92), floor: r5(price * 0.88) },
+        { mon: "0.5", line: r5(price * 0.85), floor: r5(price * 0.8) },
+        { mon: "0.25", line: r5(price * 1.05), floor: r5(price * 0.98), up: true },
+      ];
 
 function Legend({ hasTarget, hasDone }: { hasTarget: boolean; hasDone: boolean }) {
   const swatch = "inline-block h-0 w-5 shrink-0 border-t-2 align-middle";
@@ -61,8 +69,8 @@ export default function Page() {
 
   const s = t.status.data;
   useEffect(() => {
-    if (!touched && s?.twapPrice) setPlanRaw(starterPlan(s.twapPrice));
-  }, [touched, s?.twapPrice]);
+    if (!touched && s?.twapPrice) setPlanRaw(starterPlan(s.twapPrice, net.key));
+  }, [touched, s?.twapPrice, net.key]);
   const [wide, setWide] = useState(true);
   useEffect(() => {
     const m = window.matchMedia("(min-width: 1024px)");
@@ -79,10 +87,13 @@ export default function Page() {
   }, [tab, plan, t.plans, t.publicPlan, t.account]);
 
   // "Try to cheat" goes where the cheating happens: the holder's own plan once signed in, the keeper's recorded refusals before.
+  // With no refusal recorded yet (a network's first plan is still to come) it goes to the sign step instead.
   const goCheat = () => {
-    setTab("watch");
+    const nothingRecorded = !t.account && (t.recent?.plans ?? []).every((p) => p.refused.length === 0);
+    setTab(nothingRecorded ? "plan" : "watch");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setTimeout(() => document.getElementById(t.account && t.plans.length > 0 ? "cheat" : "refusals")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 60);
+    const target = nothingRecorded ? "sign" : t.account && t.plans.length > 0 ? "cheat" : "refusals";
+    setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 60);
   };
 
   const header = (

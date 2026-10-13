@@ -55,6 +55,21 @@ export function TxLink({ hash, label }: { hash: Hex; label?: string }) {
   );
 }
 
+/** What the last action did, one row per step, each linked to its transaction. */
+export function StepList({ steps }: { steps: { label: string; hash?: Hex }[] }) {
+  if (steps.length === 0) return null;
+  return (
+    <ol className="rounded-[10px] border border-hairline" aria-label="Transactions">
+      {steps.map((s, i) => (
+        <li key={i} className="flex h-8 items-center justify-between gap-3 border-b border-hairline px-4 text-[13px] last:border-b-0">
+          <span className="text-ink">{s.label}</span>
+          {s.hash && <TxLink hash={s.hash} />}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function Copy({ text }: { text: string }) {
   const [done, setDone] = useState(false);
   return (

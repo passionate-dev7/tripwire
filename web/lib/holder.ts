@@ -163,6 +163,11 @@ export async function revokePlan(net: Net, account: LocalAccount, signed: Delega
   return tx;
 }
 
+/** The DelegationManager's own answer. The keeper's snapshot of a plan can trail a revoke, so screens read this. */
+export async function revokedOnChain(net: Net, hash: Hex): Promise<boolean> {
+  return clients(net).pub.readContract({ address: net.delegationManager, abi: abis.delegationManager, functionName: "disabledDelegations", args: [hash] });
+}
+
 /** Turn set-aside WMON back into MON. */
 export async function unwrap(net: Net, account: LocalAccount, amount: bigint): Promise<Hex> {
   const { chain, pub } = clients(net);

@@ -52,7 +52,17 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
   return (
     <section aria-label="Live proof" className="min-w-0 rounded-[10px] border border-hairline bg-surface-card">
       <div className="px-4 pb-4 pt-4 sm:px-5">
-        {tot ? (
+        {tot && tot.plans === 0 ? (
+          <>
+            <p className="text-[17px] leading-7 text-ink sm:text-[18px]" data-testid="proof-first">
+              No plan on {net.name} yet. Yours can be the first.
+            </p>
+            <p className="mt-1 flex items-start gap-2 text-[13px] leading-5 text-mute">
+              <Check className="mt-[3px] shrink-0 text-ink" />
+              <span>Sign one line and a floor, then press Try to cheat: the keeper sends the sales your plan forbids and the chain refuses each one, in the open.</span>
+            </p>
+          </>
+        ) : tot ? (
           <>
             <p className="text-[17px] leading-[44px] text-ink sm:text-[18px]" data-testid="proof-totals">
               Our own keeper tried to cheat{" "}
@@ -96,7 +106,7 @@ export function ProofStrip({ t, onCheat }: { t: T; onCheat: () => void }) {
           onClick={onCheat}
           className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-ink px-5 text-[14px] font-medium text-ink transition-colors duration-150 ease-out hover:bg-ink hover:text-canvas active:scale-[0.97]"
         >
-          Try to cheat
+          {tot && tot.plans === 0 ? "Set the first plan" : "Try to cheat"}
           <span aria-hidden>&rarr;</span>
         </button>
       </div>

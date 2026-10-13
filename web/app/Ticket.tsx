@@ -8,7 +8,7 @@ import { type PlainTranche, priceToTick, toTranches } from "../lib/plan";
 import { SETUP_GAS_BUDGET } from "../lib/holder";
 import { PERPL_ANCHOR } from "../lib/perplAnchor";
 import type { useTripwire } from "./useTripwire";
-import { Card, Copy, Fact, Ghost, Pill, TxLink, addrUrl, fmtMon, fmtPrice, short } from "./parts";
+import { Card, Copy, Fact, Ghost, Pill, StepList, addrUrl, fmtMon, fmtPrice, short } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 const DEFAULT_END = "2026-10-20";
@@ -199,6 +199,13 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
               <Ghost onClick={t.signIn} disabled={t.busy !== null}>{t.busy === "Signing in" ? "Waiting for your passkey" : "Sign in with passkey"}</Ghost>
             </div>
           </div>
+        ) : short_ && h && h.mon === 0n && t.net.key !== "testnet" ? (
+          <div className="flex flex-col gap-2 rounded-[10px] border border-hairline p-4 text-[13px] leading-6 text-body" data-testid="fund">
+            <p>
+              This passkey account holds no MON on {t.net.name}. Send at least <span className="num text-ink">{fmtMon(toWrap + SETUP_GAS_BUDGET)} MON</span> to it and Sign plan unlocks the moment it lands.
+            </p>
+            <p className="break-all font-mono text-[12px] text-ink">{t.account.address}<Copy text={t.account.address} /></p>
+          </div>
         ) : short_ && h && h.mon === 0n ? (
           <div className="flex flex-col gap-2">
             <Pill onClick={t.drip} disabled={t.busy !== null}>{t.busy === "Getting testnet MON" ? "Sending testnet MON" : "Get 0.1 testnet MON to try it"}</Pill>
@@ -222,7 +229,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
               </div>
             )}
             This plan sets aside {fmtMon(toWrap)} MON and needs about {fmtMon(SETUP_GAS_BUDGET)} MON for gas. Your address holds {fmtMon(h!.mon)} MON.{" "}
-            <a className="text-ink underline underline-offset-4" href="https://faucet.monad.xyz" target="_blank" rel="noreferrer">Get testnet MON</a> for{" "}
+            {t.net.key === "testnet" ? <><a className="text-ink underline underline-offset-4" href="https://faucet.monad.xyz" target="_blank" rel="noreferrer">Get testnet MON</a> for</> : "Send more MON to"}{" "}
             <span className="font-mono text-[12px] text-ink">{short(t.account.address, 8)}</span><Copy text={t.account.address} />
           </div>
         ) : (
@@ -235,16 +242,7 @@ export function Ticket({ t, plan, setPlan, price }: { t: T; plan: PlainTranche[]
         )}
 
         {t.error && <p className="border-l-2 border-ink pl-3 text-[13px] text-ink">{t.error}</p>}
-        {t.steps.length > 0 && (
-          <ol className="rounded-[10px] border border-hairline">
-            {t.steps.map((s, i) => (
-              <li key={i} className="flex h-8 items-center justify-between border-b border-hairline px-4 text-[13px] last:border-b-0">
-                <span className="text-ink">{s.label}</span>
-                {s.hash && <TxLink hash={s.hash as Hex} />}
-              </li>
-            ))}
-          </ol>
-        )}
+        <StepList steps={t.steps} />
         {t.account && h && (
           <p className="num text-[12px] text-mute">
             <a href={addrUrl(t.account.address)} target="_blank" rel="noreferrer" className="font-mono hover:text-ink">{short(t.account.address, 8)}</a>: {fmtMon(h.mon)} MON, {fmtMon(h.wmon)} WMON set aside, {(Number(h.stable) / 1e6).toLocaleString("en-US", { maximumSignificantDigits: 4 })} {sym}

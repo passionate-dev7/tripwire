@@ -6,15 +6,17 @@ import type { Attack, PlanView } from "../lib/api";
 import { salesLeft } from "../lib/keeper-gas";
 import { tickToPrice } from "../lib/plan";
 import type { useTripwire } from "./useTripwire";
-import { Card, Ghost, TxLink, fmtMon, fmtPrice, fmtUsd, short, useNet } from "./parts";
+import { Card, Ghost, StepList, TxLink, fmtMon, fmtPrice, fmtUsd, short, useNet } from "./parts";
 
 type T = ReturnType<typeof useTripwire>;
 
+// The buttons offered on a live plan. An after-expiry sale can only be tried once the plan has expired, so it is not one of them.
 const ATTACKS: { kind: Attack["kind"]; label: string; tried: string }[] = [
   { kind: "line", label: "Sell before MON reaches your line", tried: "to sell before the line was reached" },
+  { kind: "floor", label: "Sell for half your floor", tried: "to sell for less than the floor" },
   { kind: "recipient", label: "Send proceeds to the keeper", tried: "to send proceeds to someone other than you" },
-  { kind: "expiry", label: "Fire after the plan expired", tried: "to sell after the signed end date" },
 ];
+const TRIED: Record<string, string> = { ...Object.fromEntries(ATTACKS.map((a) => [a.kind, a.tried])), expiry: "to sell after the signed end date" };
 
 const REASON_TEXT: Record<string, string> = {
   "Tripwire:above-line": "MON is above the stop line",
@@ -75,7 +77,7 @@ function activity(p: PlanView, holder: string, sym: string) {
     });
   }
   for (const a of p.attacks) {
-    rows.push({ at: 0, text: `Keeper tried ${ATTACKS.find((x) => x.kind === a.kind)?.tried}. Refused by the contract: ${REASON_TEXT[a.reason] ?? a.reason}`, hash: a.hash, refused: true });
+    rows.push({ at: 0, text: `Keeper tried ${TRIED[a.kind]}. Refused by the contract: ${REASON_TEXT[a.reason] ?? a.reason}`, hash: a.hash, refused: true });
   }
   return rows;
 }
@@ -155,6 +157,8 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
       <div className="flex flex-col gap-4">
         {t.publicPlan ? (
           <PlanCard p={t.publicPlan} price={price} title={`Latest plan on chain, plan ${t.publicPlan.id}`} action={<span className="text-[12px] text-mute">read only</span>} />
+        ) : t.recent && t.recent.plans.every((p) => p.refused.length === 0) ? (
+          <p className="text-[13px] leading-5 text-body">No plan on {t.net.name} has been tested yet. Sign the first one on the Plan tab, then make the keeper try to break it and read the chain's answer here.</p>
         ) : (
           <p className="text-[13px] text-mute">Reading the latest plan on chain.</p>
         )}
@@ -198,7 +202,7 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
       {target && (
         <Card title="Try to cheat" id="cheat">
           <p className="px-4 pt-3 text-[13px] leading-5 text-body">
-            Make the keeper break plan {target.id} on purpose: sell before your line, pay itself, or fill after the plan ends. Each try is a real transaction, and the chain refuses it.
+            Make the keeper break plan {target.id} on purpose: sell before your line, sell under your floor, or pay itself. Each try is a real transaction, and the chain refuses it.
           </p>
           <div className="mt-2">
             {ATTACKS.map((a) => {
@@ -224,6 +228,8 @@ export function Watch({ t, price, part }: { t: T; price: number | null; part: "s
           </div>
         </Card>
       )}
+
+      <StepList steps={t.steps} />
 
       {t.holdings && t.holdings.wmon > 0n && (
         <div className="flex items-center justify-between rounded-[10px] border border-hairline px-4 py-3 text-[13px]">

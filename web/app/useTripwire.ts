@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Hex, LocalAccount } from "viem";
 import { type Attack, type PlanView, type Point, type Status, keeperApi } from "../lib/api";
-import { type Holdings, createPlan, holdings, revokePlan, unwrap } from "../lib/holder";
+import { type Holdings, createPlan, holdings, revokePlan, revokedOnChain, unwrap } from "../lib/holder";
 import { createPasskeyAccount, signInWithPasskey } from "../lib/passkey";
 import { type PlainTranche, decodeDelegation } from "../lib/plan";
 import { revertReason } from "../lib/chain";
@@ -54,7 +54,12 @@ export function useTripwire() {
 
   const status = usePoll<Status>(keeperApi.status, 4000, [net.key], live);
   const history = usePoll<{ points: Point[] }>(keeperApi.history, 15000, [net.key], live);
-  const mine = usePoll<{ plans: PlanView[] } | null>(async () => (account ? keeperApi.plans(account.address) : null), 4000, [account?.address, refresh, net.key], live);
+  // A revoke is read from the DelegationManager as well: the keeper's snapshot of a plan can trail it.
+  const mine = usePoll<{ plans: PlanView[] } | null>(async () => {
+    if (!account) return null;
+    const { plans } = await keeperApi.plans(account.address);
+    return { plans: await Promise.all(plans.map(async (p) => (p.revoked ? p : { ...p, revoked: await revokedOnChain(net, p.delegationHash) }))) };
+  }, 4000, [account?.address, refresh, net.key], live);
   const recent = usePoll(keeperApi.recent, 8000, [net.key], live);
   // the newest plan on chain, shown read-only to anyone not signed in
   // the newest plan that carries refused calls, so the proof never disappears when someone arms a fresh plan
@@ -107,6 +112,7 @@ export function useTripwire() {
 
   const drip = () =>
     run("Getting testnet MON", async () => {
+      if (net.key !== "testnet") throw new Error("Testnet MON is only sent on Monad testnet.");
       if (!account) throw new Error("Sign in with your passkey first.");
       const r = await keeperApi.drip(account.address);
       setSteps([{ label: "0.1 testnet MON received", hash: r.hash }]);

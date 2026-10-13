@@ -8,7 +8,8 @@ import { Check, TxLink, fmtMon, fmtPrice, fmtUsd, short, txUrl, useNet } from ".
 const CHIP: Record<string, string> = { line: "before the line", floor: "below the floor", recipient: "to the keeper", expiry: "after the end date" };
 
 export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: string | null }) {
-  const sym = useNet().stableSymbol;
+  const net = useNet();
+  const sym = net.stableSymbol;
   return (
     <section className="rounded-[10px] border border-hairline bg-surface-card" aria-label="On chain record">
       <header className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 border-b border-hairline px-4 py-2">
@@ -18,7 +19,7 @@ export function Record({ plans, error }: { plans: RecentPlan[] | null; error?: s
       {plans === null ? (
         <p className="px-4 py-3 text-[13px] text-mute">{error ? `The keeper's record is not reachable right now: ${error}.` : "Reading the keeper's record."}</p>
       ) : plans.length === 0 ? (
-        <p className="px-4 py-3 text-[13px] text-mute">No plan has been posted yet. The first one appears here with its sale.</p>
+        <p className="px-4 py-3 text-[13px] leading-5 text-body">No plan on {net.name} yet. Set your lines above: the first plan posted lands here with its sale and every cheat the chain refuses.</p>
       ) : (
         <ul>
           {plans.map((p) => (
