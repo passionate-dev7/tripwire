@@ -4,3 +4,5 @@ vo/out-*/
 vo/old-default-voice/
 *.log
 *.mp4
+work2/
+vo/ms/out/

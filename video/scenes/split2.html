@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:"PS";src:url(fonts/sans.woff2);font-weight:400 600}
+@font-face{font-family:"PM";src:url(fonts/mono-400.woff2);font-weight:400}
+@font-face{font-family:"PM";src:url(fonts/mono-500.woff2);font-weight:500}
+:root{--canvas:#07080a;--surface:#0d0d0d;--card:#121212;--hair:#242728;--hair2:rgba(255,255,255,.16);--ink:#f4f4f6;--body:#cdcdcd;--mute:#9c9c9d;--ash:#6a6b6c;--red:#ff6161;--redsoft:rgba(255,97,97,.15)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:var(--canvas);color:var(--ink);overflow:hidden;font-family:"PS",sans-serif}
+.mono{font-family:"PM",monospace;font-variant-numeric:tabular-nums}
+.k{font:500 15px "PM";letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+</style>
+<style>
+.zone{position:absolute;font:500 15px "PM";letter-spacing:.14em;color:var(--mute);opacity:0}
+.box{position:absolute;background:var(--card);border:1px solid var(--hair2);border-radius:10px;opacity:0;padding:16px 20px}
+.box .n{font:500 22px "PM";color:var(--ink);margin-bottom:6px}
+.box .a{font:400 14px "PM";color:var(--mute);margin-bottom:12px;word-break:break-all}
+.chk{display:flex;gap:10px;align-items:center;font:400 17px "PM";color:var(--mute);height:30px}
+.chk i{width:18px;height:18px;border:2px solid var(--ash);border-radius:50%;display:inline-block;transition:none}
+.chk.on{color:var(--ink)}.chk.on i{border-color:var(--ink);background:var(--ink)}
+#arr{position:absolute;inset:0;pointer-events:none}
+.facts div{font:400 17px/1.5 "PM";color:var(--body)}
+.pkt{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 0 0 6px var(--redsoft);opacity:0;top:0;left:0}
+.hl{position:absolute;left:100px;top:70px;font:500 38px/1.15 "PS";letter-spacing:-.01em;width:1300px;opacity:0}
+</style>
+<div class="hl" id="hl"></div>
+<div class="zone" id="zoff" style="left:100px;top:262px">OFF CHAIN</div>
+<div class="zone" id="zon" style="left:560px;top:262px">ON MONAD, INSIDE EVERY SALE</div>
+<div class="box" id="b0" style="left:100px;top:300px;width:360px;height:330px"><div class="n">keeper</div><div class="a" id="ka"></div><div class="facts"><div>reads the 60 s average</div><div>on a loop</div><div>asks Monad if the sale would pass</div><div>sends the sale</div><div style="color:var(--mute);margin-top:10px">holds no funds, no key to my address</div></div></div>
+<div class="box" id="b1" style="left:560px;top:300px;width:300px;height:330px"><div class="n">my signed plan</div><div class="a" style="word-break:normal">MetaMask delegation, already on Monad</div><div class="facts"><div>carries two checks</div><div>the keeper cannot edit them</div></div></div>
+<div class="box" id="b2" style="left:900px;top:300px;width:320px;height:330px;border-color:var(--red)"><div class="n">tripwire enforcer</div><div class="a">0x4c59..703e</div><div class="chk" id="c0"><i></i>line reached</div><div class="chk" id="c1"><i></i>floor respected</div><div class="chk" id="c2"><i></i>amount as signed, once</div><div class="chk" id="c3"><i></i>pays only the holder</div><div class="chk" id="c4"><i></i>the one signed route</div></div>
+<div class="box" id="b3" style="left:1260px;top:300px;width:240px;height:150px"><div class="n">timestamp</div><div class="a">MetaMask caveat</div><div class="chk" id="c5"><i></i>before the end date</div></div>
+<div class="box" id="b4" style="left:1260px;top:480px;width:240px;height:150px"><div class="n">swap, holder</div><div class="facts"><div>MON in, USDC out</div><div>to my address</div></div></div>
+<svg id="arr" viewBox="0 0 1600 900"><g stroke="#6a6b6c" stroke-width="2" fill="none"><path id="l0" d="M460 465 L560 465"/><path id="l1" d="M860 465 L900 465"/><path id="l2" d="M1220 380 L1260 380"/><path id="l3" d="M1220 555 L1260 555"/></g></svg>
+<div class="pkt" id="pkt"></div>
+<script src="engine.js"></script>
+<script>
+// cues: keeper, headline, t0, ts:[keeperAt, mgrAt, enfAt, tsAt, outAt], ck: first check time, ckStep
+$("#ka").textContent = cue("keeper", ""); $("#hl").textContent = cue("headline", "");
+const ts = cue("ts", [0.4, 2.0, 3.6, 6.2, 7.2]), ck = cue("ck", 4.0), cs = cue("ckStep", 0.35);
+const path = [[470, 465], [540, 465], [900, 465], [1240, 380], [1240, 555]];
+window.render = (t) => {
+  const f = (el, a) => { el.style.opacity = eo(seg(t, a, a + 0.45)); el.style.transform = `translateY(${12 * (1 - eo(seg(t, a, a + 0.45)))}px)`; };
+  $("#hl").style.opacity = eo(seg(t, 0.1, 0.6));
+  f($("#b0"), ts[0]); f($("#zoff"), ts[0]); f($("#b1"), ts[1]); f($("#b2"), ts[2]); f($("#zon"), ts[1]); f($("#b3"), ts[3]); f($("#b4"), ts[4]);
+  for (let i = 0; i < 6; i++) $("#c" + i).classList.toggle("on", t > (i < 5 ? ck + i * cs : ts[3] + 0.9));
+  [[0, 1], [1, 2], [2, 3], [3, 4]].forEach(([p, i]) => { const a = ts[i]; $("#l" + p).style.opacity = eo(seg(t, a, a + 0.4)); });
+  // the redemption travels once through every gate
+  const u = seg(t, ts[1] + 0.2, ts[4] + 0.8), seg5 = u * 4, k = Math.min(3, Math.floor(seg5)), r = seg5 - k;
+  const a = path[k], b = path[k + 1] ?? path[k];
+  const pk = $("#pkt");
+  pk.style.opacity = u > 0 && u < 1 ? 1 : 0;
+  pk.style.transform = `translate(${a[0] + (b[0] - a[0]) * eio(r) - 7}px, ${a[1] + (b[1] - a[1]) * eio(r) - 7}px)`;
+};
+</script>

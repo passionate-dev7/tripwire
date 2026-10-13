@@ -23,7 +23,7 @@ beats.forEach((b, i) => {
 });
 const first = (a) => a;
 for (const c of caps) {
-  const beat = spec.beats.find((b) => c.a >= b.t0 - 0.2 && c.a < b.t1) ?? spec.beats.at(-1);
+  const beat = spec.beats.find((b) => b.name.split("+").includes(c.id)) ?? spec.beats.at(-1);
   beat.caps.push({ png: `${film.caps}/${c.id}.png`, a: c.a, b: c.b });
 }
 fs.writeFileSync(film.name + ".spec.json", JSON.stringify(spec, null, 1));

@@ -1,0 +1,121 @@
+{
+ "net": "mainnet",
+ "chainId": 143,
+ "readAtBlock": 113073758,
+ "holder": "0xDc53288B21C4B6E9C3de5f862B9638b7AC0a00ad",
+ "plan": {
+  "id": 0,
+  "delegationHash": "0x416ce5fe1d4b676ab1923a36ed158c55ed8430f39465074167d75c27f440e6b7",
+  "expiresAt": 1792454400,
+  "rows": [
+   {
+    "line": 0.024787581715666106,
+    "floorPerMon": 0.02367,
+    "mon": 0.3,
+    "atOrAbove": false,
+    "spent": true
+   },
+   {
+    "line": 0.021868539578525425,
+    "floorPerMon": 0.02089,
+    "mon": 0.2,
+    "atOrAbove": false,
+    "spent": false
+   }
+  ]
+ },
+ "price": "0.02430",
+ "line1": "0.02479",
+ "floor1": "0.02367",
+ "line2": "0.02187",
+ "floor2": "0.02089",
+ "funding": {
+  "holder": "0xDc53288B21C4B6E9C3de5f862B9638b7AC0a00ad",
+  "mon": 1,
+  "tx": "0x38221d6fd8f962534f9bd935ac0a061af51a9c0e861262487ab1992022b1710d",
+  "at": "2026-10-13T15:10:47.045Z"
+ },
+ "setup": {
+  "steps": [
+   {
+    "label": "Signing the plan",
+    "hash": ""
+   },
+   {
+    "label": "Setting aside MON as WMON",
+    "hash": ""
+   },
+   {
+    "label": "MON set aside 0xc0eb82d7..eb6d",
+    "hash": "0xc0eb82d79ac84eaf31fbe066269870e87b75acd6cb0a05a4b90aedf64049eb6d"
+   },
+   {
+    "label": "Arming the plan",
+    "hash": ""
+   },
+   {
+    "label": "Plan armed 0xe496d6cd..708a",
+    "hash": "0xe496d6cd2534847503746ef0a9d7615452235a95048a3152e7ff3d252ca8708a"
+   }
+  ],
+  "postedTx": "0xe496d6cd2534847503746ef0a9d7615452235a95048a3152e7ff3d252ca8708a",
+  "postedStatus": 1,
+  "postedBlock": 113073215
+ },
+ "sale": {
+  "tx": "0xb2989ce6fdef893c5fc63ee5fcf4b56666861a208d3e8845ba40c619c615007b",
+  "status": 1,
+  "block": 113073240,
+  "from": "0x8a916555418dc4a8a4b11e2fc2b8e85127204468",
+  "gasUsed": 512749,
+  "wmonOut": "300000000000000000",
+  "stableIn": "7267",
+  "minOut": "7101",
+  "amountIn": "300000000000000000",
+  "priceTick": -313499
+ },
+ "cheats": [
+  {
+   "kind": "line",
+   "hash": "0x31de32af5dc239fe69b5890348364f831f0c75c4dc06f3c0f86e07f2c194d951",
+   "status": 0,
+   "block": 113073332,
+   "reason": "Tripwire:above-line",
+   "keeperAttack": "Tripwire:above-line"
+  },
+  {
+   "kind": "floor",
+   "hash": "0x95afd4e0977b977893ae941ce5b77a94ab61f2745f0d89e6e97d01da9de78fb6",
+   "status": 0,
+   "block": 113073359,
+   "reason": "Tripwire:min-out",
+   "keeperAttack": "Tripwire:min-out"
+  },
+  {
+   "kind": "recipient",
+   "hash": "0x2acd2cd19571cf7c4a51cef6a660402038f583a9bc675daf852cef37875c860e",
+   "status": 0,
+   "block": 113073386,
+   "reason": "Tripwire:recipient",
+   "keeperAttack": "Tripwire:recipient"
+  }
+ ],
+ "revoke": {
+  "tx": "0xd3980d11accb41bb5b3a395c3be3b0c3b31817090ef22e67e6174219d86d5866",
+  "status": 1
+ },
+ "unwrap": {
+  "tx": "0x21a4e5870329d0d5081e19e0924b5b2e51e057430641c7444100f111df703673",
+  "status": 1
+ },
+ "after": {
+  "spent": [
+   "true",
+   "false"
+  ],
+  "disabledDelegation": "true",
+  "holderMON": "633522622000000000",
+  "holderWMON": "0",
+  "holderStable": "7267"
+ }
+}
