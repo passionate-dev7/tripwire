@@ -7,7 +7,7 @@ const film = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 const tm = JSON.parse(fs.readFileSync(film.timings, "utf8"));
 const at = Object.fromEntries(tm.lines.map((l) => [l.id, l]));
 const beats = film.beats.map((b, i) => ({ ...b, t0: i === 0 ? 0 : at[b.lines[0]].start }));
-const spec = { out: film.out, audio: film.audio, work: "asm-" + film.name, beats: [], tail: 0 };
+const spec = { capFade: film.capFade, out: film.out, audio: film.audio, work: "asm-" + film.name, beats: [], tail: 0 };
 const caps = [];
 beats.forEach((b, i) => {
   const t1 = i + 1 < beats.length ? beats[i + 1].t0 : tm.duration;

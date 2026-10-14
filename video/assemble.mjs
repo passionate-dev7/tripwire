@@ -16,6 +16,8 @@ const probe = (f) => Number(execFileSync("ffprobe", ["-v", "error", "-show_entri
 const norm = `scale=${W}:${H}:flags=lanczos,setsar=1,fps=${FPS},format=yuv420p`;
 const enc = ["-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p", "-an"];
 const warns = [];
+const CF = Math.max(spec.capFade ?? 0.25, 0.034); // one frame = hard cut (fade d=0 would fall back to ffmpeg default 1 s)
+
 
 const beatFiles = [];
 spec.beats.forEach((b, bi) => {
@@ -26,12 +28,23 @@ spec.beats.forEach((b, bi) => {
     const speed = p.speed ?? 1;
     const src = path.resolve(path.dirname(process.argv[2]), p.src);
     const inArgs = p.png ? ["-loop", "1", "-t", String(p.hold ?? want), "-i", src] : ["-ss", String(p.ss ?? 0), ...(p.se ? ["-to", String(p.se)] : []), "-i", src];
-    let zoom = "";
-    if (p.zoom && !p.png) {
-      const n = Math.max(2, Math.round(((p.se - (p.ss ?? 0)) / speed) * FPS)), z0 = p.zoom.from ?? 1, z1 = p.zoom.to ?? 1.1;
-      zoom = `,zoompan=z='${z0}+(${z1}-${z0})*on/${n}':x='(iw-iw/zoom)*${p.zoom.fx ?? 0.5}':y='(ih-ih/zoom)*${p.zoom.fy ?? 0.5}':d=1:s=${W}x${H}:fps=${FPS},format=yuv420p`;
+    const dur = p.png ? (p.hold ?? want) : ((p.se - (p.ss ?? 0)) / speed);
+    let zoom = "null";
+    if (p.zoom) {
+      const n = Math.max(2, Math.round(dur * FPS)), z0 = p.zoom.from ?? 1, z1 = p.zoom.to ?? 1.1;
+      const prog = p.zoom.ease === "linear" ? `on/${n}` : `(1-pow(1-min(on/${n},1),3))`;
+      zoom = `scale=${W * 2}:${H * 2}:flags=bicubic,zoompan=z='${z0}+(${z1}-${z0})*${prog}':x='(iw-iw/zoom)*${p.zoom.fx ?? 0.5}':y='(ih-ih/zoom)*${p.zoom.fy ?? 0.5}':d=1:s=${W}x${H}:fps=${FPS},format=yuv420p`;
     }
-    run([...inArgs, "-vf", `setpts=(PTS-STARTPTS)/${speed},${p.vf ? p.vf + "," : ""}${norm}${zoom}`, ...enc, f]);
+    const ovs = (p.ov ?? []).map((o) => ({ ...o, png: path.resolve(path.dirname(process.argv[2]), o.png) }));
+    const ovIn = ovs.flatMap((o) => ["-loop", "1", "-t", String(dur + 1), "-i", o.png]);
+    let fc = `[0:v]setpts=(PTS-STARTPTS)/${speed},${p.vf ? p.vf + "," : ""}${norm}[b0];`, prev = "b0";
+    ovs.forEach((o, i) => {
+      const fd = o.fade ?? 0.2;
+      fc += `[${i + 1}:v]format=rgba,fade=t=in:st=${o.a}:d=${fd}:alpha=1,fade=t=out:st=${Math.max(o.a, o.b - fd)}:d=${fd}:alpha=1[o${i}];[${prev}][o${i}]overlay=0:0:format=auto:enable='between(t,${o.a},${o.b})'[b${i + 1}];`;
+      prev = `b${i + 1}`;
+    });
+    fc += `[${prev}]${zoom}[out]`;
+    run([...inArgs, ...ovIn, "-filter_complex", fc, "-map", "[out]", "-t", dur.toFixed(3), ...enc, f]);
     pieceFiles.push(f);
   });
   const list = path.join(work, `b${bi}.txt`);
@@ -50,7 +63,7 @@ spec.beats.forEach((b, bi) => {
     bc.forEach((c) => args.push("-loop", "1", "-t", String(want), "-i", c.png));
     let chain = "", prev = "0:v";
     bc.forEach((c, i) => {
-      chain += `[${i + 1}:v]format=rgba,fade=t=in:st=${c.a}:d=0.25:alpha=1,fade=t=out:st=${Math.max(c.a, c.b - 0.25)}:d=0.25:alpha=1[c${i}];[${prev}][c${i}]overlay=0:0:format=auto:enable='between(t,${c.a},${c.b})'[v${i}];`;
+      chain += `[${i + 1}:v]format=rgba,fade=t=in:st=${c.a}:d=${CF}:alpha=1,fade=t=out:st=${Math.max(c.a, c.b - CF)}:d=${CF}:alpha=1[c${i}];[${prev}][c${i}]overlay=0:0:format=auto:enable='between(t,${c.a},${c.b})'[v${i}];`;
       prev = `v${i}`;
     });
     outFinal = path.join(work, `b${bi}c.mp4`);

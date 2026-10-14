@@ -1,4 +1,5 @@
 {
+ "capFade": 0,
  "out": "tripwire-pitch.mp4",
  "audio": "vo/pitch2/out/narration.wav",
  "work": "asm-tripwire-pitch",
@@ -6,55 +7,71 @@
   {
    "name": "q01",
    "t0": 0,
-   "t1": 9.141,
+   "t1": 13.292,
    "pieces": [
     {
      "src": "work2/H-old.mp4",
      "ss": 0,
      "se": 8.6,
      "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
-     "speed": 0.9408161032709769
+     "zoom": {
+      "from": 1,
+      "to": 1.12,
+      "fx": 0.4,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/mainnet_q01.png",
+       "a": 0.8,
+       "b": 5
+      },
+      {
+       "png": "work2/co/testnet_q01.png",
+       "a": 5.4,
+       "b": 12.99
+      }
+     ],
+     "speed": 0.6470057177249473
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q01.png",
      "a": 0.25,
-     "b": 8.94
+     "b": 13.09
     }
    ]
   },
   {
    "name": "q02",
-   "t0": 9.141,
-   "t1": 23.473,
+   "t0": 13.292,
+   "t1": 33.773,
    "pieces": [
     {
-     "src": "work2/H-old.mp4",
-     "ss": 8.6,
-     "se": 15.6,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"
+     "src": "work2/pp-other.mp4",
+     "ss": 0.15,
+     "se": 6.15
     },
     {
-     "src": "work2/H-old.mp4",
-     "ss": 20.9,
-     "se": 26.8,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
-     "speed": 0.8046917621385711
+     "src": "work2/pp-rules.mp4",
+     "ss": 0.15,
+     "se": 14.63
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q02.png",
-     "a": 9.09,
-     "b": 23.22
+     "a": 13.24,
+     "b": 33.52
     }
    ]
   },
   {
    "name": "q03",
-   "t0": 23.473,
-   "t1": 33.893,
+   "t0": 33.773,
+   "t1": 44.193,
    "pieces": [
     {
      "src": "work2/mainnet/P.mp4",
@@ -66,21 +83,28 @@
       "fx": 0.85,
       "fy": 0.3
      },
-     "speed": 1.0556621880998078
+     "ov": [
+      {
+       "png": "work2/co/plan_q03.png",
+       "a": 0.1,
+       "b": 4.2
+      }
+     ],
+     "speed": 1.0556621880998087
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q03.png",
-     "a": 23.42,
-     "b": 33.64
+     "a": 33.72,
+     "b": 43.94
     }
    ]
   },
   {
    "name": "q04",
-   "t0": 33.893,
-   "t1": 45.286,
+   "t0": 44.193,
+   "t1": 55.861,
    "pieces": [
     {
      "src": "work2/mainnet/W.mp4",
@@ -103,112 +127,196 @@
       "fx": 0.92,
       "fy": 0.12
      },
-     "speed": 1.0159868519348572
+     "ov": [
+      {
+       "png": "work2/co/wmon_s.png",
+       "a": 3.2,
+       "b": 6
+      }
+     ],
+     "speed": 0.9758897818599312
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q04.png",
-     "a": 33.84,
-     "b": 45.04
+     "a": 44.14,
+     "b": 55.61
     }
    ]
   },
   {
    "name": "q05",
-   "t0": 45.286,
-   "t1": 55.978,
+   "t0": 55.861,
+   "t1": 68.52,
    "pieces": [
     {
      "src": "work2/mainnet/K.mp4",
-     "ss": 7.6,
-     "se": 14.9,
+     "ss": 14.2,
+     "se": 14.8
+    },
+    {
+     "src": "work2/k-hold.png",
+     "png": true,
+     "hold": 6,
      "zoom": {
       "from": 1,
-      "to": 1.2,
-      "fx": 0.88,
-      "fy": 0.3
-     }
+      "to": 1.08,
+      "fx": 0.5,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/plan_q05.png",
+       "a": 0.15,
+       "b": 2.8
+      },
+      {
+       "png": "work2/co/mined_q05.png",
+       "a": 3,
+       "b": 5.9
+      }
+     ]
     },
     {
      "src": "work2/mainnet/X1.mp4",
-     "ss": 1.5,
-     "se": 5,
+     "ss": 1,
+     "se": 4.4,
      "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
-     "speed": 1.0318396226415096
+     "zoom": {
+      "from": 1,
+      "to": 1.05,
+      "fx": 0.5,
+      "fy": 0.4,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/wmon_x1.png",
+       "a": 0.6,
+       "b": 5.86
+      },
+      {
+       "png": "work2/co/num_x1.png",
+       "a": 1.4,
+       "b": 5.86
+      },
+      {
+       "png": "work2/co/mm_x1.png",
+       "a": 2.4,
+       "b": 5.86
+      }
+     ],
+     "speed": 0.5611487044066681
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q05.png",
-     "a": 45.24,
-     "b": 55.73
+     "a": 55.81,
+     "b": 68.27
     }
    ]
   },
   {
    "name": "q06",
-   "t0": 55.978,
-   "t1": 66.766,
+   "t0": 68.52,
+   "t1": 79.976,
    "pieces": [
-    {
-     "src": "work2/mainnet/C.mp4",
-     "ss": 8.3,
-     "se": 9.55,
-     "speed": 1.2
-    },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 9.55,
      "se": 14.24,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 14.24,
-     "se": 15.24
+     "se": 14.94,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 17.04,
      "se": 22.52,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 22.52,
-     "se": 23.52
+     "se": 23.22,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
+    },
+    {
+     "src": "work2/X2-fix.mp4",
+     "ss": 0.8,
+     "se": 3,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.05,
+      "fx": 0.5,
+      "fy": 0.45,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/fail_x2.png",
+       "a": 0.2,
+       "b": 3.53
+      }
+     ],
+     "speed": 0.6067291781577483
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 25.32,
      "se": 31.39,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 31.39,
-     "se": 32.59
-    },
-    {
-     "src": "work2/mainnet/X2.mp4",
-     "ss": 0.8,
-     "se": 3,
-     "speed": 0.8848371095321086
+     "se": 34.69,
+     "speed": 0.75,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.04,
+      "fx": 0.9,
+      "fy": 0.2,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/refused_c.png",
+       "a": 0.3,
+       "b": 4.3
+      },
+      {
+       "png": "work2/co/tally_c.png",
+       "a": 1,
+       "b": 4.3
+      }
+     ]
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q06.png",
-     "a": 55.93,
-     "b": 66.52
+     "a": 68.47,
+     "b": 79.73
     }
    ]
   },
   {
    "name": "q07",
-   "t0": 66.766,
-   "t1": 75.018,
+   "t0": 79.976,
+   "t1": 88.228,
    "pieces": [
     {
      "src": "work2/pp-proof.mp4",
@@ -219,63 +327,58 @@
    "caps": [
     {
      "png": "work2/caps-pitch2/q07.png",
-     "a": 66.72,
-     "b": 74.77
+     "a": 79.93,
+     "b": 87.98
     }
    ]
   },
   {
    "name": "q08",
-   "t0": 75.018,
-   "t1": 84.395,
+   "t0": 88.228,
+   "t1": 97.605,
    "pieces": [
     {
      "src": "work2/pp-xstop.mp4",
      "ss": 0.15,
-     "se": 4.84
+     "se": 4.84,
+     "ov": [
+      {
+       "png": "work2/co/dex_x.png",
+       "a": 0.6,
+       "b": 4.54
+      }
+     ]
     },
     {
      "src": "work2/pp-redask.mp4",
      "ss": 0.15,
-     "se": 4.84
+     "se": 4.84,
+     "ov": [
+      {
+       "png": "work2/co/dex_r.png",
+       "a": 0.6,
+       "b": 4.54
+      },
+      {
+       "png": "work2/co/noncex_r.png",
+       "a": 1.8,
+       "b": 4.54
+      }
+     ]
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q08.png",
-     "a": 74.97,
-     "b": 84.15
-    }
-   ]
-  },
-  {
-   "name": "q09",
-   "t0": 84.395,
-   "t1": 94.482,
-   "pieces": [
-    {
-     "src": "work2/pp-other.mp4",
-     "ss": 0.15,
-     "se": 6.15
-    },
-    {
-     "src": "work2/pp-rules.mp4",
-     "ss": 0.15,
-     "se": 4.24
-    }
-   ],
-   "caps": [
-    {
-     "png": "work2/caps-pitch2/q09.png",
-     "a": 84.34,
-     "b": 94.23
+     "a": 88.18,
+     "b": 97.36
     }
    ]
   },
   {
    "name": "q10",
-   "t0": 94.482,
-   "t1": 101.632,
+   "t0": 97.605,
+   "t1": 104.754,
    "pieces": [
     {
      "src": "work2/pp-next.mp4",
@@ -286,15 +389,15 @@
    "caps": [
     {
      "png": "work2/caps-pitch2/q10.png",
-     "a": 94.43,
-     "b": 101.38
+     "a": 97.56,
+     "b": 104.5
     }
    ]
   },
   {
    "name": "q11",
-   "t0": 101.632,
-   "t1": 108.26,
+   "t0": 104.754,
+   "t1": 111.38,
    "pieces": [
     {
      "src": "work2/pp-end.mp4",
@@ -305,8 +408,8 @@
    "caps": [
     {
      "png": "work2/caps-pitch2/q11.png",
-     "a": 101.58,
-     "b": 108.01
+     "a": 104.7,
+     "b": 111.13
     }
    ]
   }

@@ -4,6 +4,7 @@
  "audio": "vo/pitch2/out/narration.wav",
  "out": "tripwire-pitch.mp4",
  "caps": "work2/caps-pitch2",
+ "capFade": 0,
  "beats": [
   {
    "lines": [
@@ -15,7 +16,26 @@
      "ss": 0,
      "se": 8.6,
      "fit": true,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.12,
+      "fx": 0.4,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/mainnet_q01.png",
+       "a": 0.8,
+       "b": 5
+      },
+      {
+       "png": "work2/co/testnet_q01.png",
+       "a": 5.4,
+       "b": 12.99
+      }
+     ]
     }
    ]
   },
@@ -25,17 +45,14 @@
    ],
    "pieces": [
     {
-     "src": "work2/H-old.mp4",
-     "ss": 8.6,
-     "se": 15.6,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"
+     "src": "work2/pp-other.mp4",
+     "ss": 0.15,
+     "se": 6.15
     },
     {
-     "src": "work2/H-old.mp4",
-     "ss": 20.9,
-     "se": 26.8,
-     "fit": true,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"
+     "src": "work2/pp-rules.mp4",
+     "ss": 0.15,
+     "se": 14.63
     }
    ]
   },
@@ -54,7 +71,14 @@
       "to": 1.25,
       "fx": 0.85,
       "fy": 0.3
-     }
+     },
+     "ov": [
+      {
+       "png": "work2/co/plan_q03.png",
+       "a": 0.1,
+       "b": 4.2
+      }
+     ]
     }
    ]
   },
@@ -84,7 +108,14 @@
       "to": 1.5,
       "fx": 0.92,
       "fy": 0.12
-     }
+     },
+     "ov": [
+      {
+       "png": "work2/co/wmon_s.png",
+       "a": 3.2,
+       "b": 6
+      }
+     ]
     }
    ]
   },
@@ -95,21 +126,63 @@
    "pieces": [
     {
      "src": "work2/mainnet/K.mp4",
-     "ss": 7.6,
-     "se": 14.9,
+     "ss": 14.2,
+     "se": 14.8
+    },
+    {
+     "src": "work2/k-hold.png",
+     "png": true,
+     "hold": 6,
      "zoom": {
       "from": 1,
-      "to": 1.2,
-      "fx": 0.88,
-      "fy": 0.3
-     }
+      "to": 1.08,
+      "fx": 0.5,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/plan_q05.png",
+       "a": 0.15,
+       "b": 2.8
+      },
+      {
+       "png": "work2/co/mined_q05.png",
+       "a": 3,
+       "b": 5.9
+      }
+     ]
     },
     {
      "src": "work2/mainnet/X1.mp4",
-     "ss": 1.5,
-     "se": 5,
+     "ss": 1,
+     "se": 4.4,
      "fit": true,
-     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.05,
+      "fx": 0.5,
+      "fy": 0.4,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/wmon_x1.png",
+       "a": 0.6,
+       "b": 5.86
+      },
+      {
+       "png": "work2/co/num_x1.png",
+       "a": 1.4,
+       "b": 5.86
+      },
+      {
+       "png": "work2/co/mm_x1.png",
+       "a": 2.4,
+       "b": 5.86
+      }
+     ]
     }
    ]
   },
@@ -120,48 +193,83 @@
    "pieces": [
     {
      "src": "work2/mainnet/C.mp4",
-     "ss": 8.3,
-     "se": 9.55,
-     "speed": 1.2
-    },
-    {
-     "src": "work2/mainnet/C.mp4",
      "ss": 9.55,
      "se": 14.24,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 14.24,
-     "se": 15.24
+     "se": 14.94,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 17.04,
      "se": 22.52,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 22.52,
-     "se": 23.52
+     "se": 23.22,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
+    },
+    {
+     "src": "work2/X2-fix.mp4",
+     "ss": 0.8,
+     "se": 3,
+     "fit": true,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.05,
+      "fx": 0.5,
+      "fy": 0.45,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/fail_x2.png",
+       "a": 0.2,
+       "b": 3.53
+      }
+     ]
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 25.32,
      "se": 31.39,
-     "speed": 4
+     "speed": 8,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a"
     },
     {
      "src": "work2/mainnet/C.mp4",
      "ss": 31.39,
-     "se": 32.59
-    },
-    {
-     "src": "work2/mainnet/X2.mp4",
-     "ss": 0.8,
-     "se": 3,
-     "fit": true
+     "se": 34.69,
+     "speed": 0.75,
+     "vf": "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.04,
+      "fx": 0.9,
+      "fy": 0.2,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/refused_c.png",
+       "a": 0.3,
+       "b": 4.3
+      },
+      {
+       "png": "work2/co/tally_c.png",
+       "a": 1,
+       "b": 4.3
+      }
+     ]
     }
    ]
   },
@@ -185,29 +293,31 @@
     {
      "src": "work2/pp-xstop.mp4",
      "ss": 0.15,
-     "se": 4.84
+     "se": 4.84,
+     "ov": [
+      {
+       "png": "work2/co/dex_x.png",
+       "a": 0.6,
+       "b": 4.54
+      }
+     ]
     },
     {
      "src": "work2/pp-redask.mp4",
      "ss": 0.15,
-     "se": 4.84
-    }
-   ]
-  },
-  {
-   "lines": [
-    "q09"
-   ],
-   "pieces": [
-    {
-     "src": "work2/pp-other.mp4",
-     "ss": 0.15,
-     "se": 6.15
-    },
-    {
-     "src": "work2/pp-rules.mp4",
-     "ss": 0.15,
-     "se": 4.24
+     "se": 4.84,
+     "ov": [
+      {
+       "png": "work2/co/dex_r.png",
+       "a": 0.6,
+       "b": 4.54
+      },
+      {
+       "png": "work2/co/noncex_r.png",
+       "a": 1.8,
+       "b": 4.54
+      }
+     ]
     }
    ]
   },
