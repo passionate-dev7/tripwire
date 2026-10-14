@@ -37,7 +37,7 @@ People asked for this by name. On 2026-08-24 a MON holder posted that they wante
 
 ## The 90-second loop
 
-1. Open the site. The first screen shows the keeper's heartbeat, the pool's 60 second average, mainnet spot, and the Perpl position line 1 hedges (account 5429, market 10, long 5753 MON lots).
+1. Open the site. The first screen shows the keeper's heartbeat, the pool's 60 second average, the cheat record and the plan ticket.
 2. Pick a preset (-5%, -10%, -20%) or open a plan link such as `?sell=0.02@up0.03/0.028`. Each row is a line and a floor in aUSD per MON.
 3. Create a passkey wallet. Press Get 0.1 testnet MON.
 4. Press Sign plan. One passkey prompt wraps the planned MON, upgrades the address through EIP-7702, signs the delegation and posts it to PlanBook.
@@ -56,7 +56,7 @@ The holder's address becomes MetaMask's stateless DeleGator through EIP-7702, so
 
 The keeper ([keeper/keeper.ts](keeper/keeper.ts)) indexes PlanBook and fills, reads the TWAP every two seconds, and redeems a tranche only after Monad's own gas estimate says the chain will accept it. It holds no judgment the chain does not re-check, its key only pays gas, and it charges the holder nothing. It serves the web app's read API from memory and, on request, turns hostile on purpose so the holder can watch the contract refuse a forbidden sale.
 
-The web app (web/) is a static export with zero serverless functions. Vercel's CDN rewrites `/api/*` to the keeper. It reads the hedged Perpl position from Perpl's exchange contract on Monad mainnet.
+The web app (web/) is a static export with zero serverless functions. Vercel's CDN rewrites `/api/*` to the keeper. Each plan also records a Perpl position reference in its signed terms (account 5429, market 10, long 5753 MON lots, read from Perpl's exchange contract on Monad mainnet).
 
 The full check order, every revert string, the delegation flow and the attack catalogue with mainnet transactions are in [docs/how-it-works.md](docs/how-it-works.md).
 
@@ -139,7 +139,7 @@ bun run demo/verify-live.ts <holder> --attack
 
 - `contracts/` Solidity (TripwirePlanEnforcer, PlanBook, PoolSeeder, WMON), forge tests, mutation logs, `deployments/10143.json`
 - `keeper/` the keeper loop and its launchd unit
-- `web/` Next.js static export: ticket, chart, Watch tab, passkey wallet, Perpl position read
+- `web/` Next.js static export: ticket, chart, Watch tab, passkey wallet
 - `demo/` live proofs: `verify-live.ts`, lifecycle and hostile runs, run logs
 - `docs/` how it works, feature matrix, architecture diagram, try-it steps
 - `scripts/` static build

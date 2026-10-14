@@ -13,7 +13,7 @@ The enforcer's terms are one ABI-encoded struct, covered by the holder's delegat
 | `router`, `pool`, `wmon`, `usdc`, `fee` | the one Uniswap V3 route a sale may take (SwapRouter02, the WMON/stablecoin pool, its fee tier) |
 | `twapSeconds` | the price window; plans use 60 seconds |
 | `recipient` | the holder's own address, the only place proceeds may go |
-| `perplAccountId`, `perplMarketId`, `perplPositionLots` | the Perpl position the plan hedges |
+| `perplAccountId`, `perplMarketId`, `perplPositionLots` | the Perpl position reference recorded with the plan |
 | `tranches[]` | 1 to 16 rows of `(lineTick, amountIn, minOutPerUnit, atOrAbove)`: the line as a price tick, the exact WMON to sell, the floor in stablecoin units per 1 WMON, and whether the row is a stop (falls to the line) or a target (rises to it) |
 
 The second caveat is MetaMask's stock `TimestampEnforcer`, carrying the plan's end date.
