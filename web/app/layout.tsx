@@ -7,8 +7,8 @@ const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], 
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "tripwire: a stop-loss on your MON that the bot cannot break",
-  description: "Set a stop-loss or take-profit on your MON. It stays in your wallet. A bot sells only when MON reaches your line, never below your floor, only to you, and the chain refuses every other sale.",
+  title: "tripwire: let a bot sell for you, the chain makes sure it can only make the sale you signed",
+  description: "A permission the chain checks: your price line, floor, amount and payout address are written into what you sign, and Monad refuses every other sale. Stop-losses, take-profits and staged exits on MON that never leaves your wallet.",
   icons: { icon: "/favicon.ico" },
 };
 

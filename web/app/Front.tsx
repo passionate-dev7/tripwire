@@ -16,10 +16,10 @@ export function Hero() {
   return (
     <section aria-labelledby="claim" className="min-w-0">
       <h1 id="claim" className="max-w-[640px] text-[28px] font-medium leading-[1.15] tracking-[0.1px] text-ink sm:text-[36px]">
-        A stop-loss on your MON that the bot can&apos;t break.
+        Let a bot sell for you. The chain makes sure it can only make the sale you signed.
       </h1>
       <p className="mt-2 max-w-[600px] text-[14px] leading-6 text-body sm:mt-3 sm:text-[16px] sm:leading-7">
-        Your MON stays in your wallet. A bot sells it only on your terms. Anything else, the chain refuses.
+        A new kind of permission: your price line, floor, amount and payout address are written into what you sign, and Monad checks every sale against them. Stop-losses, take-profits and staged exits, up to sixteen sales in one signature, and your MON never leaves your wallet.
       </p>
       <ul className="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-[14px] leading-5 text-ink sm:flex">
         {["Only at your line", "Never under your floor", "Only to your address", "Only until your end date"].map((rule) => (
