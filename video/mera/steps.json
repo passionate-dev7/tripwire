@@ -1,0 +1,227 @@
+[
+ {
+  "waitFor": "/checked [0-9]+ s ago/.test(document.body.innerText)",
+  "timeout": 60000
+ },
+ {
+  "eval": "window.scrollTo(0,0)"
+ },
+ {
+  "rec": "H"
+ },
+ {
+  "mark": "start"
+ },
+ {
+  "at": 2.2,
+  "eval": "__call(()=>[...document.querySelectorAll('button')].find(b=>b.innerText.startsWith('Create a passkey')),\"Mera is the whole account layer\",'left',6,\"mera\")"
+ },
+ {
+  "at": 8.5,
+  "eval": "__clear()"
+ },
+ {
+  "rec": false
+ },
+ {
+  "rec": "W"
+ },
+ {
+  "mark": "start"
+ },
+ {
+  "eval": "__hud.start()"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "click": "Create a passkey",
+  "soft": false
+ },
+ {
+  "mark": "created"
+ },
+ {
+  "waitFor": "!!document.querySelector('#sign a[href*=\"/address/0x\"]')",
+  "timeout": 90000
+ },
+ {
+  "eval": "document.querySelector('#sign a[href*=\"/address/0x\"]').href.split('/').pop()",
+  "as": "addr"
+ },
+ {
+  "mark": "addr"
+ },
+ {
+  "eval": "(()=>{const e=document.querySelector('#sign');window.scrollTo({top:e.getBoundingClientRect().bottom+scrollY-innerHeight+120,behavior:'instant'})})()"
+ },
+ {
+  "eval": "__call(()=>document.querySelector('#sign a[href*=\"/address/0x\"]'),\"the account address, from the passkey\",'left',6,\"ad\")"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "eval": "__clear()"
+ },
+ {
+  "mark": "fundstart"
+ },
+ {
+  "click": "Get 0.1"
+ },
+ {
+  "waitFor": "[...document.querySelectorAll('button')].some(b=>b.innerText.startsWith('Sign plan'))",
+  "timeout": 120000
+ },
+ {
+  "mark": "funded"
+ },
+ {
+  "wait": 700
+ },
+ {
+  "click": "Sign plan"
+ },
+ {
+  "mark": "signclick"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "eval": "(()=>{const e=document.querySelector('#sign');window.scrollTo({top:e.getBoundingClientRect().bottom+scrollY-innerHeight+120,behavior:'instant'})})()"
+ },
+ {
+  "waitFor": "__hud.done()",
+  "timeout": 120000
+ },
+ {
+  "mark": "firsttx"
+ },
+ {
+  "eval": "(()=>{const e=document.querySelector('#sign');window.scrollTo({top:e.getBoundingClientRect().bottom+scrollY-innerHeight+120,behavior:'instant'})})()"
+ },
+ {
+  "eval": "[...document.querySelectorAll('ol[aria-label=Transactions] li')].find(li=>/MON set aside/.test(li.innerText))?.querySelector('a[href*=\"/tx/\"]')?.href.split('/').pop()",
+  "as": "wraptx"
+ },
+ {
+  "wait": 600
+ },
+ {
+  "click": "What the contract checks",
+  "soft": true
+ },
+ {
+  "wait": 700
+ },
+ {
+  "eval": "__call(()=>[...document.querySelectorAll('button,summary')].find(b=>b.innerText.trim().startsWith('What the contract checks')),\"the permission: four checks on every sale\",'left',6,\"chk\")"
+ },
+ {
+  "waitFor": "document.querySelector('[aria-current=page]')?.innerText==='Watch'",
+  "timeout": 240000
+ },
+ {
+  "mark": "armed"
+ },
+ {
+  "eval": "__clear()"
+ },
+ {
+  "eval": "__hud.read()",
+  "as": "hud"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "rec": false
+ },
+ {
+  "rec": "K"
+ },
+ {
+  "mark": "start"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "waitFor": "/Sold [0-9.]+ MON at a 60 s average/.test(document.body.innerText)",
+  "timeout": 240000
+ },
+ {
+  "mark": "sold"
+ },
+ {
+  "eval": "[...document.querySelectorAll('li')].find(li=>/^Sold /.test(li.innerText.trim())).querySelector('a[href*=\"/tx/\"]').href.split('/').pop()",
+  "as": "fillTx"
+ },
+ {
+  "eval": "__call(()=>[...document.querySelectorAll('li')].find(li=>/^Sold /.test(li.innerText.trim())),\"the keeper sold exactly what the plan allows\",'below',4,\"sold\")"
+ },
+ {
+  "wait": 4500
+ },
+ {
+  "eval": "__clear()"
+ },
+ {
+  "rec": false
+ },
+ {
+  "goto": "https://testnet.monadvision.com/tx/${wraptx}",
+  "load": 7000
+ },
+ {
+  "waitFor": "!!([...document.querySelectorAll('div,span')].filter(e=>/^(Success|Fail|Failed)$/.test(e.textContent.trim())&&e.offsetParent)[0])",
+  "timeout": 40000
+ },
+ {
+  "rec": "X1"
+ },
+ {
+  "mark": "start"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "eval": "__call(()=>([...document.querySelectorAll('div,span')].filter(e=>/^(Success|Fail|Failed)$/.test(e.textContent.trim())&&e.offsetParent)[0]),\"status: Success\",'right',8,\"x\")"
+ },
+ {
+  "wait": 4500
+ },
+ {
+  "rec": false
+ },
+ {
+  "goto": "https://testnet.monadvision.com/tx/${fillTx}",
+  "load": 7000
+ },
+ {
+  "waitFor": "!!([...document.querySelectorAll('div,span')].filter(e=>/^(Success|Fail|Failed)$/.test(e.textContent.trim())&&e.offsetParent)[0])",
+  "timeout": 40000
+ },
+ {
+  "rec": "X2"
+ },
+ {
+  "mark": "start"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "eval": "__call(()=>([...document.querySelectorAll('div,span')].filter(e=>/^(Success|Fail|Failed)$/.test(e.textContent.trim())&&e.offsetParent)[0]),\"status: Success\",'right',8,\"x\")"
+ },
+ {
+  "wait": 3500
+ },
+ {
+  "rec": false
+ }
+]

@@ -1,0 +1,13 @@
+[
+ {"waitFor": "/checked [0-9]+ s ago/.test(document.body.innerText)", "timeout": 60000},
+ {"eval": "window.scrollTo(0,0)"},
+ {"rec": "H"},
+ {"mark": "start"},
+ {"wait": 6000},
+ {"eval": "(()=>{const e=document.querySelector('#sign');window.scrollTo({top:e.getBoundingClientRect().bottom+scrollY-innerHeight+120,behavior:'instant'})})()"},
+ {"wait": 500},
+ {"eval": "__call(()=>[...document.querySelectorAll('button')].find(b=>b.innerText.startsWith('Create a passkey')),\"Mera is the whole account layer\",'left',6,\"mera\")"},
+ {"wait": 5500},
+ {"eval": "__clear()"},
+ {"rec": false}
+]
