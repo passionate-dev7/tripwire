@@ -25,9 +25,9 @@ html,body{width:1600px;height:900px;background:#07080a;color:#f4f4f6;overflow:hi
 .r span{font:400 22px "PM";color:#9c9c9d;font-variant-numeric:tabular-nums}
 .r span.n{color:#f4f4f6;font-weight:500}
 .foot{margin-top:34px;font:400 24px/1.5 "PS";color:#cdcdcd;border-top:1px solid #242728;padding-top:26px}
-</style><div class="w"><div class="k">Landing page to first confirmed Monad transaction, measured</div>
+</style><div class="w"><div class="k">Landing page to first passkey-signed Monad transaction, measured</div>
 <div class="big"><div>${f(m.signed.t)}<small>seconds</small></div><div class="t">${m.signed.taps}<small>taps</small></div><div class="t">${m.signed.prompts}<small>passkey prompt</small></div></div>
 ${rows.map((r) => `<div class="r"><div>${r[0]}</div><span class="n">${f(r[1].t)} s, ${r[1].taps} taps</span><span>${r[2]}</span></div>`).join("")}
-<div class="foot">Mera is the whole account layer: no extension, no seed phrase, no stored key. One passkey prompt, one bounded permission, then every transaction signs without asking again.</div></div><script>window.__ready=true</script>`;
+<div class="foot">Mera is the whole account layer: no extension, no seed phrase shown or stored. One passkey prompt opens the signing session, and the signed plan bounds what the keeper may sell.</div></div><script>window.__ready=true</script>`;
 fs.writeFileSync(new URL("../scenes/mera-end.html", import.meta.url), html);
 console.log("end card", f(m.signed.t), m.signed.taps, m.signed.prompts);
