@@ -12,8 +12,8 @@ const L = [
   ["m05", "Tap three: sign plan. The session signs it, with no new prompt.", 0.3],
   ["m06", `The drip confirmed at ${D} seconds. The first transaction the passkey signed confirms at ${T} seconds: three taps, one passkey prompt.`, 0.4],
   ["m10", "That transaction on the explorer. Status: Success.", 0.35],
-  ["m07", "In code, one Mera call makes the passkey, and its signing session is the account. The session lives in memory for the page, so there is no second prompt.", 0.4],
-  ["m08", "What bounds the plan is the plan itself: size, price floor, recipient and end date, checked by the contract on every sale.", 0.4],
+  ["m07", "In code, one Mera call makes the passkey, and its signing session is the account. The session lives only in memory, for as long as the page holds it. Reload the page and it asks for the passkey again.", 0.4],
+  ["m08", "While the session is open it signs for the user without asking. What bounds the keeper is the plan: price line, price floor, recipient and end date, checked by the contract on every sale.", 0.4],
   ["m09", "The keeper then sells for that plan, inside those bounds. Confirmed on Monad.", 0.35],
   ["m11", `Landing page to a passkey-signed Monad transaction: ${T} seconds, three taps, one passkey prompt. Mera is the whole account layer.`, 0.5],
 ].map(([id, text, gap]) => ({ id, text, gap }));
