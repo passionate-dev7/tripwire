@@ -132,7 +132,7 @@
     {
      "src": "work2/k-hold.png",
      "png": true,
-     "hold": 6,
+     "hold": 7,
      "zoom": {
       "from": 1,
       "to": 1.08,
@@ -149,7 +149,7 @@
       {
        "png": "work2/co/mined_q05.png",
        "a": 3,
-       "b": 5.9
+       "b": 6.9
       }
      ]
     },
@@ -170,17 +170,17 @@
       {
        "png": "work2/co/wmon_x1.png",
        "a": 0.6,
-       "b": 5.86
+       "b": 5.91
       },
       {
        "png": "work2/co/num_x1.png",
        "a": 1.4,
-       "b": 5.86
+       "b": 5.91
       },
       {
        "png": "work2/co/mm_x1.png",
        "a": 2.4,
-       "b": 5.86
+       "b": 5.91
       }
      ]
     }
@@ -329,7 +329,7 @@
     {
      "src": "work2/pp-next.mp4",
      "ss": 0.15,
-     "se": 7.3
+     "se": 11.93
     }
    ]
   },
@@ -341,7 +341,7 @@
     {
      "src": "work2/pp-end.mp4",
      "ss": 0.15,
-     "se": 6.78
+     "se": 6.77
     }
    ]
   }

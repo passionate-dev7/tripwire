@@ -17,7 +17,7 @@ C = {
   "num_x1": P("the small 2 means two zeros: 0.007267", "tl", 1110, 690, pad=True),
   "mm_x1": P("MetaMask's contract, already live on Monad", "tl", 870, 940, pad=True),
   "refused_c": P("refused: the rule it broke", "tr", 1850, 418),
-  "tally_c": P("3 tried, 3 refused, 0 paid out", "tl", 100, 8, 30, 52),
+  "tally_c": P("3 tried, 3 refused, 0 paid out", "tl", 100, 26, 30, 52),
   "fail_x2": P("fail: the chain refused it", "tl", 528, 560, pad=True),
   "mainnet_q01": P("mainnet: the live network, real money", "tr", 1883, 62, pad=True),
   "testnet_q01": P("testnet: a practice copy of the network", "tl", 98, 642, pad=True),

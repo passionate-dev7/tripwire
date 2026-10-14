@@ -43,7 +43,8 @@ cue("rules", { title: "ON EVERY SALE, THE CHAIN CHECKS DAN'S SIGNED PLAN", big: 
   rows: [["only at your line", "the bot sells once the price has reached it"], ["never under your floor", "the lowest price Dan set"], ["only to your address", "the money goes to Dan's wallet"], ["only until your end date", "the plan switches itself off"]] });
 add("rules", "chain.html", bSec);
 // q10 next
-cue("next", { title: "NEXT", big: "Any bot can carry out a signed plan. tripwire goes to the holders who asked.", t0: 0.15, r0: 99, step: 1, top: 300, bigPx: 56, drift: 0.03, dur: r(D("q10")), rows: [] });
+cue("next", { title: "NEXT", big: "Any bot can carry out Dan's plan. The chain still refuses every sale he did not sign.", t0: 0.15, r0: 1.0, step: 3.5, top: 230, bigPx: 52, drift: 0.03, dur: r(D("q10")),
+  rows: [["any bot", "can carry out Dan's plan"], ["every sale", "still checked against his four rules"], ["holders who asked", "tripwire goes to them next"]] });
 add("next", "chain.html", D("q10"));
 // q11 end
 cue("end", { tag: "A bot sells for you. The blockchain blocks any sale you didn't sign.", url: "tripwire-three.vercel.app", note: "live on Monad mainnet, open it with ?net=mainnet", word: 0.8, tagAt: 1.2, urlAt: 2.0, drift: 0.05, dur: r(D("q11")) });
@@ -58,7 +59,7 @@ const PAD = "scale=1728:972,pad=1920:1080:96:0:color=0x07080a"; // keeps the pag
 // the C clip's page, panned up 140 px so the caption sits on the dark strip and every refusal stays readable
 const PAN = "crop=1920:940:0:140,pad=1920:1080:0:0:color=0x07080a";
 // K ends with the sale row highlighted: the keeper's counter reads 1 sale from 14.2 s. The beat starts there, never on the 0-sales frames.
-const hold5 = 6.0, x1len = D("q05") - 0.6 - hold5;
+const hold5 = 7.0, x1len = D("q05") - 0.6 - hold5;
 const fixed6 = (C.refused1 - 0.2 - C.try1) / 8 + 0.7 + (C.refused2 - 0.2 - C.try2) / 8 + 0.7 + (C.refused3 - 0.2 - C.try3) / 8;
 const hold6 = 4.4, x2len = D("q06") - fixed6 - hold6; // final list shown for hold6 s at speed 0.75 (the C clip has 3.3 s left after the third refusal)
 const beats = [

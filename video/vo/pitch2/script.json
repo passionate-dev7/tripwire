@@ -25,8 +25,8 @@
  },
  {
   "id": "q05",
-  "text": "Here it is, live on Monad. Dan set his line just above today's price, so the bot sells at once, and zero point three Mon becomes a dollar coin, USDC, in Dan's wallet.",
-  "cap": "Here it is, live on Monad. Dan set his line just above today's price, so the bot sells at once, and 0.3 MON becomes a dollar coin, 0.007267 USDC, in Dan's wallet.",
+  "text": "Here it is, live on Monad. Dan set his line just above today's price, so the bot sells at once, and zero point three Mon becomes USDC, a coin pegged to the dollar, in Dan's wallet.",
+  "cap": "Here it is, live on Monad. Dan set his line just above today's price, so the bot sells at once, and 0.3 MON becomes USDC, a coin pegged to the dollar, in Dan's wallet.",
   "gap": 0.4
  },
  {
@@ -49,8 +49,8 @@
  },
  {
   "id": "q10",
-  "text": "Next, any bot can carry out a signed plan, and we bring tripwire to the holders who asked.",
-  "cap": "Next, any bot can carry out a signed plan, and we bring tripwire to the holders who asked.",
+  "text": "Next: any bot can carry out Dan's signed plan, and the chain still refuses every sale he did not sign. We are taking tripwire to the holders who asked.",
+  "cap": "Next: any bot can carry out Dan's signed plan, and the chain still refuses every sale he did not sign. We are taking tripwire to the holders who asked.",
   "gap": 0.4
  },
  {
