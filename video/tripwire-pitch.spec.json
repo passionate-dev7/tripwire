@@ -7,7 +7,7 @@
   {
    "name": "q01",
    "t0": 0,
-   "t1": 13.292,
+   "t1": 9.75,
    "pieces": [
     {
      "src": "work2/H-old.mp4",
@@ -23,55 +23,90 @@
      },
      "ov": [
       {
-       "png": "work2/co/mainnet_q01.png",
-       "a": 0.8,
-       "b": 5
+       "png": "work2/co/mon_q01.png",
+       "a": 0.4,
+       "b": 4.2
       },
       {
-       "png": "work2/co/testnet_q01.png",
-       "a": 5.4,
-       "b": 12.99
+       "png": "work2/co/mainnet_q01.png",
+       "a": 4.4,
+       "b": 9.45
       }
      ],
-     "speed": 0.6470057177249473
+     "speed": 0.882051282051282
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q01.png",
      "a": 0.25,
-     "b": 13.09
+     "b": 9.8
+    }
+   ]
+  },
+  {
+   "name": "q01b",
+   "t0": 9.75,
+   "t1": 22.661,
+   "pieces": [
+    {
+     "src": "work2/H-old.mp4",
+     "ss": 8.6,
+     "se": 15.6,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.1,
+      "fx": 0.6,
+      "fy": 0.4,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/what_q01b.png",
+       "a": 1,
+       "b": 6
+      },
+      {
+       "png": "work2/co/testnet_q01.png",
+       "a": 6.2,
+       "b": 12.61
+      }
+     ],
+     "speed": 0.5421733405623111
+    }
+   ],
+   "caps": [
+    {
+     "png": "work2/caps-pitch2/q01b.png",
+     "a": 9.7,
+     "b": 22.71
     }
    ]
   },
   {
    "name": "q02",
-   "t0": 13.292,
-   "t1": 33.773,
+   "t0": 22.661,
+   "t1": 32.136,
    "pieces": [
-    {
-     "src": "work2/pp-other.mp4",
-     "ss": 0.15,
-     "se": 6.15
-    },
     {
      "src": "work2/pp-rules.mp4",
      "ss": 0.15,
-     "se": 14.63
+     "se": 9.63
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q02.png",
-     "a": 13.24,
-     "b": 33.52
+     "a": 22.61,
+     "b": 32.19
     }
    ]
   },
   {
    "name": "q03",
-   "t0": 33.773,
-   "t1": 44.193,
+   "t0": 32.136,
+   "t1": 38.868,
    "pieces": [
     {
      "src": "work2/mainnet/P.mp4",
@@ -90,21 +125,21 @@
        "b": 4.2
       }
      ],
-     "speed": 1.0556621880998087
+     "speed": 1.6339869281045754
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q03.png",
-     "a": 33.72,
-     "b": 43.94
+     "a": 32.09,
+     "b": 38.92
     }
    ]
   },
   {
    "name": "q04",
-   "t0": 44.193,
-   "t1": 55.861,
+   "t0": 38.868,
+   "t1": 48.39,
    "pieces": [
     {
      "src": "work2/mainnet/W.mp4",
@@ -134,21 +169,21 @@
        "b": 6
       }
      ],
-     "speed": 0.9758897818599312
+     "speed": 1.4102032351721283
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q04.png",
-     "a": 44.14,
-     "b": 55.61
+     "a": 38.82,
+     "b": 48.44
     }
    ]
   },
   {
    "name": "q05",
-   "t0": 55.861,
-   "t1": 69.571,
+   "t0": 48.39,
+   "t1": 61.786,
    "pieces": [
     {
      "src": "work2/mainnet/K.mp4",
@@ -195,34 +230,53 @@
       {
        "png": "work2/co/wmon_x1.png",
        "a": 0.6,
-       "b": 5.91
+       "b": 5.6
       },
       {
        "png": "work2/co/num_x1.png",
        "a": 1.4,
-       "b": 5.91
+       "b": 5.6
       },
       {
        "png": "work2/co/mm_x1.png",
        "a": 2.4,
-       "b": 5.91
+       "b": 5.6
       }
      ],
-     "speed": 0.5564648117839608
+     "speed": 0.5866114561766737
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q05.png",
-     "a": 55.81,
-     "b": 69.32
+     "a": 48.34,
+     "b": 61.84
+    }
+   ]
+  },
+  {
+   "name": "q05b",
+   "t0": 61.786,
+   "t1": 74.418,
+   "pieces": [
+    {
+     "src": "work2/pp-nov.mp4",
+     "ss": 0.15,
+     "se": 12.78
+    }
+   ],
+   "caps": [
+    {
+     "png": "work2/caps-pitch2/q05b.png",
+     "a": 61.74,
+     "b": 74.47
     }
    ]
   },
   {
    "name": "q06",
-   "t0": 69.571,
-   "t1": 81.027,
+   "t0": 74.418,
+   "t1": 85.582,
    "pieces": [
     {
      "src": "work2/mainnet/C.mp4",
@@ -266,10 +320,10 @@
       {
        "png": "work2/co/fail_x2.png",
        "a": 0.2,
-       "b": 3.53
+       "b": 3.23
       }
      ],
-     "speed": 0.6067291781577483
+     "speed": 0.6598680263947226
     },
     {
      "src": "work2/mainnet/C.mp4",
@@ -308,61 +362,61 @@
    "caps": [
     {
      "png": "work2/caps-pitch2/q06.png",
-     "a": 69.52,
-     "b": 80.78
+     "a": 74.37,
+     "b": 85.63
     }
    ]
   },
   {
    "name": "q07",
-   "t0": 81.027,
-   "t1": 89.279,
+   "t0": 85.582,
+   "t1": 93.556,
    "pieces": [
     {
      "src": "work2/pp-proof.mp4",
      "ss": 0.15,
-     "se": 8.4
+     "se": 8.12
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q07.png",
-     "a": 80.98,
-     "b": 89.03
+     "a": 85.53,
+     "b": 93.61
     }
    ]
   },
   {
    "name": "q08",
-   "t0": 89.279,
-   "t1": 98.656,
+   "t0": 93.556,
+   "t1": 102.689,
    "pieces": [
     {
      "src": "work2/pp-xstop.mp4",
      "ss": 0.15,
-     "se": 4.84,
+     "se": 4.72,
      "ov": [
       {
        "png": "work2/co/dex_x.png",
        "a": 0.6,
-       "b": 4.54
+       "b": 4.42
       }
      ]
     },
     {
      "src": "work2/pp-redask.mp4",
      "ss": 0.15,
-     "se": 4.84,
+     "se": 4.72,
      "ov": [
       {
        "png": "work2/co/dex_r.png",
        "a": 0.6,
-       "b": 4.54
+       "b": 4.42
       },
       {
        "png": "work2/co/noncex_r.png",
        "a": 1.8,
-       "b": 4.54
+       "b": 4.42
       }
      ]
     }
@@ -370,46 +424,72 @@
    "caps": [
     {
      "png": "work2/caps-pitch2/q08.png",
-     "a": 89.23,
-     "b": 98.41
+     "a": 93.51,
+     "b": 102.74
     }
    ]
   },
   {
    "name": "q10",
-   "t0": 98.656,
-   "t1": 110.437,
+   "t0": 102.689,
+   "t1": 111.948,
    "pieces": [
     {
-     "src": "work2/pp-next.mp4",
-     "ss": 0.15,
-     "se": 11.93
+     "src": "work2/H-old.mp4",
+     "ss": 0,
+     "se": 7.5,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.3,
+      "fx": 0.9,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/stoploss_q10.png",
+       "a": 1.6,
+       "b": 8.96
+      },
+      {
+       "png": "work2/co/target_q10.png",
+       "a": 3,
+       "b": 8.96
+      },
+      {
+       "png": "work2/co/sixteen_q10.png",
+       "a": 4.6,
+       "b": 8.96
+      }
+     ],
+     "speed": 0.8100226806350578
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q10.png",
-     "a": 98.61,
-     "b": 110.19
+     "a": 102.64,
+     "b": 112
     }
    ]
   },
   {
    "name": "q11",
-   "t0": 110.437,
-   "t1": 117.06,
+   "t0": 111.948,
+   "t1": 118.93,
    "pieces": [
     {
      "src": "work2/pp-end.mp4",
      "ss": 0.15,
-     "se": 6.77
+     "se": 7.13
     }
    ],
    "caps": [
     {
      "png": "work2/caps-pitch2/q11.png",
-     "a": 110.39,
-     "b": 116.82
+     "a": 111.9,
+     "b": 118.98
     }
    ]
   }

@@ -34,20 +34,18 @@ cue("xstop", src("xstop", "<b>x.com/fine_tec_</b>, another Monad holder, 2026-08
 add("xstop", "source.html", h8);
 cue("redask", src("redask", "<b>r/Monad</b>, another holder asks, read 2026-10-13", D("q08") - h8, [0.0, 0.15, 1.0, 0.22]));
 add("redask", "source.html", D("q08") - h8);
-// q02 the contrast, then the four rules read aloud
-const aSec = 6.0, bSec = D("q02") - aSec; // whisper word times of the clip: "access." ends 5.6 s, "Here" starts 6.1 s
-const RU = JSON.parse(fs.readFileSync("work2/rules-times.json", "utf8")); // seconds into the q02 clip where each rule is spoken
-cue("other", { title: "OTHER STOP-LOSS BOTS", big: "Once you grant access, they can sell however they like.", t0: 0.15, r0: 99, step: 1, top: 330, bigPx: 64, drift: 0.02, dur: r(aSec), rows: [] });
-add("other", "chain.html", aSec);
-cue("rules", { title: "ON EVERY SALE, THE CHAIN CHECKS DAN'S SIGNED PLAN", big: "Four rules. Break any one and the sale fails.", t0: 0.1, r0: r(RU[0] - aSec - 0.05), step: r((RU[3] - RU[0]) / 3), top: 220, drift: 0.03, dur: r(bSec),
+// q02 the four rules read aloud; rows appear a beat before the voice reaches them (positions are fractions of the clip: "only at" 36/127, "never" 58, "only to" 80, "only until" 101 chars)
+const q2 = D("q02"), RU = [36, 58, 80, 101].map((c) => q2 * (c / 127) - 0.4);
+cue("rules", { title: "ON EVERY SALE, THE CHAIN CHECKS DAN'S SIGNED PLAN", big: "Four rules. Break any one and the sale fails.", t0: 0.1, r0: r(RU[0] - 0.05), step: r((RU[3] - RU[0]) / 3), top: 220, drift: 0.03, dur: r(q2),
   rows: [["only at your line", "the bot sells once the price has reached it"], ["never under your floor", "the lowest price Dan set"], ["only to your address", "the money goes to Dan's wallet"], ["only until your end date", "the plan switches itself off"]] });
-add("rules", "chain.html", bSec);
-// q10 next
-cue("next", { title: "NEXT", big: "Any bot can carry out Dan's plan. The chain still refuses every sale he did not sign.", t0: 0.15, r0: 1.0, step: 3.5, top: 230, bigPx: 52, drift: 0.03, dur: r(D("q10")),
-  rows: [["any bot", "can carry out Dan's plan"], ["every sale", "still checked against his four rules"], ["holders who asked", "tripwire goes to them next"]] });
-add("next", "chain.html", D("q10"));
+add("rules", "chain.html", q2);
+// q05b the novelty line
+const q5b = D("q05b");
+cue("nov", { title: "WHY THIS IS DIFFERENT", big: "A normal bot is trusted. This one does not need to be.", t0: 0.15, r0: r(q5b * 0.34), step: r(q5b * 0.34), top: 250, bigPx: 52, drift: 0.03, dur: r(q5b),
+  rows: [["the rules", "live on chain, inside the permission"], ["every sale", "checked against the pool's live price, at that moment"]] });
+add("nov", "chain.html", q5b);
 // q11 end
-cue("end", { tag: "A bot sells for you. The blockchain blocks any sale you didn't sign.", url: "tripwire-three.vercel.app", note: "live on Monad mainnet, open it with ?net=mainnet", word: 0.8, tagAt: 1.2, urlAt: 2.0, drift: 0.05, dur: r(D("q11")) });
+cue("end", { tag: "Let a bot sell for you. The chain makes sure it can only make the sale you signed.", url: "tripwire-three.vercel.app", note: "live on Monad mainnet, open it with ?net=mainnet", word: 0.8, tagAt: 1.2, urlAt: 2.0, drift: 0.05, dur: r(D("q11")) });
 add("end", "end.html", D("q11"));
 fs.writeFileSync("work2/scenes-pitch2.json", JSON.stringify(scenes));
 
@@ -63,14 +61,16 @@ const hold5 = 7.0, x1len = D("q05") - 0.6 - hold5;
 const fixed6 = (C.refused1 - 0.2 - C.try1) / 8 + 0.7 + (C.refused2 - 0.2 - C.try2) / 8 + 0.7 + (C.refused3 - 0.2 - C.try3) / 8;
 const hold6 = 4.4, x2len = D("q06") - fixed6 - hold6; // final list shown for hold6 s at speed 0.75 (the C clip has 3.3 s left after the third refusal)
 const beats = [
-  { lines: ["q01"], pieces: [P("work2/H-old.mp4", 0, 8.6, { fit: true, vf: PAD, ...Z(1, 1.12, 0.4, 0.3, "linear"), ov: [CO("mainnet_q01", 0.8, 5.0), CO("testnet_q01", 5.4, D("q01") - 0.3)] })] },
-  { lines: ["q02"], pieces: [P(S("other"), 0.15, aSec + 0.15), P(S("rules"), 0.15, bSec + 0.15)] },
+  { lines: ["q01"], pieces: [P("work2/H-old.mp4", 0, 8.6, { fit: true, vf: PAD, ...Z(1, 1.12, 0.4, 0.3, "linear"), ov: [CO("mon_q01", 0.4, 4.2), CO("mainnet_q01", 4.4, D("q01") - 0.3)] })] },
+  { lines: ["q01b"], pieces: [P("work2/H-old.mp4", 8.6, 15.6, { fit: true, vf: PAD, ...Z(1, 1.1, 0.6, 0.4, "linear"), ov: [CO("what_q01b", 1.0, 6.0), CO("testnet_q01", 6.2, D("q01b") - 0.3)] })] },
+  { lines: ["q02"], pieces: [P(S("rules"), 0.15, D("q02") + 0.15)] },
   { lines: ["q03"], pieces: [P(W("P"), 14.5, 25.5, { fit: true, ...Z(1, 1.25, 0.85, 0.3), ov: [CO("plan_q03", 0.1, 4.2)] })] },
   { lines: ["q04"], pieces: [P(W("W"), 0.3, 5.0, Z(1, 1.1, 0.85, 0.5)), P(W("S"), 0.2, 7.0, { fit: true, ...Z(1, 1.5, 0.92, 0.12), ov: [CO("wmon_s", 3.2, 6.0)] })] },
   { lines: ["q05"], pieces: [
     P(W("K"), 14.2, 14.8),
     { src: "work2/k-hold.png", png: true, hold: r(hold5), ...Z(1, 1.08, 0.5, 0.3, "linear"), ov: [CO("plan_q05", 0.15, 2.8), CO("mined_q05", 3.0, hold5 - 0.1)] },
     P(W("X1"), 1.0, 4.4, { fit: true, vf: PAD, ...Z(1, 1.05, 0.5, 0.4, "linear"), ov: [CO("wmon_x1", 0.6, x1len - 0.2), CO("num_x1", 1.4, x1len - 0.2), CO("mm_x1", 2.4, x1len - 0.2)] })] },
+  { lines: ["q05b"], pieces: [P(S("nov"), 0.15, D("q05b") + 0.15)] },
   { lines: ["q06"], pieces: [
     P(W("C"), C.try1, C.refused1 - 0.2, { speed: 8, vf: PAN }), P(W("C"), C.refused1 - 0.2, C.refused1 + 0.5, { vf: PAN }),
     P(W("C"), C.try2, C.refused2 - 0.2, { speed: 8, vf: PAN }), P(W("C"), C.refused2 - 0.2, C.refused2 + 0.5, { vf: PAN }),
@@ -80,7 +80,7 @@ const beats = [
   { lines: ["q07"], pieces: [P(S("proof"), 0.15, D("q07") + 0.15)] },
   { lines: ["q08"], pieces: [P(S("xstop"), 0.15, h8 + 0.15, { ov: [CO("dex_x", 0.6, h8 - 0.15)] }),
     P(S("redask"), 0.15, D("q08") - h8 + 0.15, { ov: [CO("dex_r", 0.6, D("q08") - h8 - 0.15), CO("noncex_r", 1.8, D("q08") - h8 - 0.15)] })] },
-  { lines: ["q10"], pieces: [P(S("next"), 0.15, D("q10") + 0.15)] },
+  { lines: ["q10"], pieces: [P("work2/H-old.mp4", 0, 7.5, { fit: true, vf: PAD, ...Z(1, 1.3, 0.9, 0.3, "linear"), ov: [CO("stoploss_q10", 1.6, D("q10") - 0.3), CO("target_q10", 3.0, D("q10") - 0.3), CO("sixteen_q10", 4.6, D("q10") - 0.3)] })] },
   { lines: ["q11"], pieces: [P(S("end"), 0.15, D("q11") + 0.15)] },
 ];
 fs.writeFileSync("film-pitch2.json", JSON.stringify({ name: "tripwire-pitch", timings: "vo/pitch2/out/timings.json", audio: "vo/pitch2/out/narration.wav", out: "tripwire-pitch.mp4", caps: "work2/caps-pitch2", capFade: 0, beats }, null, 1));

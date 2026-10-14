@@ -26,14 +26,47 @@
      },
      "ov": [
       {
+       "png": "work2/co/mon_q01.png",
+       "a": 0.4,
+       "b": 4.2
+      },
+      {
        "png": "work2/co/mainnet_q01.png",
-       "a": 0.8,
-       "b": 5
+       "a": 4.4,
+       "b": 9.45
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "lines": [
+    "q01b"
+   ],
+   "pieces": [
+    {
+     "src": "work2/H-old.mp4",
+     "ss": 8.6,
+     "se": 15.6,
+     "fit": true,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.1,
+      "fx": 0.6,
+      "fy": 0.4,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/what_q01b.png",
+       "a": 1,
+       "b": 6
       },
       {
        "png": "work2/co/testnet_q01.png",
-       "a": 5.4,
-       "b": 12.99
+       "a": 6.2,
+       "b": 12.61
       }
      ]
     }
@@ -45,14 +78,9 @@
    ],
    "pieces": [
     {
-     "src": "work2/pp-other.mp4",
-     "ss": 0.15,
-     "se": 6.15
-    },
-    {
      "src": "work2/pp-rules.mp4",
      "ss": 0.15,
-     "se": 14.63
+     "se": 9.63
     }
    ]
   },
@@ -170,19 +198,31 @@
       {
        "png": "work2/co/wmon_x1.png",
        "a": 0.6,
-       "b": 5.91
+       "b": 5.6
       },
       {
        "png": "work2/co/num_x1.png",
        "a": 1.4,
-       "b": 5.91
+       "b": 5.6
       },
       {
        "png": "work2/co/mm_x1.png",
        "a": 2.4,
-       "b": 5.91
+       "b": 5.6
       }
      ]
+    }
+   ]
+  },
+  {
+   "lines": [
+    "q05b"
+   ],
+   "pieces": [
+    {
+     "src": "work2/pp-nov.mp4",
+     "ss": 0.15,
+     "se": 12.78
     }
    ]
   },
@@ -234,7 +274,7 @@
       {
        "png": "work2/co/fail_x2.png",
        "a": 0.2,
-       "b": 3.53
+       "b": 3.23
       }
      ]
     },
@@ -281,7 +321,7 @@
     {
      "src": "work2/pp-proof.mp4",
      "ss": 0.15,
-     "se": 8.4
+     "se": 8.12
     }
    ]
   },
@@ -293,29 +333,29 @@
     {
      "src": "work2/pp-xstop.mp4",
      "ss": 0.15,
-     "se": 4.84,
+     "se": 4.72,
      "ov": [
       {
        "png": "work2/co/dex_x.png",
        "a": 0.6,
-       "b": 4.54
+       "b": 4.42
       }
      ]
     },
     {
      "src": "work2/pp-redask.mp4",
      "ss": 0.15,
-     "se": 4.84,
+     "se": 4.72,
      "ov": [
       {
        "png": "work2/co/dex_r.png",
        "a": 0.6,
-       "b": 4.54
+       "b": 4.42
       },
       {
        "png": "work2/co/noncex_r.png",
        "a": 1.8,
-       "b": 4.54
+       "b": 4.42
       }
      ]
     }
@@ -327,9 +367,35 @@
    ],
    "pieces": [
     {
-     "src": "work2/pp-next.mp4",
-     "ss": 0.15,
-     "se": 11.93
+     "src": "work2/H-old.mp4",
+     "ss": 0,
+     "se": 7.5,
+     "fit": true,
+     "vf": "scale=1728:972,pad=1920:1080:96:0:color=0x07080a",
+     "zoom": {
+      "from": 1,
+      "to": 1.3,
+      "fx": 0.9,
+      "fy": 0.3,
+      "ease": "linear"
+     },
+     "ov": [
+      {
+       "png": "work2/co/stoploss_q10.png",
+       "a": 1.6,
+       "b": 8.96
+      },
+      {
+       "png": "work2/co/target_q10.png",
+       "a": 3,
+       "b": 8.96
+      },
+      {
+       "png": "work2/co/sixteen_q10.png",
+       "a": 4.6,
+       "b": 8.96
+      }
+     ]
     }
    ]
   },
@@ -341,7 +407,7 @@
     {
      "src": "work2/pp-end.mp4",
      "ss": 0.15,
-     "se": 6.77
+     "se": 7.13
     }
    ]
   }

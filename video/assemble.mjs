@@ -14,7 +14,7 @@ fs.mkdirSync(work, { recursive: true });
 const run = (args) => execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...args], { stdio: ["ignore", "inherit", "inherit"] });
 const probe = (f) => Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], { encoding: "utf8" }));
 const norm = `scale=${W}:${H}:flags=lanczos,setsar=1,fps=${FPS},format=yuv420p`;
-const enc = ["-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p", "-an"];
+const enc = ["-c:v", "libx264", "-crf", "16", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-an"];
 const warns = [];
 const CF = Math.max(spec.capFade ?? 0.25, 0.034); // one frame = hard cut (fade d=0 would fall back to ffmpeg default 1 s)
 
@@ -33,7 +33,7 @@ spec.beats.forEach((b, bi) => {
     if (p.zoom) {
       const n = Math.max(2, Math.round(dur * FPS)), z0 = p.zoom.from ?? 1, z1 = p.zoom.to ?? 1.1;
       const prog = p.zoom.ease === "linear" ? `on/${n}` : `(1-pow(1-min(on/${n},1),3))`;
-      zoom = `scale=${W * 2}:${H * 2}:flags=bicubic,zoompan=z='${z0}+(${z1}-${z0})*${prog}':x='(iw-iw/zoom)*${p.zoom.fx ?? 0.5}':y='(ih-ih/zoom)*${p.zoom.fy ?? 0.5}':d=1:s=${W}x${H}:fps=${FPS},format=yuv420p`;
+      zoom = `scale=${Math.round(W * 1.5)}:${Math.round(H * 1.5)}:flags=bicubic,zoompan=z='${z0}+(${z1}-${z0})*${prog}':x='(iw-iw/zoom)*${p.zoom.fx ?? 0.5}':y='(ih-ih/zoom)*${p.zoom.fy ?? 0.5}':d=1:s=${W}x${H}:fps=${FPS},format=yuv420p`;
     }
     const ovs = (p.ov ?? []).map((o) => ({ ...o, png: path.resolve(path.dirname(process.argv[2]), o.png) }));
     const ovIn = ovs.flatMap((o) => ["-loop", "1", "-t", String(dur + 1), "-i", o.png]);
